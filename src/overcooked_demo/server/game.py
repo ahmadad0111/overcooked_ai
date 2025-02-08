@@ -22,6 +22,15 @@ from overcooked_ai_py.planning.planners import (
 
 from database import Database
 
+import uuid
+import hashlib
+
+
+def generate_unique_hash():
+    unique_str = str(uuid.uuid4())  # Generate a unique identifier
+    return hashlib.sha256(unique_str.encode()).hexdigest()
+
+
 database = Database()
 
 # Relative path to where all static pre-trained agents are stored on server
@@ -701,10 +710,12 @@ class OvercookedGame(Game):
         """
         Returns and then clears the accumulated trajectory
         """
+        commit_hash = str(generate_unique_hash())
         data = {
             "uid": str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.utcnow().isoformat(),
+            "hash_key": commit_hash,
         }
         self.trajectory = []
         # if we want to store the data and there is data to store
