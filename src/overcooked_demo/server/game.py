@@ -5,6 +5,7 @@ import random
 from abc import ABC, abstractmethod
 from queue import Empty, Full, LifoQueue, Queue
 from threading import Lock, Thread
+from datetime import datetime
 from time import time
 
 import ray
@@ -18,6 +19,10 @@ from overcooked_ai_py.planning.planners import (
     NO_COUNTERS_PARAMS,
     MotionPlanner,
 )
+
+from database import Database
+
+database = Database()
 
 # Relative path to where all static pre-trained agents are stored on server
 AGENT_DIR = None
@@ -588,6 +593,7 @@ class OvercookedGame(Game):
             "player_1_id": self.players[1],
             "player_0_is_human": self.players[0] in self.human_players,
             "player_1_is_human": self.players[1] in self.human_players,
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         self.trajectory.append(transition)
@@ -698,16 +704,22 @@ class OvercookedGame(Game):
         data = {
             "uid": str(time()),
             "trajectory": self.trajectory,
+            "timestamp": datetime.utcnow().isoformat(),
         }
         self.trajectory = []
         # if we want to store the data and there is data to store
         if self.write_data and len(data["trajectory"]) > 0:
-            configs = self.write_config
+            # configs = self.write_config
             # create necessary dirs
-            data_path = create_dirs(configs, self.curr_layout)
+            # data_path = create_dirs(configs, self.curr_layout)
             # the 3-layer-directory structure should be able to uniquely define any experiment
-            with open(os.path.join(data_path, "result.pkl"), "wb") as f:
-                pickle.dump(data, f)
+            # with open(os.path.join(data_path, "result.pkl"), "wb") as f:
+            #     pickle.dump(data, f)
+                # 1 single table - timestamp, uid, string of self.trajectory
+                # 1.5 single table - timestamp, uid, expanded self.trajectory
+                # 2 double table - timestamp, uid, foreign key :: foreign key, other fields of self.trajectory
+            # insert the database table update logic
+            database.update(data)
         return data
 
 
