@@ -24,7 +24,7 @@ class Database:
                 hash_key, state, joint_action, reward, time_left, score, time_elapsed, 
                 cur_gameloop, layout, layout_name, trial_id, player_0_id, 
                 player_1_id, player_0_is_human, player_1_is_human, timestamp
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
             """
 
