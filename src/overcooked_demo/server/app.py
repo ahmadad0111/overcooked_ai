@@ -18,7 +18,7 @@ from datetime import datetime
 from threading import Lock
 
 import game
-from flask import Flask, jsonify, render_template, request, session
+from flask import Flask, jsonify, render_template, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from game import Game, OvercookedGame, OvercookedTutorial
 from utils import ThreadSafeDict, ThreadSafeSet
@@ -366,7 +366,7 @@ def index():
     return render_template(
         "index.html", agent_names=agent_names, layouts=LAYOUTS
     )
-    
+
 
 @app.route("/predefined")
 def predefined():
@@ -598,14 +598,13 @@ def on_disconnect():
 
 # Exit handler for server
 def on_exit():
-    subject_id = 1
     # Force-terminate all games on server termination
     for game_id in GAMES:
         socketio.emit(
             "end_game",
             {
                 "status": Game.Status.INACTIVE,
-                "data": get_game(game_id).get_data(subject_id),
+                "data": get_game(game_id).get_data(),
             },
             room=game_id,
         )
@@ -626,13 +625,12 @@ def play_game(game: OvercookedGame, fps=6):
     fps (int):              Number of game ticks that should happen every second
     """
     status = Game.Status.ACTIVE
-    subject_id = 1#session.get('subjectID')
     while status != Game.Status.DONE and status != Game.Status.INACTIVE:
         with game.lock:
             status = game.tick()
         if status == Game.Status.RESET:
             with game.lock:
-                data = game.get_data(subject_id)
+                data = game.get_data()
             socketio.emit(
                 "reset_game",
                 {
@@ -650,7 +648,7 @@ def play_game(game: OvercookedGame, fps=6):
         socketio.sleep(1 / fps)
 
     with game.lock:
-        data = game.get_data(subject_id)
+        data = game.get_data()
         socketio.emit(
             "end_game", {"status": status, "data": data}, room=game.id
         )
