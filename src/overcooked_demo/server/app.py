@@ -606,7 +606,7 @@ def on_exit():
             "end_game",
             {
                 "status": Game.Status.INACTIVE,
-                "data": get_game(game_id).get_data(),
+                "data": get_game(game_id).get_data(subject_id),
             },
             room=game_id,
         )
@@ -632,7 +632,7 @@ def play_game(game: OvercookedGame, fps=6):
             status = game.tick()
         if status == Game.Status.RESET:
             with game.lock:
-                data = game.get_data()
+                data = game.get_data(subject_id)
             socketio.emit(
                 "reset_game",
                 {
@@ -650,7 +650,7 @@ def play_game(game: OvercookedGame, fps=6):
         socketio.sleep(1 / fps)
 
     with game.lock:
-        data = game.get_data()
+        data = game.get_data(subject_id)
         socketio.emit(
             "end_game", {"status": status, "data": data}, room=game.id
         )
