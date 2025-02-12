@@ -120,7 +120,7 @@ app.logger.addHandler(handler)
 #################################
 # Global Coordination Functions #
 #################################
-
+subject_id = None
 
 def try_create_game(game_name, **kwargs):
     """
@@ -484,6 +484,8 @@ def creation_params(params):
 
 @socketio.on("create")
 def on_create(data):
+    global subject_id  # Declare the global variable
+    subject_id = data.get("subject_id", None)
     user_id = request.sid
     with USERS[user_id]:
         # Retrieve current game if one exists
