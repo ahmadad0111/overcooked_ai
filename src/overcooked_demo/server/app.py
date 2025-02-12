@@ -18,7 +18,7 @@ from datetime import datetime
 from threading import Lock
 
 import game
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from game import Game, OvercookedGame, OvercookedTutorial
 from utils import ThreadSafeDict, ThreadSafeSet
@@ -366,6 +366,19 @@ def index():
     return render_template(
         "index.html", agent_names=agent_names, layouts=LAYOUTS
     )
+    
+@app.route('/submit', methods=['POST'])
+def handle_submit():
+    # Get the subjectID from the form
+    subject_id = request.form.get('subjectID')
+    session['subjectID'] = subject_id 
+    
+    # Print the subjectID or process it as needed
+    print(f"Received Subject ID: {subject_id}")
+    
+    # You can return a message or redirect
+    return f"Received Subject ID: {subject_id}"
+
 
 
 @app.route("/predefined")
@@ -598,13 +611,14 @@ def on_disconnect():
 
 # Exit handler for server
 def on_exit():
+    subject_id = session.get('subjectID')
     # Force-terminate all games on server termination
     for game_id in GAMES:
         socketio.emit(
             "end_game",
             {
                 "status": Game.Status.INACTIVE,
-                "data": get_game(game_id).get_data(),
+                "data": get_game(game_id).get_data(subject_id),
             },
             room=game_id,
         )
@@ -625,12 +639,13 @@ def play_game(game: OvercookedGame, fps=6):
     fps (int):              Number of game ticks that should happen every second
     """
     status = Game.Status.ACTIVE
+    subject_id = session.get('subjectID')
     while status != Game.Status.DONE and status != Game.Status.INACTIVE:
         with game.lock:
             status = game.tick()
         if status == Game.Status.RESET:
             with game.lock:
-                data = game.get_data()
+                data = game.get_data(subject_id)
             socketio.emit(
                 "reset_game",
                 {
@@ -648,7 +663,7 @@ def play_game(game: OvercookedGame, fps=6):
         socketio.sleep(1 / fps)
 
     with game.lock:
-        data = game.get_data()
+        data = game.get_data(subject_id)
         socketio.emit(
             "end_game", {"status": status, "data": data}, room=game.id
         )
