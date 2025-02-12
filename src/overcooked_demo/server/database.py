@@ -56,7 +56,7 @@ class Database:
             insert_record_query = """
             INSERT INTO records (uid, timestamp, hash_key) VALUES (%s, %s, %s);
             """
-
+            # here i need subject id
             self.cursor.execute(insert_record_query, (data["uid"], data['timestamp'], commit_hash))
 
             # Commit the transaction
