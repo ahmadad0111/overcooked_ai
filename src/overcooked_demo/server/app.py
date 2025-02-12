@@ -120,7 +120,7 @@ app.logger.addHandler(handler)
 #################################
 # Global Coordination Functions #
 #################################
-subject_id = None
+
 
 def try_create_game(game_name, **kwargs):
     """
@@ -484,8 +484,6 @@ def creation_params(params):
 
 @socketio.on("create")
 def on_create(data):
-    global subject_id  # Declare the global variable
-    subject_id = data.get("subject_id", None)
     user_id = request.sid
     with USERS[user_id]:
         # Retrieve current game if one exists
@@ -606,7 +604,7 @@ def on_exit():
             "end_game",
             {
                 "status": Game.Status.INACTIVE,
-                "data": get_game(game_id).get_data(subject_id),
+                "data": get_game(game_id).get_data(),
             },
             room=game_id,
         )
@@ -632,7 +630,7 @@ def play_game(game: OvercookedGame, fps=6):
             status = game.tick()
         if status == Game.Status.RESET:
             with game.lock:
-                data = game.get_data(subject_id)
+                data = game.get_data()
             socketio.emit(
                 "reset_game",
                 {
@@ -650,7 +648,7 @@ def play_game(game: OvercookedGame, fps=6):
         socketio.sleep(1 / fps)
 
     with game.lock:
-        data = game.get_data(subject_id)
+        data = game.get_data()
         socketio.emit(
             "end_game", {"status": status, "data": data}, room=game.id
         )
