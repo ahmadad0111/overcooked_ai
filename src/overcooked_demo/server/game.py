@@ -709,13 +709,13 @@ class OvercookedGame(Game):
             except Exception as e:
                 raise IOError("Error loading agent\n{}".format(e.__repr__()))
 
-    def get_data(self,subject_id):
+    def get_data(self):
         """
         Returns and then clears the accumulated trajectory
         """
         commit_hash = str(generate_unique_hash())
         data = {
-            "uid": subject_id, #str(time()),
+            "uid": str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.now().isoformat(),
             "hash_key": commit_hash,
