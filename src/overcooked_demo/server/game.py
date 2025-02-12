@@ -27,8 +27,11 @@ import hashlib
 
 
 def generate_unique_hash():
-    unique_str = str(uuid.uuid4())  # Generate a unique identifier
-    return hashlib.sha256(unique_str.encode()).hexdigest()
+    user_id = "user123"
+    timestamp = str(datetime.now())
+    random_string = str(uuid.uuid4())
+    session_data = user_id + timestamp + random_string
+    return hashlib.sha256(session_data.encode()).hexdigest()
 
 
 database = Database()
@@ -602,7 +605,7 @@ class OvercookedGame(Game):
             "player_1_id": self.players[1],
             "player_0_is_human": self.players[0] in self.human_players,
             "player_1_is_human": self.players[1] in self.human_players,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
         }
 
         self.trajectory.append(transition)
@@ -714,7 +717,7 @@ class OvercookedGame(Game):
         data = {
             "uid": str(time()),
             "trajectory": self.trajectory,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "hash_key": commit_hash,
         }
         self.trajectory = []
