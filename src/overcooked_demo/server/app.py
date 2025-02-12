@@ -367,19 +367,6 @@ def index():
         "index.html", agent_names=agent_names, layouts=LAYOUTS
     )
     
-@app.route('/submit', methods=['POST'])
-def handle_submit():
-    # Get the subjectID from the form
-    subject_id = request.form.get('subjectID')
-    session['subjectID'] = subject_id 
-    
-    # Print the subjectID or process it as needed
-    print(f"Received Subject ID: {subject_id}")
-    
-    # You can return a message or redirect
-    return f"Received Subject ID: {subject_id}"
-
-
 
 @app.route("/predefined")
 def predefined():
@@ -611,7 +598,7 @@ def on_disconnect():
 
 # Exit handler for server
 def on_exit():
-    subject_id = session.get('subjectID')
+    subject_id = 1
     # Force-terminate all games on server termination
     for game_id in GAMES:
         socketio.emit(
@@ -639,7 +626,7 @@ def play_game(game: OvercookedGame, fps=6):
     fps (int):              Number of game ticks that should happen every second
     """
     status = Game.Status.ACTIVE
-    subject_id = session.get('subjectID')
+    subject_id = 1#session.get('subjectID')
     while status != Game.Status.DONE and status != Game.Status.INACTIVE:
         with game.lock:
             status = game.tick()
