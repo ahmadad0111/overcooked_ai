@@ -58,6 +58,8 @@ class Database:
             """
             # here i need subject id
             self.cursor.execute(insert_record_query, (data["uid"], data['timestamp'], commit_hash))
+            print('Record inserted successfully.')
+            print( data['timestamp'])            
 
             # Commit the transaction
             self.conn.commit()
