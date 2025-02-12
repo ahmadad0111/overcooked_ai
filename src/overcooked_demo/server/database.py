@@ -52,14 +52,19 @@ class Database:
                     ),
                 )
 
-            # Insert into records table
+            # Extract start and stop timestamps from the first and last transition
+            start_timestamp = transition_list[0]["timestamp"]
+            stop_timestamp = transition_list[-1]["timestamp"]
+
+            # Insert into records table with start and stop timestamps
             insert_record_query = """
-            INSERT INTO records (uid, timestamp, hash_key) VALUES (%s, %s, %s);
+            INSERT INTO records (uid, timestamp, hash_key, start, stop) 
+            VALUES (%s, %s, %s, %s, %s);
             """
-            # here i need subject id
-            self.cursor.execute(insert_record_query, (data["uid"], data['timestamp'], commit_hash))
+            self.cursor.execute(insert_record_query, (data["uid"], data['timestamp'], commit_hash, start_timestamp, stop_timestamp))
+
             print('Record inserted successfully.')
-            print( data['timestamp'])            
+            print(f'Start: {start_timestamp}, Stop: {stop_timestamp}')            
 
             # Commit the transaction
             self.conn.commit()
