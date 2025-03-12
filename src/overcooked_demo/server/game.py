@@ -21,6 +21,7 @@ from overcooked_ai_py.planning.planners import (
 )
 
 from database import Database
+from database1 import Database1
 # from keyboard_tracker import KeyboardTracker
 # from keyboard_tracking_controller import TrackingController
 
@@ -38,6 +39,7 @@ def generate_unique_hash():
 
 
 database = Database()
+database1 = Database1()
 
 # Relative path to where all static pre-trained agents are stored on server
 AGENT_DIR = None
