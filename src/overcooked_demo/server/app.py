@@ -371,8 +371,6 @@ def index():
 @app.route("/predefined")
 def predefined():
     uid = request.args.get("UID")
-    if uid:
-        session['UID'] = uid  # Store UID in session
     num_layouts = len(CONFIG["predefined"]["experimentParams"]["layouts"])
 
     return render_template(
