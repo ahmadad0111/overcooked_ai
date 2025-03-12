@@ -368,6 +368,7 @@ def index():
     if request.method == "POST":
         # Get the UID from the form
         uid = request.form.get('uid')
+        print(f"Received UID: {uid}")
 
         # Store the UID in the session (Flask's session management)
         session['user_id'] = uid
