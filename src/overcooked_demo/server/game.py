@@ -1,5 +1,4 @@
 import json
-import keyboard
 import os
 import pickle
 import random
@@ -464,11 +463,6 @@ class OvercookedGame(Game):
         self.human_players = set()
         self.npc_players = set()
         self.num_collisions = 0
-        self.key_events = []  # To store key presses
-
-        # Start listening for keyboard events
-        self.listener = keyboard.Listener(on_press=self.on_key_press, on_release=self.on_key_release)
-        self.listener.start()
 
         if randomized:
             random.shuffle(self.layouts)
@@ -500,25 +494,6 @@ class OvercookedGame(Game):
             self.write_data = False
 
         self.trajectory = []
-    def on_key_press(self, event):
-        key_name = event.name  # 'name' gives the key name for both alphanumeric and special keys
-
-        event_data = {
-            "key": key_name,
-            "action": "pressed",
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-        self.key_events.append(event_data)
-
-    def on_key_release(self, event):
-        key_name = event.name  # 'name' gives the key name for both alphanumeric and special keys
-
-        event_data = {
-            "key": key_name,
-            "action": "released",
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-        self.key_events.append(event_data)
     def _curr_game_over(self):
         return time() - self.start_time >= self.max_time
 
@@ -637,7 +612,6 @@ class OvercookedGame(Game):
             "player_1_is_human": self.players[1] in self.human_players,
             "collision": collision,
             "num_collisions": self.num_collisions,
-            "keyboard_events": json.dumps(self.key_events),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
