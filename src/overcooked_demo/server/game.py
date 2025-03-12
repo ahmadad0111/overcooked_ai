@@ -591,9 +591,9 @@ class OvercookedGame(Game):
         curr_reward = sum(info["sparse_reward_by_agent"])
         self.score += curr_reward
         
-        # collision = self.env.mdp.prev_step_was_collision
-        # if collision:
-        #     self.num_collisions += 1
+        collision = self.mdp.is_prev_step_was_collision 
+        if collision:
+            self.num_collisions += 1
 
         
         transition = {
@@ -611,6 +611,8 @@ class OvercookedGame(Game):
             "player_1_id": self.players[1],
             "player_0_is_human": self.players[0] in self.human_players,
             "player_1_is_human": self.players[1] in self.human_players,
+            "collision": collision,
+            "num_collisions": self.num_collisions,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
