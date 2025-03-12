@@ -474,6 +474,7 @@ class OvercookedGame(Game):
         # self.commit_hash = str(generate_unique_hash())
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
+        self.uid = None
 
         
         
@@ -509,14 +510,14 @@ class OvercookedGame(Game):
             self.write_data = False
 
         self.trajectory = []
-    uid = None
+    
     @classmethod
-    def set_uid(cls, uid_value):
-        cls.uid = uid_value
+    def set_uid(self, uid_value):
+        self.uid = uid_value
 
     @classmethod
-    def get_uid(cls):
-        return cls.uid
+    def get_uid(self):
+        return self.uid
         
     def _curr_game_over(self):
         return time() - self.start_time >= self.max_time
@@ -748,7 +749,7 @@ class OvercookedGame(Game):
         """
         
         data = {
-            "uid": cls.get_uid(),#str(time()),
+            "uid": self.get_uid(),#str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "hash_key": str(generate_unique_hash())
