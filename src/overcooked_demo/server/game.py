@@ -746,7 +746,7 @@ class OvercookedGame(Game):
         """
         
         data = {
-            "uid": str(time()),
+            "uid": get_uid_from_session(), # str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "hash_key": str(generate_unique_hash())
