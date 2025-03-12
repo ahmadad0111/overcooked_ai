@@ -469,6 +469,8 @@ class OvercookedGame(Game):
         self.kb_tracker = KeyboardTracker()
         self.kb_tracker.start_tracking()
         self.kb_controller = TrackingController()
+        self.commit_hash = str(generate_unique_hash())
+        session_id = self.commit_hash 
         self.start_tracking(session_id)
         
         
