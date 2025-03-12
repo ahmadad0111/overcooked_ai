@@ -21,7 +21,7 @@ from overcooked_ai_py.planning.planners import (
 )
 
 from database import Database
-from database1 import Database1
+# from database1 import Database1
 # from keyboard_tracker import KeyboardTracker
 # from keyboard_tracking_controller import TrackingController
 
@@ -39,7 +39,7 @@ def generate_unique_hash():
 
 
 database = Database()
-database1 = Database1()
+# database1 = Database1()
 
 # Relative path to where all static pre-trained agents are stored on server
 AGENT_DIR = None
@@ -471,8 +471,8 @@ class OvercookedGame(Game):
         # self.kb_tracker = KeyboardTracker()
         # self.kb_tracker.start_tracking()
         # self.kb_controller = TrackingController()
-        self.commit_hash = str(generate_unique_hash())
-        session_id = self.commit_hash 
+        # self.commit_hash = str(generate_unique_hash())
+        # session_id = self.commit_hash 
         # self.start_tracking(session_id)
         
         
@@ -629,7 +629,7 @@ class OvercookedGame(Game):
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
-        database1.update_transition(transition, self.commit_hash)
+        # database1.update_transition(transition, self.commit_hash)
         self.trajectory.append(transition)
         
 
@@ -741,7 +741,7 @@ class OvercookedGame(Game):
             "uid": str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "hash_key": self.commit_hash,
+            "hash_key": str(generate_unique_hash())
         }
         self.trajectory = []
         # if we want to store the data and there is data to store
@@ -756,8 +756,8 @@ class OvercookedGame(Game):
                 # 1.5 single table - timestamp, uid, expanded self.trajectory
                 # 2 double table - timestamp, uid, foreign key :: foreign key, other fields of self.trajectory
             # insert the database table update logic
-            #database.update(data)
-            database1.update(data)
+            database.update(data)
+            # database1.update(data)
             
 
         # self.stop_tracking()
