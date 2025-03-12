@@ -1146,6 +1146,8 @@ class OvercookedGridworld(object):
         self._prev_potential_params = {}
         # determines whether to start cooking automatically once 3 items are in the pot
         self.old_dynamics = old_dynamics
+        # collision records
+        self.is_prev_step_was_collision = False
 
     @staticmethod
     def from_layout_name(layout_name, **params_to_overwrite):
@@ -1705,7 +1707,9 @@ class OvercookedGridworld(object):
     def _handle_collisions(self, old_positions, new_positions):
         """If agents collide, they stay at their old locations"""
         if self.is_transition_collision(old_positions, new_positions):
+            self.is_prev_step_was_collision = True
             return old_positions
+        self.is_prev_step_was_collision = False
         return new_positions
 
     def _get_terrain_type_pos_dict(self):
