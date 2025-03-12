@@ -29,7 +29,15 @@ from database import Database
 import uuid
 import hashlib
 
+from flask import session
 
+def get_uid_from_session():
+    # Access the UID from the session
+    uid = session.get('UID')
+    if uid:
+        return f"Fetched UID from session: {uid}"
+    else:
+        return "UID not found in session"
 def generate_unique_hash():
     user_id = "user123"
     timestamp = str(datetime.now())
