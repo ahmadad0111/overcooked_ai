@@ -64,43 +64,6 @@ class Database:
             transition_list = data["trajectory"]
             commit_hash = data["hash_key"]
 
-            # Prepare insert query for the trajectories table
-            insert_trajectory_query = """
-            INSERT INTO trajectories (
-                hash_key, state, joint_action, reward, time_left, score, time_elapsed, 
-                cur_gameloop, layout, layout_name, trial_id, player_0_id, 
-                player_1_id, player_0_is_human, player_1_is_human, collision, num_collisions, keyboard_events, timestamp
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s, %s, %s)
-            RETURNING id;
-            """
-
-            # Iterate over the list of trajectory dictionaries and insert them
-            for transition in transition_list:
-                self.cursor.execute(
-                    insert_trajectory_query,
-                    (
-                        commit_hash,  # Insert hash_key first
-                        transition['state'],
-                        transition["joint_action"],
-                        transition["reward"],
-                        transition["time_left"],
-                        transition["score"],
-                        transition["time_elapsed"],
-                        transition["cur_gameloop"],
-                        transition["layout"],
-                        transition["layout_name"],
-                        transition["trial_id"],
-                        transition["player_0_id"],
-                        transition["player_1_id"],
-                        transition["player_0_is_human"],
-                        transition["player_1_is_human"],
-                        transition["collision"],
-                        transition["num_collisions"],
-                        transition["keyboard_events"],
-                        transition["timestamp"]
-                    ),
-                )
-
             # Extract start and stop timestamps from the first and last transition
             start_timestamp = transition_list[0]["timestamp"]
             stop_timestamp = transition_list[-1]["timestamp"]
