@@ -38,6 +38,9 @@ COPY ./db.json ./db.json
 ENV HOST 0.0.0.0
 ENV PORT 5000
 ENV CONF_PATH config.json
+# Set the DISPLAY environment variable to a dummy value
+ENV DISPLAY=:0
+
 
 # Do the thing
 EXPOSE 5000
