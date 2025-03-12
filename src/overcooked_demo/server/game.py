@@ -429,7 +429,7 @@ class OvercookedGame(Game):
             spawned for each NPC
         - _curr_game_over: Determines whether the game on the current mdp has ended
     """
-
+    uid_value = None
     def __init__(
         self,
         layouts=["cramped_room"],
@@ -474,7 +474,7 @@ class OvercookedGame(Game):
         # self.commit_hash = str(generate_unique_hash())
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
-        self.uid = None
+        #self.uid = None
 
         
         
@@ -512,12 +512,16 @@ class OvercookedGame(Game):
         self.trajectory = []
     
 
-    def set_uid(self, uid_value):
-        self.uid = uid_value
+    # def set_uid(self, uid_value):
+    #     self.uid = uid_value
+    @classmethod
+    def set_uid(cls, uid_value):
+        cls.uid_value = uid_value
+        print(f"Setting UID: {uid_value}")
 
-
-    def get_uid(self):
-        return self.uid
+    @classmethod
+    def get_uid(cls):
+        return cls.uid_value
         
     def _curr_game_over(self):
         return time() - self.start_time >= self.max_time
@@ -747,7 +751,7 @@ class OvercookedGame(Game):
         """
         Returns and then clears the accumulated trajectory
         """
-        #print("UID is:", self.get_uid())
+        print("UID is:", self.get_uid())
         data = {
             "uid": str(time()),
             "trajectory": self.trajectory,
