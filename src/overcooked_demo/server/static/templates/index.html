@@ -26,7 +26,18 @@
     <link rel="stylesheet" href="static/css/style.css" type="text/css" />
   </head>
   <body>
+  <div class="container">
+    <!-- User ID Input Form -->
+    <h2 class="text-center">Enter Your User ID</h2>
     <form action="/set_user" method="POST">
+      <div class="form-group">
+        <label for="user_id">Enter UID:</label>
+        <input type="text" id="user_id" name="user_id" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Set UID</button>
+    </form>
+  </div>
+    <form>
       <div class="container">
       <div class="row text-center">
 	<div class="form-group col-lg-3">
