@@ -1,0 +1,7 @@
+{
+    "host": "192.168.0.4",
+    "port": 5433,
+    "dbname": "experiments",
+    "user": "postgres",
+    "password": "experiments"
+}
