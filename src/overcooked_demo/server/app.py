@@ -361,17 +361,22 @@ def get_agent_names():
 # at after the server response is received. Standard HTTP protocol
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
     agent_names = get_agent_names()
-    # Get the UID from the form
-    uid = request.form.get('uid')
+    # Check if the form was submitted (POST request)
+    if request.method == "POST":
+        # Get the UID from the form
+        uid = request.form.get('uid')
 
-    # Store the UID in the session (Flask's session management)
-    session['user_id'] = uid
+        # Store the UID in the session (Flask's session management)
+        session['user_id'] = uid
 
-    # Optionally, store the UID in the GameSession class
-    OvercookedGame.set_uid(uid)  
+        # Optionally, store the UID in the GameSession class
+        OvercookedGame.set_uid(uid)
+    else:
+        # Handle the case when GET request is received (initial page load)
+        uid = session.get('user_id')  # If the UID is already stored in the session
     return render_template(
         "index.html", agent_names=agent_names, layouts=LAYOUTS, uid = uid
     )
