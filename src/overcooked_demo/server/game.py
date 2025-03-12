@@ -509,6 +509,15 @@ class OvercookedGame(Game):
             self.write_data = False
 
         self.trajectory = []
+    uid = None
+    @classmethod
+    def set_uid(cls, uid_value):
+        cls.uid = uid_value
+
+    @classmethod
+    def get_uid(cls):
+        return cls.uid
+        
     def _curr_game_over(self):
         return time() - self.start_time >= self.max_time
     
@@ -739,7 +748,7 @@ class OvercookedGame(Game):
         """
         
         data = {
-            "uid": str(time()),
+            "uid": get_uid(),#str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "hash_key": str(generate_unique_hash())
