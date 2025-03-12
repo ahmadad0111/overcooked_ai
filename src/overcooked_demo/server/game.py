@@ -730,12 +730,12 @@ class OvercookedGame(Game):
         """
         Returns and then clears the accumulated trajectory
         """
-        commit_hash = str(generate_unique_hash())
+        
         data = {
             "uid": str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "hash_key": commit_hash,
+            "hash_key": self.commit_hash,
         }
         self.trajectory = []
         # if we want to store the data and there is data to store
