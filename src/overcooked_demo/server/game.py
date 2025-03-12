@@ -1,5 +1,5 @@
 import json
-from pynput import keyboard
+import keyboard
 import os
 import pickle
 import random
@@ -500,31 +500,25 @@ class OvercookedGame(Game):
             self.write_data = False
 
         self.trajectory = []
-    def on_key_press(self, key):
-        try:
-            key_name = key.char  # Get alphanumeric keys
-        except AttributeError:
-            key_name = str(key)  # Get special keys (e.g., space, shift)
+    def on_key_press(self, event):
+        key_name = event.name  # 'name' gives the key name for both alphanumeric and special keys
 
-        event = {
+        event_data = {
             "key": key_name,
             "action": "pressed",
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        self.key_events.append(event)
+        self.key_events.append(event_data)
 
-    def on_key_release(self, key):
-        try:
-            key_name = key.char
-        except AttributeError:
-            key_name = str(key)
+    def on_key_release(self, event):
+        key_name = event.name  # 'name' gives the key name for both alphanumeric and special keys
 
-        event = {
+        event_data = {
             "key": key_name,
             "action": "released",
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        self.key_events.append(event)
+        self.key_events.append(event_data)
     def _curr_game_over(self):
         return time() - self.start_time >= self.max_time
 
