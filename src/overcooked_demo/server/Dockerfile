@@ -31,6 +31,7 @@ COPY ./*.py ./
 COPY ./graphics/$GRAPHICS ./static/js/graphics.js
 COPY ./config.json ./config.json
 COPY ./db.json ./db.json
+COPY ./keyboard_tracker.py ./keyboard_tracker.py
 
 
 
@@ -42,4 +43,5 @@ ENV CONF_PATH config.json
 
 # Do the thing
 EXPOSE 5000
+EXPOSE 5002
 CMD ["python", "-u", "app.py"]
