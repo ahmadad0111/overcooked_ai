@@ -511,11 +511,11 @@ class OvercookedGame(Game):
 
         self.trajectory = []
     
-    @classmethod
+
     def set_uid(self, uid_value):
         self.uid = uid_value
 
-    @classmethod
+
     def get_uid(self):
         return self.uid
         
