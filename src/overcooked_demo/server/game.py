@@ -747,9 +747,9 @@ class OvercookedGame(Game):
         """
         Returns and then clears the accumulated trajectory
         """
-        print("UID is:", self.get_uid())
+        #print("UID is:", self.get_uid())
         data = {
-            "uid": self.get_uid(),#str(time()),
+            "uid": str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "hash_key": str(generate_unique_hash())
