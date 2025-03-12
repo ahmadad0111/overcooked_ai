@@ -380,7 +380,7 @@ def set_user():
     OvercookedGame.set_uid(uid)
 
     # Redirect to the game page or another appropriate route
-    return redirect(url_for('play_game'))
+    return render_template("index.html", uid=uid)
 
 @app.route("/predefined")
 def predefined():
