@@ -22,6 +22,7 @@ from overcooked_ai_py.planning.planners import (
 
 from database import Database
 from keyboard_tracker import KeyboardTracker
+from keyboard_tracking_controller import TrackingController
 
 
 import uuid
@@ -467,6 +468,10 @@ class OvercookedGame(Game):
         self.num_collisions = 0
         self.kb_tracker = KeyboardTracker()
         self.kb_tracker.start_tracking()
+        self.kb_controller = TrackingController()
+        self.start_tracking(session_id)
+        
+        
         
 
         if randomized:
