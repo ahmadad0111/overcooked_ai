@@ -753,7 +753,7 @@ class OvercookedGame(Game):
         """
         print("UID is:", self.get_uid())
         data = {
-            "uid": str(time()),
+            "uid": self.get_uid(),#str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "hash_key": str(generate_unique_hash())
