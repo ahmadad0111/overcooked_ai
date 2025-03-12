@@ -371,7 +371,6 @@ def index():
 @app.route("/predefined")
 def predefined():
     uid = request.args.get("UID")
-    game.process_uid(uid)
     num_layouts = len(CONFIG["predefined"]["experimentParams"]["layouts"])
 
     return render_template(
