@@ -116,6 +116,7 @@ handler = logging.FileHandler(LOGFILE)
 handler.setLevel(logging.ERROR)
 app.logger.addHandler(handler)
 
+app.secret_key = 'abc'
 
 #################################
 # Global Coordination Functions #
