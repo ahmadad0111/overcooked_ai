@@ -2,7 +2,7 @@ import json
 import psycopg2
 
 
-class Database1:
+class Database:
     def __init__(self, config_file="db.json"):
         # Load database credentials
         with open(config_file, "r") as file:
