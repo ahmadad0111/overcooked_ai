@@ -629,7 +629,9 @@ class OvercookedGame(Game):
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
+        database1.update_transition(transition, self.commit_hash)
         self.trajectory.append(transition)
+        
 
         # Return about the current transition
         return prev_state, joint_action, info
@@ -754,7 +756,9 @@ class OvercookedGame(Game):
                 # 1.5 single table - timestamp, uid, expanded self.trajectory
                 # 2 double table - timestamp, uid, foreign key :: foreign key, other fields of self.trajectory
             # insert the database table update logic
-            database.update(data)
+            #database.update(data)
+            database1.update(data)
+            
 
         # self.stop_tracking()
         return data
