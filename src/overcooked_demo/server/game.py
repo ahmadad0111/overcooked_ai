@@ -29,7 +29,10 @@ from database import Database
 import uuid
 import hashlib
 
-
+def process_uid(uid):
+    # Set the UID for the session
+    OvercookedGame.set_uid(uid)
+    print(f"Processing UID: {OvercookedGame.get_uid()}")
 def generate_unique_hash():
     user_id = "user123"
     timestamp = str(datetime.now())
@@ -474,6 +477,7 @@ class OvercookedGame(Game):
         # self.commit_hash = str(generate_unique_hash())
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
+        self.uid = None
         
         
         
@@ -511,6 +515,14 @@ class OvercookedGame(Game):
     def _curr_game_over(self):
         return time() - self.start_time >= self.max_time
 
+    def set_uid(self, uid_value):
+        # Set UID for this instance
+        self.uid = uid_value
+
+    def get_uid(self):
+        # Get UID for this instance
+        return self.uid
+    
     def needs_reset(self):
         return self._curr_game_over() and not self.is_finished()
 
@@ -738,7 +750,7 @@ class OvercookedGame(Game):
         """
         
         data = {
-            "uid":  str(time()),
+            "uid":  self.get_uid(),#str(time()),
             "trajectory": self.trajectory,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "hash_key": str(generate_unique_hash())
