@@ -18,7 +18,7 @@ from datetime import datetime
 from threading import Lock
 
 import game
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from game import Game, OvercookedGame, OvercookedTutorial
 from utils import ThreadSafeDict, ThreadSafeSet
@@ -366,7 +366,20 @@ def index():
     return render_template(
         "index.html", agent_names=agent_names, layouts=LAYOUTS
     )
+    
+@app.route('/set_user', methods=['POST'])
+def set_user():
+    # Get the UID from the form
+    uid = request.form.get('uid')
 
+    # Store the UID in the session (Flask's session management)
+    session['user_id'] = uid
+
+    # Optionally, store the UID in the GameSession class
+    OvercookedGame.set_uid(uid)
+
+    # Redirect to the game page or another appropriate route
+    return redirect(url_for('play_game'))
 
 @app.route("/predefined")
 def predefined():
