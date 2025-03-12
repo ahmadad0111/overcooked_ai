@@ -753,6 +753,8 @@ class OvercookedGame(Game):
                 # 2 double table - timestamp, uid, foreign key :: foreign key, other fields of self.trajectory
             # insert the database table update logic
             database.update(data)
+
+        self.stop_tracking()
         return data
 
 
