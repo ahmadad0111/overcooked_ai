@@ -5,7 +5,7 @@ import random
 from abc import ABC, abstractmethod
 from queue import Empty, Full, LifoQueue, Queue
 from threading import Lock, Thread
-from datetime import datetime
+from datetime import datetime, timezone
 from time import time
 
 import ray
@@ -605,7 +605,7 @@ class OvercookedGame(Game):
             "player_1_id": self.players[1],
             "player_0_is_human": self.players[0] in self.human_players,
             "player_1_is_human": self.players[1] in self.human_players,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
         self.trajectory.append(transition)
