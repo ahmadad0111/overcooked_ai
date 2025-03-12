@@ -364,12 +364,6 @@ def get_agent_names():
 @app.route("/")
 def index():
     agent_names = get_agent_names()
-    return render_template(
-        "index.html", agent_names=agent_names, layouts=LAYOUTS
-    )
-    
-@app.route('/set_user', methods=['POST'])
-def set_user():
     # Get the UID from the form
     uid = request.form.get('uid')
 
@@ -377,10 +371,24 @@ def set_user():
     session['user_id'] = uid
 
     # Optionally, store the UID in the GameSession class
-    OvercookedGame.set_uid(uid)
+    OvercookedGame.set_uid(uid)  
+    return render_template(
+        "index.html", agent_names=agent_names, layouts=LAYOUTS, uid = uid
+    )
+    
+# @app.route('/set_user', methods=['POST'])
+# def set_user():
+#     # Get the UID from the form
+#     uid = request.form.get('uid')
 
-    # Redirect to the game page or another appropriate route
-    #return render_template("index.html", uid=uid)
+#     # Store the UID in the session (Flask's session management)
+#     session['user_id'] = uid
+
+#     # Optionally, store the UID in the GameSession class
+#     OvercookedGame.set_uid(uid)
+
+#     # Redirect to the game page or another appropriate route
+#     #return render_template("index.html", uid=uid)
 
 @app.route("/predefined")
 def predefined():
