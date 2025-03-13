@@ -6,17 +6,6 @@ ARG GRAPHICS
 
 WORKDIR /app
 
-# Clone the pylsl repository
-RUN git clone https://github.com/labstreaminglayer/pylsl.git
-# Set the working directory to the cloned pylsl directory
-WORKDIR /app/pylsl
-# Install pylsl using the setup.py file
-RUN python setup.py install
-
-
-
-WORKDIR /app
-
 # Install non-chai dependencies
 COPY ./requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
