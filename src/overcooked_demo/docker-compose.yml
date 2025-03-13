@@ -17,6 +17,7 @@ services:
             - "5433:5433"
         volumes:
             - data:/app/data
+            - /mnt/c/Users/adnan/Desktop/OC/DB/pylsl:/home/adnan/pylsl
 volumes:
   data:
         
