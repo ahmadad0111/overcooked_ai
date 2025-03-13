@@ -641,7 +641,7 @@ class OvercookedGame(Game):
             "player_1_is_human": self.players[1] in self.human_players,
             "collision": collision,
             "num_collisions": self.num_collisions,
-            "timestamp":  datetime.now(timezone.utc).isoformat(timespec='microseconds') #str(time.time())
+            "timestamp":  str(time()) #datetime.now(timezone.utc).isoformat(timespec='microseconds') 
         }
 
         # database1.update_transition(transition, self.commit_hash)
@@ -756,7 +756,7 @@ class OvercookedGame(Game):
         data = {
             "uid": self.get_uid(),#str(time()),
             "trajectory": self.trajectory,
-            "timestamp":  datetime.now(timezone.utc).isoformat(timespec='microseconds'),# str(time.time()),
+            "timestamp":   str(time()), #datetime.now(timezone.utc).isoformat(timespec='microseconds'),# str(time.time()),
             "hash_key": str(generate_unique_hash())
         }
         self.trajectory = []
