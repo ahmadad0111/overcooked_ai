@@ -19,6 +19,5 @@ protobuf==3.19
 datetime
 psycopg2
 keyboard
-git+https://github.com/labstreaminglayer/pylsl.git
 
 
