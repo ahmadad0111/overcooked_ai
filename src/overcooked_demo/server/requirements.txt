@@ -19,4 +19,4 @@ protobuf==3.19
 datetime
 psycopg2
 keyboard
-pylsl
+
