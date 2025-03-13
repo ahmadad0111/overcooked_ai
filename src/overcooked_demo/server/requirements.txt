@@ -19,5 +19,6 @@ protobuf==3.19
 datetime
 psycopg2
 keyboard
-pylsl @ file:///C:/Users/adnan/Desktop/OC/DB/pylsl
+pylsl @ file:///home/adnan/pylsl
+
 
