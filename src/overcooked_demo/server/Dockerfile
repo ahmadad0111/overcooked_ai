@@ -6,7 +6,7 @@ ARG GRAPHICS
 
 WORKDIR /app
 
-RUN conda install -c conda-forge liblsl
+RUN apt-get update && apt-get install -y liblsl
 
 # Install non-chai dependencies
 COPY ./requirements.txt ./requirements.txt
