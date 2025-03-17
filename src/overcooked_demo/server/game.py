@@ -646,11 +646,16 @@ class OvercookedGame(Game):
         }
 
         info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
-        
-        # Create the stream outlet 
+                
+        # Create the stream outlet
         outlet = StreamOutlet(info)
+        print("Stream outlet created.")
+        
         message = json.dumps(transition)
+        print("Pushing sample:", message)  # Debugging message content
+        
         outlet.push_sample([message])
+        print("Sample pushed.")
         
         # database1.update_transition(transition, self.commit_hash)
         self.trajectory.append(transition)
