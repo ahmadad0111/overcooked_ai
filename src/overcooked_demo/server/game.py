@@ -1,4 +1,4 @@
-# from pylsl import StreamInfo, StreamOutlet
+from pylsl import StreamInfo, StreamOutlet
 import json
 import os
 import pickle
@@ -645,12 +645,12 @@ class OvercookedGame(Game):
             "timestamp":  str(time()) #datetime.now(timezone.utc).isoformat(timespec='microseconds') 
         }
 
-        # info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
         
-        # # Create the stream outlet 
-        # outlet = StreamOutlet(info)
-        # message = json.dumps(transition)
-        # outlet.push_sample([message])
+        # Create the stream outlet 
+        outlet = StreamOutlet(info)
+        message = json.dumps(transition)
+        outlet.push_sample([message])
         
         # database1.update_transition(transition, self.commit_hash)
         self.trajectory.append(transition)
