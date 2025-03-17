@@ -476,7 +476,7 @@ class OvercookedGame(Game):
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
         #self.uid = None
-
+        self.outlet = None
         
         
         
@@ -624,7 +624,13 @@ class OvercookedGame(Game):
         if collision:
             self.num_collisions += 1
 
-        
+        # Initialize the stream outlet once
+        if not hasattr(self, 'outlet'):  # Check if outlet has already been created
+            info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+            self.outlet = StreamOutlet(info)
+            print("Stream outlet created.")
+            
+                
         transition = {
             "state": json.dumps(prev_state.to_dict()),
             "joint_action": json.dumps(joint_action),
@@ -645,18 +651,23 @@ class OvercookedGame(Game):
             "timestamp":  str(time()) #datetime.now(timezone.utc).isoformat(timespec='microseconds') 
         }
 
-        info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        # info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
                 
-        # Create the stream outlet
-        outlet = StreamOutlet(info)
-        print("Stream outlet created.")
+        # # Create the stream outlet
+        # outlet = StreamOutlet(info)
+        # print("Stream outlet created.")
         
+        # message = json.dumps(transition)
+        # print("Pushing sample:", message)  # Debugging message content
+        
+        # outlet.push_sample([message])
+        # print("Sample pushed.")
+
+
         message = json.dumps(transition)
         print("Pushing sample:", message)  # Debugging message content
-        
-        outlet.push_sample([message])
+        self.outlet.push_sample([message])
         print("Sample pushed.")
-        
         # database1.update_transition(transition, self.commit_hash)
         self.trajectory.append(transition)
         
