@@ -5,10 +5,10 @@ ARG OVERCOOKED_BRANCH
 ARG GRAPHICS
 
 # Make sure `lsl.dll` is in the same directory as your Dockerfile or specify the correct relative path
-COPY ./liblsl/bin/lsl.dll /usr/local/lib/lsl.dll
+COPY ./liblsl/bin/ /usr/local/lib/
 
 # Set the environment variable
-ENV PYLSL_LIB=/usr/local/lib/lsl.dll
+ENV PYLSL_LIB=/usr/local/lib/liblsl.so
 
 # Install pylsl
 RUN pip install pylsl
