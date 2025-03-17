@@ -476,7 +476,7 @@ class OvercookedGame(Game):
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
         #self.uid = None
-        self.outlet = None
+        
         
         
         
