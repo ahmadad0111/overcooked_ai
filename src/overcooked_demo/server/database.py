@@ -50,20 +50,20 @@ class Database:
                         transition["player_1_is_human"],
                         transition["collision"],
                         transition["num_collisions"],
-                        transition["timestamp"]
+                        transition["unix_timestamp"]
                     ),
                 )
 
             # Extract start and stop timestamps from the first and last transition
-            start_timestamp = transition_list[0]["timestamp"]
-            stop_timestamp = transition_list[-1]["timestamp"]
+            start_timestamp = transition_list[0]["unix_timestamp"]
+            stop_timestamp = transition_list[-1]["unix_timestamp"]
 
             # Insert into records table with start and stop timestamps
             insert_record_query = """
             INSERT INTO records (uid, timestamp, hash_key, start, stop) 
             VALUES (%s, %s, %s, %s, %s);
             """
-            self.cursor.execute(insert_record_query, (data["uid"], data['timestamp'], commit_hash, start_timestamp, stop_timestamp))
+            self.cursor.execute(insert_record_query, (data["uid"], data['unix_timestamp'], commit_hash, start_timestamp, stop_timestamp))
 
             print('Record inserted successfully.')
             print(f'Start: {start_timestamp}, Stop: {stop_timestamp}')            
