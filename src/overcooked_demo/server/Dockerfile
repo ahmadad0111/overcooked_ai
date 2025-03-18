@@ -22,7 +22,7 @@ RUN pip install -r requirements.txt
 
 # Install eventlet production server if production build
 RUN if [ "$BUILD_ENV" = "production" ] ; then pip install eventlet ; fi
-RUN pip install eventlet
+
 
 
 # Clone chai code
