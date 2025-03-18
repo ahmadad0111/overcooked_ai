@@ -630,12 +630,12 @@ class OvercookedGame(Game):
             self.outlet = StreamOutlet(info)
             print("Stream outlet created.")
 
-        # Create dummy JSON data
-        dummy_data = {
-            "event": "dummy_event",
-            "timestamp": time(),
-            "value": 42
-        }
+        # # Create dummy JSON data
+        # dummy_data = {
+        #     "event": "dummy_event",
+        #     "timestamp": time(),
+        #     "value": 42
+        # }
 
             
                 
@@ -656,7 +656,7 @@ class OvercookedGame(Game):
             "player_1_is_human": self.players[1] in self.human_players,
             "collision": collision,
             "num_collisions": self.num_collisions,
-            "timestamp":  str(time()) #datetime.now(timezone.utc).isoformat(timespec='microseconds') 
+            "unix_timestamp":  str(time()) #datetime.now(timezone.utc).isoformat(timespec='microseconds') 
         }
 
         # info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
@@ -665,14 +665,14 @@ class OvercookedGame(Game):
         # outlet = StreamOutlet(info)
         # print("Stream outlet created.")
         
-        # message = json.dumps(transition)
+        message = json.dumps(transition)
         # print("Pushing sample:", message)  # Debugging message content
         
         # outlet.push_sample([message])
         # print("Sample pushed.")
 
 
-        message = json.dumps(dummy_data)
+        #message = json.dumps(dummy_data)
         print("Pushing sample:", message)  # Debugging message content
         self.outlet.push_sample([message])
         print("Sample pushed.")
@@ -788,8 +788,8 @@ class OvercookedGame(Game):
         data = {
             "uid": self.get_uid(),#str(time()),
             "trajectory": self.trajectory,
-            "timestamp":   str(time()), #datetime.now(timezone.utc).isoformat(timespec='microseconds'),# str(time.time()),
-            "hash_key": str(generate_unique_hash())
+            "unix_timestamp":   str(time()), #datetime.now(timezone.utc).isoformat(timespec='microseconds'),# str(time.time()),
+            "round_id": str(generate_unique_hash())
         }
         self.trajectory = []
         # if we want to store the data and there is data to store
