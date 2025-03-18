@@ -21,9 +21,9 @@ class Database:
             # Prepare insert query for the trajectories table
             insert_trajectory_query = """
             INSERT INTO trajectories (
-                hash_key, state, joint_action, reward, time_left, score, time_elapsed, 
+                round_id, state, joint_action, reward, time_left, score, time_elapsed, 
                 cur_gameloop, layout, layout_name, trial_id, player_0_id, 
-                player_1_id, player_0_is_human, player_1_is_human, collision, num_collisions,  timestamp
+                player_1_id, player_0_is_human, player_1_is_human, collision, num_collisions,  unix_timestamp
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s, %s)
             RETURNING id;
             """
@@ -60,7 +60,7 @@ class Database:
 
             # Insert into records table with start and stop timestamps
             insert_record_query = """
-            INSERT INTO records (uid, timestamp, hash_key, start, stop) 
+            INSERT INTO records (uid, unix_timestamp, round_id, start, stop) 
             VALUES (%s, %s, %s, %s, %s);
             """
             self.cursor.execute(insert_record_query, (data["uid"], data['unix_timestamp'], commit_hash, start_timestamp, stop_timestamp))
