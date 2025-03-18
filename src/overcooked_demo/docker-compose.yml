@@ -1,24 +1,19 @@
-version : '3.7'
+version: '3.7'
 
 services:
-    app:
-        build:
-            context: ./server
-            args:
-                BUILD_ENV: "${BUILD_ENV:-production}"
-                OVERCOOKED_BRANCH: "${OVERCOOKED_BRANCH:-master}"
-                GRAPHICS: "${GRAPHICS:-overcooked_graphics_v2.2.js}"
-            shm_size: "5gb"
-        shm_size: "5gb"
-        environment: 
-            FLASK_ENV: "${BUILD_ENV:-production}"
-        ports:
-            - "80:5000"
-            - "5433:5433"
-            - "10100:10100/udp"  # LSL streaming port (UDP)
-            - "10101:10101/udp"  # LSL streaming port (UDP)
-        volumes:
-            - data:/app/data
+  app:
+    build:
+      context: ./server
+      args:
+        BUILD_ENV: "${BUILD_ENV:-production}"
+        OVERCOOKED_BRANCH: "${OVERCOOKED_BRANCH:-master}"
+        GRAPHICS: "${GRAPHICS:-overcooked_graphics_v2.2.js}"
+    shm_size: "5gb"
+    environment:
+      FLASK_ENV: "${BUILD_ENV:-production}"
+    network_mode: "host"  # Use the host network
+    volumes:
+      - data:/app/data
+
 volumes:
   data:
-        
