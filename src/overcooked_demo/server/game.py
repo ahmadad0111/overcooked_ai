@@ -629,6 +629,14 @@ class OvercookedGame(Game):
             info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
             self.outlet = StreamOutlet(info)
             print("Stream outlet created.")
+
+        # Create dummy JSON data
+        dummy_data = {
+            "event": "dummy_event",
+            "timestamp": time.time(),
+            "value": 42
+        }
+
             
                 
         transition = {
@@ -664,7 +672,7 @@ class OvercookedGame(Game):
         # print("Sample pushed.")
 
 
-        message = json.dumps(transition)
+        message = json.dumps(dummy_data)
         print("Pushing sample:", message)  # Debugging message content
         self.outlet.push_sample([message])
         print("Sample pushed.")
