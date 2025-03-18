@@ -633,7 +633,7 @@ class OvercookedGame(Game):
         # Create dummy JSON data
         dummy_data = {
             "event": "dummy_event",
-            "timestamp": time.time(),
+            "timestamp": time(),
             "value": 42
         }
 
