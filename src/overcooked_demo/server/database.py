@@ -16,7 +16,7 @@ class Database:
         """Inserts new records and their transition data into the database."""
         try:
             transition_list = data["trajectory"]
-            commit_hash = data["hash_key"]
+            commit_hash = data["round_id"]
 
             # Prepare insert query for the trajectories table
             insert_trajectory_query = """
