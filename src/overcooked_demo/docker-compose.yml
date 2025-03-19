@@ -13,6 +13,7 @@ services:
       FLASK_ENV: "${BUILD_ENV:-production}"
       LSL_ALLOW_REMOTE: "1"
       LSL_LISTEN_ADDRESS: "0.0.0.0"
+    network_mode: "host"
     ports:
       - "80:5000"          # Flask web app
       - "5433:5433"        # Database port
