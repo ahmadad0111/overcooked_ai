@@ -898,6 +898,7 @@ def load_agent(save_path, policy_id="ppo", agent_index=0):
     as the featurization is not symmetric for both players
     """
     trainer = load_trainer(save_path)
+    print("Trainer Loaded from path")
     return get_agent_from_trainer(
         trainer, policy_id=policy_id, agent_index=agent_index
     )
