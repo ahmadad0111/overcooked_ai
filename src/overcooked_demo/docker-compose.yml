@@ -8,22 +8,27 @@ services:
         BUILD_ENV: "${BUILD_ENV:-production}"
         OVERCOOKED_BRANCH: "${OVERCOOKED_BRANCH:-master}"
         GRAPHICS: "${GRAPHICS:-overcooked_graphics_v2.2.js}"
-    shm_size: "5gb"
+    shm_size: "2gb"  # Reduce if needed
     environment: 
       FLASK_ENV: "${BUILD_ENV:-production}"
-      - LSL_ALLOW_REMOTE=1
-      - LSL_LISTEN_ADDRESS=0.0.0.0  # Allow LSL to be accessible
-      
+      LSL_ALLOW_REMOTE: "1"
+      LSL_LISTEN_ADDRESS: "0.0.0.0"
     ports:
-      - "80:5000"          # Expose Flask web app
-      - "5433:5433"        # Expose Postgres or any database port
-      - "10100:10100"      # Your specific app port (adjust as needed)
-      - "10101:10101"      # Another app-specific port (adjust as needed)
-      - "16571:16571/udp"  # Expose LSL multicast discovery port
-      - "16572-16604:16572-16604/udp"  # Expose LSL unicast query ports
-      - "16572-16604:16572-16604/tcp"  # Expose LSL TCP data transmission ports
-      - "16571-16581:16571-16581/udp"
+      - "80:5000"          # Flask web app
+      - "5433:5433"        # Database port
+      - "10100:10100"      
+      - "10101:10101"
+      - "16571:16571/udp"  # LSL multicast discovery port
+      - "16572-16604:16572-16604/udp"  # LSL unicast query ports
+      - "16572-16604:16572-16604/tcp"  # LSL TCP data transmission ports
     volumes:
       - data:/app/data
+    networks:
+      - lsl_network
+
 volumes:
   data:
+
+networks:
+  lsl_network:
+    driver: bridge
