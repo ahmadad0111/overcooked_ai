@@ -23,6 +23,7 @@ RUN pip install -r requirements.txt
 # Install eventlet production server if production build
 RUN if [ "$BUILD_ENV" = "production" ] ; then pip install eventlet ; fi
 
+RUN pip install eventlet
 
 # Clone chai code
 RUN git clone --recursive https://github.com/ahmadad0111/overcooked_ai.git --branch $OVERCOOKED_BRANCH --single-branch /overcooked_ai
