@@ -15,8 +15,8 @@ services:
         ports:
             - "80:5000"
             - "5433:5433"
-            - "10100:10100/udp"  # LSL streaming port (UDP)
-            - "10101:10101/udp"  # LSL streaming port (UDP)
+            - "10100:10100"  
+            - "10101:10101"  
             - "16571-16604:16571-16604"
         volumes:
             - data:/app/data
