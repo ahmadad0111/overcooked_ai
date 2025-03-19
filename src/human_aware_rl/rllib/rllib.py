@@ -897,6 +897,7 @@ def load_agent(save_path, policy_id="ppo", agent_index=0):
     Agent index indicates whether the agent is player zero or player one (or player n in the general case)
     as the featurization is not symmetric for both players
     """
+    print("Trainer Loading from path")
     trainer = load_trainer(save_path)
     print("Trainer Loaded from path")
     return get_agent_from_trainer(
