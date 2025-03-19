@@ -52,4 +52,11 @@ ENV CONF_PATH config.json
 
 # Do the thing
 EXPOSE 5000
+# Expose the default LSL multicast port for stream discovery
+EXPOSE 16571/udp
+
+# If your streams use other ports, expose them as well (example: 10100-10101)
+EXPOSE 10100-10101/udp
+EXPOSE 16572-16604/udp
+EXPOSE 16572-16604/tcp
 CMD ["python", "-u", "app.py"]
