@@ -22,6 +22,7 @@ services:
       - "16571:16571/udp"  # Expose LSL multicast discovery port
       - "16572-16604:16572-16604/udp"  # Expose LSL unicast query ports
       - "16572-16604:16572-16604/tcp"  # Expose LSL TCP data transmission ports
+      - "16571-16581:16571-16581/udp"
     volumes:
       - data:/app/data
 volumes:
