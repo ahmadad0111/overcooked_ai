@@ -1,3 +1,47 @@
+# Transition to WSL2/Conda Environment to run overcooked demo
+
+conda create -n overcooked-env1 python=3.7
+
+conda activate overcooked-env1
+
+
+pip install -r requirements.txt
+
+sudo apt-get update
+sudo apt-get install -y libgl1-mesa-dev
+
+pip install pylsl
+pip install eventlet
+
+
+git clone --recursive https://github.com/ahmadad0111/overcooked_ai.git --branch master --single-branch
+
+cd overcooked_ai/src/human_aware_rl/
+echo "import os; DATA_DIR=os.path.abspath('.')" >> data_dir.py
+
+cd setup_folder
+
+pip install -e './overcooked_ai[harl]'
+
+cd overcooked_ai/src/overcooked_demo
+
+cp ./server/*.py ./
+cp ./server/config.json ./
+cp ./server/db.json ./
+cp -r ./server/static ./static
+cp ./server/graphics/overcooked_graphics_v2.2.js ./static/js/graphics.js
+
+
+export FLASK_ENV=production  # Or your desired environment
+export HOST=0.0.0.0
+export PORT=5000
+export CONF_PATH=config.json
+
+cd server
+
+python -u app.py
+
+
 ![MDP python tests](https://github.com/HumanCompatibleAI/overcooked_ai/workflows/.github/workflows/pythontests.yml/badge.svg) ![overcooked-ai codecov](https://codecov.io/gh/HumanCompatibleAI/overcooked_ai/branch/master/graph/badge.svg) [![PyPI version](https://badge.fury.io/py/overcooked-ai.svg)](https://badge.fury.io/py/overcooked-ai) [!["Open Issues"](https://img.shields.io/github/issues-raw/HumanCompatibleAI/overcooked_ai.svg)](https://github.com/HumanCompatibleAI/minerl/overcooked_ai) [![GitHub issues by-label](https://img.shields.io/github/issues-raw/HumanCompatibleAI/overcooked_ai/bug.svg?color=red)](https://github.com/HumanCompatibleAI/overcooked_ai/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+label%3Abug) [![Downloads](https://pepy.tech/badge/overcooked-ai)](https://pepy.tech/project/overcooked-ai)
 [![arXiv](https://img.shields.io/badge/arXiv-1910.05789-bbbbbb.svg)](https://arxiv.org/abs/1910.05789)
 
