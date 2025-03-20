@@ -1,4 +1,6 @@
 #!/bin/bash
+# activate env
+conda activate overcooked-env
 
 # Navigate to the overcooked_demo directory
 cd src/overcooked_demo
