@@ -118,8 +118,6 @@ class Game(ABC):
         self.id = kwargs.get("id", id(self))
         self.lock = Lock()
         self._is_active = False
-        self.adax_explanation = ''
-
 
     @abstractmethod
     def is_full(self):
@@ -244,9 +242,6 @@ class Game(ABC):
             self.pending_actions[player_idx].put(action)
         except Full:
             pass
-
-    def update_adax(self, explanation):
-        self.adax_explanation = explanation
 
     def get_state(self):
         """
@@ -481,7 +476,6 @@ class OvercookedGame(Game):
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
         #self.uid = None
-        self.adax_explanation = 'test'
         
         
         
@@ -631,7 +625,6 @@ class OvercookedGame(Game):
             self.num_collisions += 1
 
         # Initialize the stream outlet once
-        # TODO: start stream when UI has loaded if it's undetected by other listeners for streaming
         if not hasattr(self, 'outlet'):  # Check if outlet has already been created
             info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
             self.outlet = StreamOutlet(info)
@@ -663,7 +656,7 @@ class OvercookedGame(Game):
             "player_1_is_human": self.players[1] in self.human_players,
             "collision": collision,
             "num_collisions": self.num_collisions,
-            "unix_timestamp":  time() #datetime.now(timezone.utc).isoformat(timespec='microseconds') 
+            "unix_timestamp":  str(time()) #datetime.now(timezone.utc).isoformat(timespec='microseconds') 
         }
 
         # info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
@@ -696,9 +689,6 @@ class OvercookedGame(Game):
             player_id, overcooked_action
         )
 
-    def update_adax(self, explanation):
-        super(OvercookedGame, self).update_adax(explanation)
-
     def reset(self):
         status = super(OvercookedGame, self).reset()
         if status == self.Status.RESET:
@@ -709,10 +699,6 @@ class OvercookedGame(Game):
         self.curr_tick += 1
         return super(OvercookedGame, self).tick()
 
-    def update_adax(self, new_adax):
-        self.adax_explanation = new_adax
-        return super(OvercookedGame, self).update_adax(new_adax)
-    
     def activate(self):
         super(OvercookedGame, self).activate()
 
@@ -765,8 +751,6 @@ class OvercookedGame(Game):
         state_dict["time_left"] = max(
             self.max_time - (time() - self.start_time), 0
         )
-        state_dict["adax_explanation"] = self.adax_explanation
-
         return state_dict
 
     def to_json(self):
@@ -804,7 +788,7 @@ class OvercookedGame(Game):
         data = {
             "uid": self.get_uid(),#str(time()),
             "trajectory": self.trajectory,
-            "unix_timestamp":  time(), #datetime.now(timezone.utc).isoformat(timespec='microseconds'),# str(time.time()),
+            "unix_timestamp":   str(time()), #datetime.now(timezone.utc).isoformat(timespec='microseconds'),# str(time.time()),
             "round_id": str(generate_unique_hash())
         }
         self.trajectory = []
