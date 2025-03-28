@@ -118,6 +118,9 @@ app.logger.addHandler(handler)
 
 app.secret_key = 'abc'
 
+global use_adax_agent
+use_adax_agent = True
+
 #################################
 # Global Coordination Functions #
 #################################
@@ -265,7 +268,6 @@ def _leave_game(user_id):
 
     return was_active
 
-
 def _create_game(user_id, game_name, params={}):
     game, err = try_create_game(game_name, **params)
     if not game:
@@ -283,11 +285,17 @@ def _create_game(user_id, game_name, params={}):
         set_curr_room(user_id, game.id)
         if game.is_ready():
             game.activate()
+            game.update_adax('')
             ACTIVE_GAMES.add(game.id)
             emit(
                 "start_game",
                 {"spectating": spectating, "start_info": game.to_json()},
                 room=game.id,
+            )
+            emit(
+                "start_ecg",
+                {"spectating": spectating, "start_info": {"round_id": game.id, "player_id": user_id}},
+                broadcast=True
             )
             socketio.start_background_task(play_game, game, fps=6)
         else:
@@ -482,12 +490,12 @@ def creation_params(params):
     # dataCollection: on/off
     # layouts: [layout in the config file], this one determines which layout to use, and if there is more than one layout, a series of game is run back to back
     #
-
+    print("params", params)
     use_old = False
+    global use_adax_agent 
     if "oldDynamics" in params and params["oldDynamics"] == "on":
         params["mdp_params"] = {"old_dynamics": True}
-        use_old = True
-
+        use_old = True  
     if "dataCollection" in params and params["dataCollection"] == "on":
         # config the necessary setting to properly save data
         params["dataCollection"] = True
@@ -505,7 +513,12 @@ def creation_params(params):
             params["collection_config"]["old_dynamics"] = "Old"
         else:
             params["collection_config"]["old_dynamics"] = "New"
-
+    if "adaxAgent" in params and params["adaxAgent"] == "on":
+        use_adax_agent = True
+        params["adaxAgent"] = True
+    elif "adaxAgent" not in params:
+        use_adax_agent = False
+        params["adaxAgent"] = True  
     else:
         params["dataCollection"] = False
 
@@ -536,6 +549,7 @@ def on_join(data):
 
         # Retrieve current game if one exists
         curr_game = get_curr_game(user_id)
+        print("curr_game", curr_game)
         if curr_game:
             # Cannot join if currently in a game
             return
@@ -564,11 +578,17 @@ def on_join(data):
                 if game.is_ready():
                     # Game is ready to begin play
                     game.activate()
+                    game.update_adax('')
                     ACTIVE_GAMES.add(game.id)
                     emit(
                         "start_game",
                         {"spectating": False, "start_info": game.to_json()},
                         room=game.id,
+                    )
+                    emit(
+                        "start_ecg",
+                        {"spectating": False, "start_info":  {"round_id": game.id, "player_id": user_id}},
+                        broadcast=True
                     )
                     socketio.start_background_task(play_game, game)
                 else:
@@ -585,6 +605,8 @@ def on_leave(data):
 
         if was_active:
             emit("end_game", {"status": Game.Status.DONE, "data": {}})
+            emit("stop_ecg", {"status": Game.Status.DONE, "data": {}}, broadcast=True)
+
         else:
             emit("end_lobby")
 
@@ -610,6 +632,19 @@ def on_connect():
 
     USERS[user_id] = Lock()
 
+@socketio.on("adax")
+def on_adax(data):
+    print(f"\n-----\n{data}---------\n")
+    user_id = request.sid
+    print("user_id", user_id)
+    adaxplanation = data["explanation"]
+    print("adaxplanation ", adaxplanation)
+    print("use_adax_agent ", use_adax_agent)
+    game = get_curr_game(user_id) or GAMES[0]
+    # if not game:
+    #     return
+    if use_adax_agent:
+        game.update_adax(adaxplanation)
 
 @socketio.on("disconnect")
 def on_disconnect():
@@ -635,6 +670,14 @@ def on_exit():
                 "data": get_game(game_id).get_data(),
             },
             room=game_id,
+        )
+        socketio.emit(
+            "stop_ecg",
+            {
+                "status": Game.Status.INACTIVE,
+                "data": get_game(game_id).get_data(),
+            },
+            broadcast=True
         )
 
 
@@ -680,6 +723,9 @@ def play_game(game: OvercookedGame, fps=6):
         socketio.emit(
             "end_game", {"status": status, "data": data}, room=game.id
         )
+        socketio.emit(
+            "stop_ecg", {"status": status, "data": data}, broadcast=True
+        )
 
         if status != Game.Status.INACTIVE:
             game.deactivate()
@@ -690,7 +736,7 @@ if __name__ == "__main__":
     # Dynamically parse host and port from environment variables (set by docker build)
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", 80))
-
+    print("socket ", host, port)
     # Attach exit handler to ensure graceful shutdown
     atexit.register(on_exit)
 
