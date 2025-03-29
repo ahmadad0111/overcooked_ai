@@ -268,7 +268,6 @@ def _leave_game(user_id):
 
     return was_active
 
-
 def _create_game(user_id, game_name, params={}):
     game, err = try_create_game(game_name, **params)
     if not game:
@@ -495,8 +494,7 @@ def creation_params(params):
     global use_adax_agent 
     if "oldDynamics" in params and params["oldDynamics"] == "on":
         params["mdp_params"] = {"old_dynamics": True}
-        use_old = True
-
+        use_old = True  
     if "dataCollection" in params and params["dataCollection"] == "on":
         # config the necessary setting to properly save data
         params["dataCollection"] = True
@@ -552,6 +550,7 @@ def on_join(data):
 
         # Retrieve current game if one exists
         curr_game = get_curr_game(user_id)
+        print("curr_game", curr_game)
         if curr_game:
             # Cannot join if currently in a game
             return
@@ -734,7 +733,7 @@ if __name__ == "__main__":
     # Dynamically parse host and port from environment variables (set by docker build)
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", 80))
-
+    print("socket ", host, port)
     # Attach exit handler to ensure graceful shutdown
     atexit.register(on_exit)
 

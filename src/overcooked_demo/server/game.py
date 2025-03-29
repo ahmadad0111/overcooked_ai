@@ -806,7 +806,7 @@ class OvercookedGame(Game):
         data = {
             "uid": self.get_uid(),#str(time()),
             "trajectory": self.trajectory,
-            "unix_timestamp":   time(), #datetime.now(timezone.utc).isoformat(timespec='microseconds'),# str(time.time()),
+            "unix_timestamp":  time(), #datetime.now(timezone.utc).isoformat(timespec='microseconds'),# str(time.time()),
             "round_id": str(generate_unique_hash())
         }
         self.trajectory = []
