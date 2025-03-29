@@ -24,7 +24,8 @@ var scene_config = {
     show_post_cook_time : false,
     cook_time : 20,
     assets_loc : "./static/assets/",
-    hud_size : 150
+    hud_size : 220,
+    adax_explanation: ''
 };
 
 var game_config = {
@@ -93,7 +94,8 @@ class OvercookedScene extends Phaser.Scene {
             score : config.start_state.score,
             time : config.start_state.time_left,
             bonus_orders : config.start_state.state.bonus_orders,
-            all_orders : config.start_state.state.all_orders
+            all_orders : config.start_state.state.all_orders,
+            adax_explanation: config.adax_explanation
         }
     }
 
@@ -103,6 +105,7 @@ class OvercookedScene extends Phaser.Scene {
         this.hud_data.time = Math.round(state.time_left);
         this.hud_data.bonus_orders = state.state.bonus_orders;
         this.hud_data.all_orders = state.state.all_orders;
+        this.hud_data.adax_explanation = state.adax_explanation;
         this.state = state.state;
     }
 
@@ -170,7 +173,6 @@ class OvercookedScene extends Phaser.Scene {
     }
     _drawState (state, sprites) {
         sprites = typeof(sprites) === 'undefined' ? {} : sprites;
-
         //draw chefs
         sprites['chefs'] =
             typeof(sprites['chefs']) === 'undefined' ? {} : sprites['chefs'];
@@ -352,8 +354,10 @@ class OvercookedScene extends Phaser.Scene {
             this._drawScore(hud_data.score, sprites, board_height);
         }
         if (typeof(hud_data.potential) !== 'undefined' && hud_data.potential !== null) {
-            console.log(hud_data.potential)
             this._drawPotential(hud_data.potential, sprites, board_height);
+        }
+        if (typeof(hud_data.adax_explanation) !== 'undefined' && hud_data.adax_explanation !== null) {
+            this._drawAdaXplanation(hud_data.adax_explanation, sprites, board_height);
         }
     }
 
@@ -492,6 +496,25 @@ class OvercookedScene extends Phaser.Scene {
         let num_tomatoes = ingredients.filter(x => x === 'tomato').length;
         let num_onions = ingredients.filter(x => x === 'onion').length;
         return `soup_${status}_tomato_${num_tomatoes}_onion_${num_onions}.png`
+    }
+
+    _drawAdaXplanation(adax_explanation, sprites, board_height) {
+        adax_explanation = "AI Chef's reason: "+ adax_explanation;
+        if (typeof(sprites['adax_explanation']) !== 'undefined') {
+            sprites['adax_explanation'].setText(adax_explanation);
+        }
+        else {
+            sprites['adax_explanation'] = this.add.text(
+                5, board_height + 150, adax_explanation,
+                {
+                    font: "20px Arial",
+                    fill: "green",
+                    align: "left",
+                    wordWrap: { width: this.game.canvas.width - 10, useAdvancedWrap: true }
+                }
+            )
+            
+        }
     }
 }
 

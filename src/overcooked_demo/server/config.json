@@ -1,7 +1,7 @@
 {
     "logfile" : "app.log",
     "layouts" : ["cramped_room","counter_circuit_o_1order", "cramped_room_tomato", "asymmetric_advantages", "coordination_ring", "forced_coordination", "counter_circuit", "cramped_corridor", "marshmallow_experiment", "long_cook_time", "forced_coordination_tomato", "asymmetric_advantages_tomato", "marshmallow_experiment_coordination", "pipeline", "you_shall_not_pass", "tutorial_3"],
-    "MAX_GAMES" : 10,
+    "MAX_GAMES" : 20,
     "MAX_GAME_LENGTH" : 120,
     "AGENT_DIR" : "./static/assets/agents",
     "MAX_FPS" : 30,
@@ -18,10 +18,9 @@
     },
     "tutorial" : {
         "tutorialParams" : {
-            "layouts" : ["tutorial_3", "tutorial_2", "tutorial_1", "tutorial_0"],
+            "layouts" : [ "tutorial_0", "tutorial_0", "tutorial_0", "tutorial_0"],
             "playerZero" : "human",
-            "playerOne" : "TutorialAI",
-            "phaseTwoScore" : 34
+            "playerOne" : "TutorialAI"
         },
         "tomato_value" : 13,
         "onion_value" : 21
