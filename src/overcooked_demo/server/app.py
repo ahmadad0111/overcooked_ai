@@ -490,7 +490,6 @@ def creation_params(params):
     # dataCollection: on/off
     # layouts: [layout in the config file], this one determines which layout to use, and if there is more than one layout, a series of game is run back to back
     #
-    print("params", params)
     use_old = False
     global use_adax_agent 
     if "oldDynamics" in params and params["oldDynamics"] == "on":
@@ -513,12 +512,14 @@ def creation_params(params):
             params["collection_config"]["old_dynamics"] = "Old"
         else:
             params["collection_config"]["old_dynamics"] = "New"
+    if not "dataCollection" in params or not params["dataCollection"] == "on":
+        params["dataCollection"] = False
     if "adaxAgent" in params and params["adaxAgent"] == "on":
         use_adax_agent = True
         params["adaxAgent"] = True
-    elif "adaxAgent" not in params:
+    if "adaxAgent" not in params:
         use_adax_agent = False
-        params["adaxAgent"] = True  
+        params["adaxAgent"] = False  
     else:
         params["dataCollection"] = False
 
@@ -606,7 +607,6 @@ def on_leave(data):
         if was_active:
             emit("end_game", {"status": Game.Status.DONE, "data": {}})
             emit("stop_ecg", {"status": Game.Status.DONE, "data": {}}, broadcast=True)
-
         else:
             emit("end_lobby")
 
@@ -632,17 +632,14 @@ def on_connect():
 
     USERS[user_id] = Lock()
 
+# TODO: remove adax UI element if adax is unchecked
 @socketio.on("adax")
 def on_adax(data):
-    print(f"\n-----\n{data}---------\n")
     user_id = request.sid
-    print("user_id", user_id)
     adaxplanation = data["explanation"]
-    print("adaxplanation ", adaxplanation)
-    print("use_adax_agent ", use_adax_agent)
-    game = get_curr_game(user_id) or GAMES[0]
-    # if not game:
-    #     return
+    game = next(iter(GAMES.values()))
+    if not game:
+        return
     if use_adax_agent:
         game.update_adax(adaxplanation)
 
@@ -741,4 +738,4 @@ if __name__ == "__main__":
     atexit.register(on_exit)
 
     # https://localhost:80 is external facing address regardless of build environment
-    socketio.run(app, host=host, port=port, log_output=app.config["DEBUG"])
+    socketio.run(app, host=host, port=port, log_output=app.config["DEBUG"], debug=True)

@@ -24,7 +24,7 @@ var scene_config = {
     show_post_cook_time : false,
     cook_time : 20,
     assets_loc : "./static/assets/",
-    hud_size : 200,
+    hud_size : 220,
     adax_explanation: ''
 };
 
@@ -97,7 +97,7 @@ class OvercookedScene extends Phaser.Scene {
             time : config.start_state.time_left,
             bonus_orders : config.start_state.state.bonus_orders,
             all_orders : config.start_state.state.all_orders,
-            adax_explanation: config.start_state.adax_explanation
+            adax_explanation: config.adax_explanation
         }
     }
 
@@ -176,7 +176,6 @@ class OvercookedScene extends Phaser.Scene {
     }
     _drawState (state, sprites) {
         sprites = typeof(sprites) === 'undefined' ? {} : sprites;
-        console.log("statesssss ", state)
         //draw chefs
         sprites['chefs'] =
             typeof(sprites['chefs']) === 'undefined' ? {} : sprites['chefs'];
@@ -359,11 +358,9 @@ class OvercookedScene extends Phaser.Scene {
             this._drawScore(hud_data.score, sprites, board_height);
         }
         if (typeof(hud_data.potential) !== 'undefined' && hud_data.potential !== null) {
-            console.log(hud_data.potential)
             this._drawPotential(hud_data.potential, sprites, board_height);
         }
         if (typeof(hud_data.adax_explanation) !== 'undefined' && hud_data.adax_explanation !== null) {
-            console.log(hud_data.adax_explanation)
             this._drawAdaXplanation(hud_data.adax_explanation, sprites, board_height);
         }
     }
@@ -523,6 +520,5 @@ class OvercookedScene extends Phaser.Scene {
             
         }
     }
-    
 }
 
