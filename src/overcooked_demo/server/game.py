@@ -120,7 +120,6 @@ class Game(ABC):
         self._is_active = False
         self.adax_explanation = ''
 
-
     @abstractmethod
     def is_full(self):
         """
@@ -441,7 +440,7 @@ class OvercookedGame(Game):
         layouts=["cramped_room"],
         mdp_params={},
         num_players=2,
-        gameTime=30,
+        gameTime=80,
         playerZero="human",
         playerOne="human",
         showPotential=False,
@@ -584,6 +583,9 @@ class OvercookedGame(Game):
         """
         Game is ready to be activated if there are a sufficient number of players and at least one human (spectator or player)
         """
+        info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        self.outlet = StreamOutlet(info)
+        print("Stream outlet created.")
         return super(OvercookedGame, self).is_ready() and not self.is_empty()
 
     def apply_action(self, player_id, action):
@@ -631,10 +633,10 @@ class OvercookedGame(Game):
             self.num_collisions += 1
 
         # Initialize the stream outlet once
-        if not hasattr(self, 'outlet'):  # Check if outlet has already been created
-            info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
-            self.outlet = StreamOutlet(info)
-            print("Stream outlet created.")
+        # if not hasattr(self, 'outlet'):  # Check if outlet has already been created
+        #     info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        #     self.outlet = StreamOutlet(info)
+        #     print("Stream outlet created.")
 
         # # Create dummy JSON data
         # dummy_data = {
@@ -695,8 +697,8 @@ class OvercookedGame(Game):
             player_id, overcooked_action
         )
 
-    def update_adax(self, explanation):
-        super(OvercookedGame, self).update_adax(explanation)
+    # def update_adax(self, explanation):
+    #     super(OvercookedGame, self).update_adax(explanation)
 
     def reset(self):
         status = super(OvercookedGame, self).reset()
@@ -707,7 +709,7 @@ class OvercookedGame(Game):
     def tick(self):
         self.curr_tick += 1
         return super(OvercookedGame, self).tick()
-
+    
     def update_adax(self, new_adax):
         self.adax_explanation = new_adax
         return super(OvercookedGame, self).update_adax(new_adax)
@@ -718,6 +720,7 @@ class OvercookedGame(Game):
         # Sanity check at start of each game
         if not self.npc_players.union(self.human_players) == set(self.players):
             raise ValueError("Inconsistent State")
+
 
         self.curr_layout = self.layouts.pop()
         self.mdp = OvercookedGridworld.from_layout_name(
@@ -765,7 +768,6 @@ class OvercookedGame(Game):
             self.max_time - (time() - self.start_time), 0
         )
         state_dict["adax_explanation"] = self.adax_explanation
-
         return state_dict
 
     def to_json(self):
@@ -776,6 +778,7 @@ class OvercookedGame(Game):
 
     def get_policy(self, npc_id, idx=0):
         if npc_id.lower().startswith("rllib"):
+            print("agent policy", "rllib", npc_id.lower())
             try:
                 # Loading rllib agents requires additional helpers
                 fpath = os.path.join(AGENT_DIR, npc_id, "agent")
@@ -843,7 +846,7 @@ class OvercookedTutorial(OvercookedGame):
         mdp_params={},
         playerZero="human",
         playerOne="AI",
-        phaseTwoScore=15,
+        phaseTwoScore=63,
         **kwargs
     ):
         super(OvercookedTutorial, self).__init__(
@@ -875,9 +878,9 @@ class OvercookedTutorial(OvercookedGame):
         elif self.curr_phase == 2:
             return self.phase_two_finished
         return False
-
+    
     def is_finished(self):
-        return not self.layouts and self.score >= float("inf")
+        return not self.layouts and self.score >= 0 # changed to 0 from  float("inf") TODO: game ends early fix
 
     def reset(self):
         super(OvercookedTutorial, self).reset()
@@ -893,10 +896,8 @@ class OvercookedTutorial(OvercookedGame):
         _, _, info = super(OvercookedTutorial, self).apply_actions()
 
         human_reward, ai_reward = info["sparse_reward_by_agent"]
-
         # We only want to keep track of the human's score in the tutorial
         self.score -= ai_reward
-
         # Phase two requires a specific reward to complete
         if self.curr_phase == 2:
             self.score = 0
@@ -1059,13 +1060,13 @@ class TutorialAI:
                 self.COOK_SOUP_LOOP[self.curr_tick % len(self.COOK_SOUP_LOOP)],
                 None,
             )
-        elif self.curr_phase == 2:
-            return (
-                self.COOK_SOUP_COOP_LOOP[
-                    self.curr_tick % len(self.COOK_SOUP_COOP_LOOP)
-                ],
-                None,
-            )
+        # elif self.curr_phase == 2:
+        #     return (
+        #         self.COOK_SOUP_COOP_LOOP[
+        #             self.curr_tick % len(self.COOK_SOUP_COOP_LOOP)
+        #         ],
+        #         None,
+        #     )
         return Action.STAY, None
 
     def reset(self):
