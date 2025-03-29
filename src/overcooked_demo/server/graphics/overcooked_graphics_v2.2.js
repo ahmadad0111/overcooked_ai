@@ -50,6 +50,8 @@ function drawState(state) {
 
 // Invoked at 'start_game' event
 function graphics_start(graphics_config) {
+    console.log("===graphics_config", graphics_config)
+    console.log("===scene_config", scene_config)
     graphics = new GraphicsManager(game_config, scene_config, graphics_config);
 };
 
@@ -100,6 +102,7 @@ class OvercookedScene extends Phaser.Scene {
     }
 
     set_state(state) {
+        console.log("state,", state)
         this.hud_data.potential = state.potential;
         this.hud_data.score = state.score;
         this.hud_data.time = Math.round(state.time_left);
@@ -341,6 +344,7 @@ class OvercookedScene extends Phaser.Scene {
     }
 
     _drawHUD(hud_data, sprites, board_height) {
+        console.log("================", hud_data)
         if (typeof(hud_data.all_orders) !== 'undefined') {
             this._drawAllOrders(hud_data.all_orders, sprites, board_height);
         }
