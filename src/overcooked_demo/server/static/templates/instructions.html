@@ -6,6 +6,8 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://unpkg.com/survey-core@1.9.51/defaultV2.min.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="static/css/style.css" type="text/css" />
     <style>
       img.center {
         display: block;
@@ -13,7 +15,7 @@
       }
       table, td, th {  
         border: 1px solid #ddd;
-        text-align: left;
+        text-align: center;
       }
 
       table {
@@ -35,12 +37,13 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   </head>
   <body>
-    <div class="container">
+    <div class="container" style="padding-top: 30px; max-width: 600px;">
       <h4 class="text-center"><a href="./">Back to game</a></h4>
-      <p>
-        Hello! In this task, you will be playing a
-        cooking game. You will play one of two chefs
-        in a restaurant that serves various soups.
+      <h2 class="text-center">Instructions</h2>
+      <p class="inst_left_text">
+        Hello! <br>
+        In this survey you will be playing a cooperative cooking game. <br>
+        You will play one of two chefs in a restaurant that serves onion soups.
       </p>
 
       <br>
@@ -48,14 +51,16 @@
       <br>
 
       <h3 class="text-center">Layouts</h3>
-      <p>
-        This is what one level of the game looks like:
+      <p class="inst_left_text">
+        This is what a level of the game looks like:
       </p>
-      <img class="center" src="static/images/training0.png" style="width:500px">
-      <p>
-        There are a number of objects in the game, labeled here:
+      <img class="center" src="static/images/training0.png" style="width:600px;">
+      <p class="inst_left_text">
+        <br>
+        The image below labels each different component of the game. The dark brown tiles are counters that
+        you can place objects on (but cannot walk on), and the light beige tiles are floor tiles.
       </p>
-      <img class="center" src="static/images/training0-annotated.png" style="width:800px">
+      <img class="center" src="static/images/training0-annotated.png" style="width:600px;">
 
       <br>
       <hr>
@@ -63,31 +68,32 @@
 
       <h3 class="text-center">Movement and interactions</h3>
       <img class="center" src="static/images/space-arrows.png" style="width:250px">
-      <p>
+      <p class="inst_left_text">
         You can move up, down, left, and right using
         the <b>arrow keys</b>, and interact with objects
         using the <b>spacebar</b>.
       </p>
-      <p>
+      <p class="inst_left_text">
         You can interact with objects by facing them and pressing
         <b>spacebar</b>. Here are some examples:
         <ul>
-          <li>You can pick up ingredients (onions or tomatoes) by facing
-            the ingredient area and pressing <b>spacebar</b>.</li>
-          <li>If you are holding an ingredient, are facing an empty counter,
-            and press <b>spacebar</b>, you put the ingredient on the counter.</li>
-          <li>If you are holding an ingredient, are facing a pot that is not full,
-            and press <b>spacebar</b>, you will put the ingredient in the pot.</li>
-          <li>If you are facing a pot that is non-empty, are currently holding nothing, and 
-            and press <b>spacebar</b>, you will begin cooking a soup.</li>
+          <li>You can pick up onions by facing an onion dispenser or an onion on
+            a counter and pressing <b>spacebar</b>.</li>
+          <li>If you are holding an onion or dish and are facing an empty counter,
+            and press <b>spacebar</b>, you will put the onion/dish on the counter.</li>
+          <li>If you are holding an onion and are facing a pot that is not full,
+            and press <b>spacebar</b>, you will put the onion in the pot.</li>
+          <li>If you are holding a dish and are facing a pot with a soup that has finished cooking,
+            and press <b>spacebar</b>, you will move the soup from the pot to your dish.</li>
+          <li>If you are holding a dish with soup in it and are facing a serving area,
+            and press <b>spacebar</b>, you will serve the soup.</li>
         </ul>
       </p>
 
       <br>
-      <br>
-      <p>
-        Note that as you and your partner are moving around the kitchen
-        you <u><b>cannot occupy the same location</b></u>.
+      <p class="inst_left_text">
+        <i>NOTE:</i> You and your teammate <u><b>cannot occupy the same location at the same time</b></u>. If both of
+        you try to move into the same space, neither action will go through.
       </p>
       <br>
       <hr>
@@ -95,100 +101,11 @@
 
       <h3 class="text-center">Cooking</h3>
       <img class="center" src="static/images/soup.png" style="width:250px">
-      <p>
-        Once an ingredient is in the pot, you can begin cooking a soup by pressing 
-        <b>spacebar</b> as noted above. You can place up to 3 ingredients in a pot 
-        before cooking. 
-      </p>
-      <p>
+      <p class="inst_left_text">
+        Once 3 onions are in the pot, the soup will automatically start cooking.
         When a soup begins cooking, you'll notice a red number appear over the pot to 
-        denote the cook time. This number counts upward until the soup is done. Soup 
-        cook time is determined its ingredients; every onion add {{ layout_conf.onion_time }} and 
-        every tomato adds {{ layout_conf.tomato_time }} to the cook time.
-      </p>
-      <p>
-        Additionally, the base 
-        reward for any recipe is determined by its ingredients; each onion adds {{ layout_conf.onion_value }} 
-        points and each tomato adds {{ layout_conf.tomato_value }} points.
-      </p>
-
-      <br>
-      <hr>
-      <br>
-
-      <h3 class="text-center">Serving</h3>
-      <img class="center" src="static/images/serving-counter.png" style="width:800px">
-      <p>
-        Once the soup is in a bowl, you can serve it by bringing it to
-        a grey serving counter.
-      </p>
-
-      <br>
-      <hr>
-      <br>
-
-      <h3 class="text-center">Soups</h3>
-      <p>
-        There are 9 possible soup recipes that can be created from combinations of tomatoes
-        and onions, each with its own icon. The recipe icons and the corresponding ingredients are
-        listed below
-      </p>
-      <table>
-        <tr>
-          <th>Ingredients</th>
-          <th>Icon</th>
-          <th>Base Reward</th>
-          <th>Cook Time</th>
-        </tr>
-        {% for num_tomatoes in range(layout_conf.max_num_ingredients + 1) %}
-          {% for num_onions in range(layout_conf.max_num_ingredients + 1) %}
-            {% if num_tomatoes + num_onions > 0 and num_onions + num_tomatoes <= layout_conf.max_num_ingredients %}
-              <tr>
-                <td>{{ num_onions ~ " Onion" if num_onions }} {{ num_tomatoes ~ " Tomato" if num_tomatoes }}</td>
-                <td><img src="{{ "static/assets/new_sprites/soup_done_tomato_" ~ num_tomatoes ~ "_onion_" ~ num_onions ~ ".png" }}" style="width:75px;background-color: #e6b453;"></td>
-                <td>{{ layout_conf.onion_value * num_onions + layout_conf.tomato_value * num_tomatoes }}</td>
-                <td>{{ layout_conf.onion_time * num_onions + layout_conf.tomato_time * num_tomatoes }}</td>
-              </tr>
-            {% endif %}
-          {% endfor %}
-        {% endfor %}
-
-      </table>
-
-      <br>
-      <hr>
-      <br>
-
-      <h3 class="text-center">All Orders</h3>
-      <p>
-        While you are free to cook any 3-ingredient soup you like, only some are worth points. 
-        The <b>All Orders</b> list shows which recipes will recieve points. This is important, 
-        as any soup served not in this list will not count towards your score. The <b>All Orders</b>
-        list does not change throughout the duration of a level.
-      </p>
-      <p>To reiterate: <b>ANY SOUP COOKED THAT IS NOT IN ALL ORDERS WILL NOT BE WORTH POINTS</b></p>
-
-      <br>
-      <hr>
-      <br>
-
-      <h3 class="text-center">Bonus Orders</h3>
-      <p>
-        In addition to the list of available orders, there is also a list of <b>bonus orders</b>. Any 
-        soup from this list served will be worth its base reward times {{ layout_conf.order_bonus }}
-      </p>
-
-      <br>
-      <hr>
-      <br>
-
-      <h3 class="text-center">Score</h3>
-      <p>
-        When a soup is served at the serving counter, points could potentially be added to your score.
-        The base reward for any recipe is determined by its ingredients; each onion adds {{ layout_conf.onion_value }} 
-        points and each tomato adds {{ layout_conf.tomato_value }} points. Note that serving a soup in the <b>Bonus Orders</b>
-        multiplies the base soup score by {{ layout_conf.order_bonus }}. Additionally, serving a soup not in the
-        <b>All Orders</b> list results in zero points not matter what!
+        denote the cook time. This number counts up to 20 at which point the soup is done.
+        Each soup served (by either you or your teammate) awards 20 points to your team.
       </p>
 
       <br>
@@ -196,17 +113,23 @@
       <br>
 
       <h3 class="text-center">Goal</h3>
-      <img class="center" src="static/images/info-panel.png" style="width:500px">
-      <p>
-        Your goal in this task is to serve as many of the orders as you can
-        before each level ends.
-        The current all orders, bonus orders, time, and score are all displayed 
-        in an info panel below the layout.
+      <p class="inst_left_text">
+        The goal of the game is for your team to maximize your points by delivering as many soups as possible
+        within the provided time. Each round will last 80 seconds.
       </p>
-
+      <div id="control" class="text-center" style="margin-top: 60px;">
+        <a class="btn-cta sd-btn sd-btn--action sd-navigation__complete-btn" href="./tutorial">Go to Tutorial</a>
+      </div>
       <br>
-      <hr>
       <br>
     </div>
+  <script>
+     $('.btn-cta').each(function(i, el){
+        let $this = $(this); // only need to create the object once
+        $this.attr({
+            href: $this.attr("href") + window.location.search
+        });
+    });
+  </script>
   </body>
 </html>
