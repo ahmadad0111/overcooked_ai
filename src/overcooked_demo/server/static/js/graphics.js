@@ -17,6 +17,7 @@ var DIRECTION_TO_NAME = {
     '-1,0': 'WEST'
 };
 
+var ADAX_UI_HEIGHT = 80;
 var scene_config = {
     player_colors : {0: 'blue', 1: 'green'},
     tileSize : 80,
@@ -24,7 +25,7 @@ var scene_config = {
     show_post_cook_time : false,
     cook_time : 20,
     assets_loc : "./static/assets/",
-    hud_size : 220,
+    hud_size : 150 + ADAX_UI_HEIGHT,
     adax_explanation: ''
 };
 
@@ -50,8 +51,8 @@ function drawState(state) {
 
 // Invoked at 'start_game' event
 function graphics_start(graphics_config) {
-    console.log("===graphics_config", graphics_config)
-    console.log("===scene_config", scene_config)
+    // console.log("===graphics_config", graphics_config)
+    // console.log("===scene_config", scene_config)
     graphics = new GraphicsManager(game_config, scene_config, graphics_config);
 };
 
@@ -67,9 +68,10 @@ class GraphicsManager {
         let start_info = graphics_config.start_info;
         scene_config.terrain = start_info.terrain;
         scene_config.start_state = start_info.state;
+        scene_config.isAdaxAgent = start_info.isAdaxAgent;
         game_config.scene = new OvercookedScene(scene_config);
         game_config.width = scene_config.tileSize*scene_config.terrain[0].length;
-        game_config.height = scene_config.tileSize*scene_config.terrain.length  + scene_config.hud_size;
+        game_config.height = scene_config.tileSize*scene_config.terrain.length  + scene_config.hud_size - (start_info.isAdaxAgent ? 0 : ADAX_UI_HEIGHT);
         game_config.parent = graphics_config.container_id;
         this.game = new Phaser.Game(game_config);
     }
@@ -90,19 +92,21 @@ class OvercookedScene extends Phaser.Scene {
         this.show_post_cook_time = config.show_post_cook_time;
         this.cook_time = config.cook_time;
         this.assets_loc = config.assets_loc;
-        this.hud_size = config.hud_size
+        this.hud_size = config.isAdaxAgent ? config.hud_size : config.hud_size - ADAX_UI_HEIGHT;
+        this.agent_msg_size = config.isAdaxAgent ? 80 : 0
         this.hud_data = {
             potential : config.start_state.potential,
             score : config.start_state.score,
             time : config.start_state.time_left,
             bonus_orders : config.start_state.state.bonus_orders,
             all_orders : config.start_state.state.all_orders,
+            isAdaxAgent: config.isAdaxAgent,
             adax_explanation: config.adax_explanation
         }
     }
 
     set_state(state) {
-        console.log("state,", state)
+        // console.log("state,", state)
         this.hud_data.potential = state.potential;
         this.hud_data.score = state.score;
         this.hud_data.time = Math.round(state.time_left);
@@ -165,7 +169,7 @@ class OvercookedScene extends Phaser.Scene {
                 let ttype = pos_dict[row][col];
                 let tile = this.add.sprite(
                     this.tileSize * x,
-                    this.tileSize * y,
+                    this.tileSize * y + this.agent_msg_size,
                     "tiles",
                     terrain_to_img[ttype]
                 );
@@ -204,7 +208,7 @@ class OvercookedScene extends Phaser.Scene {
             if (typeof(sprites['chefs'][pi]) === 'undefined') {
                 let chefsprite = this.add.sprite(
                     this.tileSize*x,
-                    this.tileSize*y,
+                    this.tileSize*y + this.agent_msg_size,
                     "chefs",
                     `${dir}${held_obj}.png`
                 );
@@ -213,7 +217,7 @@ class OvercookedScene extends Phaser.Scene {
                 chefsprite.setOrigin(0);
                 let hatsprite = this.add.sprite(
                     this.tileSize*x,
-                    this.tileSize*y,
+                    this.tileSize*y + this.agent_msg_size,
                     "chefs",
                     `${dir}-${this.player_colors[pi]}hat.png`
                 );
@@ -230,7 +234,7 @@ class OvercookedScene extends Phaser.Scene {
                 this.tweens.add({
                     targets: [chefsprite, hatsprite],
                     x: this.tileSize*x,
-                    y: this.tileSize*y,
+                    y: this.tileSize*y + this.agent_msg_size,
                     duration: this.animation_duration,
                     ease: 'Linear',
                     onComplete: (tween, target, player) => {
@@ -273,7 +277,7 @@ class OvercookedScene extends Phaser.Scene {
                 spriteframe = this._ingredientsToSpriteFrame(ingredients, soup_status);
                 let objsprite = this.add.sprite(
                     this.tileSize*x,
-                    this.tileSize*y,
+                    this.tileSize*y + this.agent_msg_size,
                     "soups",
                     spriteframe
                 );
@@ -290,7 +294,7 @@ class OvercookedScene extends Phaser.Scene {
                 if (show_time) {
                     let timesprite =  this.add.text(
                         this.tileSize*(x+.5),
-                        this.tileSize*(y+.6),
+                        this.tileSize*(y+.6) + this.agent_msg_size,
                         String(obj._cooking_tick),
                         {
                             font: "25px Arial",
@@ -310,7 +314,7 @@ class OvercookedScene extends Phaser.Scene {
                 spriteframe = this._ingredientsToSpriteFrame(ingredients, soup_status);
                 let objsprite = this.add.sprite(
                     this.tileSize*x,
-                    this.tileSize*y,
+                    this.tileSize*y + this.agent_msg_size,
                     "soups",
                     spriteframe
                 );
@@ -331,7 +335,7 @@ class OvercookedScene extends Phaser.Scene {
                 }
                 let objsprite = this.add.sprite(
                     this.tileSize*x,
-                    this.tileSize*y,
+                    this.tileSize*y + this.agent_msg_size,
                     "objects",
                     spriteframe
                 );
@@ -344,7 +348,10 @@ class OvercookedScene extends Phaser.Scene {
     }
 
     _drawHUD(hud_data, sprites, board_height) {
-        console.log("================", hud_data)
+        // console.log("================", hud_data)
+        if (hud_data.isAdaxAgent && typeof(hud_data.adax_explanation) !== 'undefined' && hud_data.adax_explanation !== null) {
+            this._drawAdaXplanation(hud_data.adax_explanation, sprites, board_height);
+        }
         if (typeof(hud_data.all_orders) !== 'undefined') {
             this._drawAllOrders(hud_data.all_orders, sprites, board_height);
         }
@@ -359,9 +366,6 @@ class OvercookedScene extends Phaser.Scene {
         }
         if (typeof(hud_data.potential) !== 'undefined' && hud_data.potential !== null) {
             this._drawPotential(hud_data.potential, sprites, board_height);
-        }
-        if (typeof(hud_data.adax_explanation) !== 'undefined' && hud_data.adax_explanation !== null) {
-            this._drawAdaXplanation(hud_data.adax_explanation, sprites, board_height);
         }
     }
 
@@ -380,7 +384,7 @@ class OvercookedScene extends Phaser.Scene {
                     let spriteFrame = this._ingredientsToSpriteFrame(orders[i]['ingredients'], "done");
                     let orderSprite = this.add.sprite(
                         130 + 40 * i,
-                        board_height + 40,
+                        board_height + 40 + this.agent_msg_size,
                         "soups",
                         spriteFrame
                     );
@@ -393,7 +397,7 @@ class OvercookedScene extends Phaser.Scene {
             else {
                 sprites['bonus_orders'] = {};
                 sprites['bonus_orders']['str'] = this.add.text(
-                    5, board_height + 60, orders_str,
+                    5, board_height + 60 + this.agent_msg_size, orders_str,
                     {
                         font: "20px Arial",
                         fill: "red",
@@ -420,7 +424,7 @@ class OvercookedScene extends Phaser.Scene {
                     let spriteFrame = this._ingredientsToSpriteFrame(orders[i]['ingredients'], "done");
                     let orderSprite = this.add.sprite(
                         90 + 40 * i,
-                        board_height - 4,
+                        board_height - 4 + this.agent_msg_size,
                         "soups",
                         spriteFrame
                     );
@@ -433,7 +437,7 @@ class OvercookedScene extends Phaser.Scene {
             else {
                 sprites['all_orders'] = {};
                 sprites['all_orders']['str'] = this.add.text(
-                    5, board_height + 15, orders_str,
+                    5, board_height + 15 + this.agent_msg_size, orders_str,
                     {
                         font: "20px Arial",
                         fill: "red",
@@ -452,7 +456,7 @@ class OvercookedScene extends Phaser.Scene {
         }
         else {
             sprites['score'] = this.add.text(
-                5, board_height + 90, score,
+                5, board_height + 90 + this.agent_msg_size, score,
                 {
                     font: "20px Arial",
                     fill: "red",
@@ -469,7 +473,7 @@ class OvercookedScene extends Phaser.Scene {
         }
         else {
             sprites['potential'] = this.add.text(
-                100, board_height + 90, potential,
+                100, board_height + 90 + this.agent_msg_size, potential,
                 {
                     font: "20px Arial",
                     fill: "red",
@@ -486,7 +490,7 @@ class OvercookedScene extends Phaser.Scene {
         }
         else {
             sprites['time_left'] = this.add.text(
-                5, board_height + 115, time_left,
+                5, board_height + 115 + this.agent_msg_size, time_left,
                 {
                     font: "20px Arial",
                     fill: "red",
@@ -503,18 +507,27 @@ class OvercookedScene extends Phaser.Scene {
     }
 
     _drawAdaXplanation(adax_explanation, sprites, board_height) {
-        adax_explanation = "AI Chef's reason: "+ adax_explanation;
+        // adax_explanation = "AI Chef's msg: "+ adax_explanation;
         if (typeof(sprites['adax_explanation']) !== 'undefined') {
             sprites['adax_explanation'].setText(adax_explanation);
         }
         else {
-            sprites['adax_explanation'] = this.add.text(
-                5, board_height + 150, adax_explanation,
+            sprites['base_adax_label'] = this.add.text(
+                5, 5, "AI Chef's msg: ",
                 {
                     font: "20px Arial",
                     fill: "green",
                     align: "left",
-                    wordWrap: { width: this.game.canvas.width - 10, useAdvancedWrap: true }
+                    // wordWrap: { width: this.game.canvas.width - 10, useAdvancedWrap: true }
+                }
+            )
+            sprites['adax_explanation'] = this.add.text(
+                5, 30, adax_explanation,
+                {
+                    font: "20px Arial",
+                    fill: "black",
+                    align: "left",
+                    wordWrap: { width: this.game.canvas.width - 20, useAdvancedWrap: true }
                 }
             )
             

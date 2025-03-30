@@ -287,14 +287,16 @@ def _create_game(user_id, game_name, params={}):
             game.activate()
             game.update_adax('')
             ACTIVE_GAMES.add(game.id)
+            start_info = game.to_json()
+            start_info["isAdaxAgent"] = params["adaxAgent"]
             emit(
                 "start_game",
-                {"spectating": spectating, "start_info": game.to_json()},
+                {"spectating": spectating, "start_info": start_info},
                 room=game.id,
             )
             emit(
                 "start_ecg",
-                {"spectating": spectating, "start_info": {"round_id": game.id, "player_id": user_id}},
+                {"spectating": spectating, "start_info": {"round_id": game.id, "player_id": user_id, "isAdaxAgent": params["adaxAgent"]}},
                 broadcast=True
             )
             socketio.start_background_task(play_game, game, fps=6)
@@ -579,6 +581,8 @@ def on_join(data):
                     # Game is ready to begin play
                     game.activate()
                     game.update_adax('')
+                    start_info = game.to_json()
+                    start_info["isAdaxAgent"] = params["adaxAgent"]
                     ACTIVE_GAMES.add(game.id)
                     emit(
                         "start_game",
@@ -587,7 +591,7 @@ def on_join(data):
                     )
                     emit(
                         "start_ecg",
-                        {"spectating": False, "start_info":  {"round_id": game.id, "player_id": user_id}},
+                        {"spectating": False, "start_info":  {"round_id": game.id, "player_id": user_id,  "isAdaxAgent": params["adaxAgent"]}},
                         broadcast=True
                     )
                     socketio.start_background_task(play_game, game)
