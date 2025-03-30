@@ -20,7 +20,8 @@
         "tutorialParams" : {
             "layouts" : [ "tutorial_0", "tutorial_0", "tutorial_0", "tutorial_0"],
             "playerZero" : "human",
-            "playerOne" : "TutorialAI"
+            "playerOne" : "TutorialAI",
+            "oldDynamics": "on"
         },
         "tomato_value" : 13,
         "onion_value" : 21
