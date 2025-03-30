@@ -512,16 +512,15 @@ def creation_params(params):
             params["collection_config"]["old_dynamics"] = "Old"
         else:
             params["collection_config"]["old_dynamics"] = "New"
-    if not "dataCollection" in params or not params["dataCollection"] == "on":
+    else:
         params["dataCollection"] = False
+    
     if "adaxAgent" in params and params["adaxAgent"] == "on":
         use_adax_agent = True
         params["adaxAgent"] = True
-    if "adaxAgent" not in params:
+    else:
         use_adax_agent = False
         params["adaxAgent"] = False  
-    else:
-        params["dataCollection"] = False
 
 
 @socketio.on("create")

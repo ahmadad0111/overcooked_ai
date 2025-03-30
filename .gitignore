@@ -173,4 +173,5 @@ node_modules/
 #manually correcting for demo 
 !**/static/**/*.png
 !src/overcooked_demo/server/static/lib
-overcooked_ai
+
+src/overcooked_demo/server/db.json
