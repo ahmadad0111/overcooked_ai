@@ -20,5 +20,5 @@ datetime
 psycopg2
 keyboard
 pylsl
-
+eventlet
 
