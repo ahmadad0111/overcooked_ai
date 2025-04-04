@@ -19,6 +19,11 @@ protobuf==3.19
 datetime
 psycopg2-binary==2.9.9
 keyboard
-pylsl
+pylsl==1.16.2
+eventlet==0.38.2
 
-
+ray==2.0.0
+dm-tree==0.1.8
+pyarrow==12.0.1
+pandas==1.3.5
+gym==0.26.2

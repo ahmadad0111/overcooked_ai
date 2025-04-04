@@ -388,10 +388,21 @@ def index():
     else:
         # Handle the case when GET request is received (initial page load)
         uid = session.get('user_id')  # If the UID is already stored in the session
+    default_layout = CONFIG["default_layout"]
     return render_template(
-        "index.html", agent_names=agent_names, layouts=LAYOUTS, uid = uid
+        "index.html",
+        agent_names=agent_names, 
+        layouts=LAYOUTS,
+        uid = uid,
+        default_agent=CONFIG["layout_agent_mapping"][default_layout],
+        default_layout=default_layout
     )
-    
+
+@app.route("/get_config", methods=["GET"])
+def get_config():
+    resp = {"config_data":CONFIG}
+    return jsonify(resp)
+
 # @app.route('/set_user', methods=['POST'])
 # def set_user():
 #     # Get the UID from the form
@@ -536,6 +547,7 @@ def on_create(data):
             return
 
         params = data.get("params", {})
+        print("Create game params: ",params)
 
         creation_params(params)
 
