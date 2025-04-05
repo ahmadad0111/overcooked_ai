@@ -118,8 +118,8 @@ app.logger.addHandler(handler)
 
 app.secret_key = 'abc'
 
-global use_adax_agent
-use_adax_agent = True
+global xai_agent_type
+xai_agent_type = 'NoX'
 
 #################################
 # Global Coordination Functions #
@@ -285,10 +285,10 @@ def _create_game(user_id, game_name, params={}):
         set_curr_room(user_id, game.id)
         if game.is_ready():
             game.activate()
-            game.update_adax('')
+            game.update_explanation('')
             ACTIVE_GAMES.add(game.id)
             start_info = game.to_json()
-            start_info["isAdaxAgent"] = params["adaxAgent"]
+            start_info["xaiAgentType"] = params["xaiAgentType"]
             emit(
                 "start_game",
                 {"spectating": spectating, "start_info": start_info},
@@ -296,7 +296,7 @@ def _create_game(user_id, game_name, params={}):
             )
             emit(
                 "start_ecg",
-                {"spectating": spectating, "start_info": {"round_id": game.id, "player_id": user_id, "isAdaxAgent": params["adaxAgent"]}},
+                {"spectating": spectating, "start_info": {"round_id": game.id, "player_id": user_id, "xaiAgentType": params["xaiAgentType"]}},
                 broadcast=True
             )
             socketio.start_background_task(play_game, game, fps=6)
@@ -504,7 +504,7 @@ def creation_params(params):
     # layouts: [layout in the config file], this one determines which layout to use, and if there is more than one layout, a series of game is run back to back
     #
     use_old = False
-    global use_adax_agent 
+    global xai_agent_type 
     if "oldDynamics" in params and params["oldDynamics"] == "on":
         params["mdp_params"] = {"old_dynamics": True}
         use_old = True  
@@ -528,13 +528,8 @@ def creation_params(params):
     else:
         params["dataCollection"] = False
     
-    if "adaxAgent" in params and params["adaxAgent"] == "on":
-        use_adax_agent = True
-        params["adaxAgent"] = True
-    else:
-        use_adax_agent = False
-        params["adaxAgent"] = False  
-
+    if "xaiAgentType" in params:
+        xai_agent_type = params["xaiAgentType"]
 
 @socketio.on("create")
 def on_create(data):
@@ -592,9 +587,9 @@ def on_join(data):
                 if game.is_ready():
                     # Game is ready to begin play
                     game.activate()
-                    game.update_adax('')
+                    game.update_explanation('')
                     start_info = game.to_json()
-                    start_info["isAdaxAgent"] = params["adaxAgent"]
+                    start_info["xaiAgentType"] = params["xaiAgentType"]
                     ACTIVE_GAMES.add(game.id)
                     emit(
                         "start_game",
@@ -603,7 +598,7 @@ def on_join(data):
                     )
                     emit(
                         "start_ecg",
-                        {"spectating": False, "start_info":  {"round_id": game.id, "player_id": user_id,  "isAdaxAgent": params["adaxAgent"]}},
+                        {"spectating": False, "start_info":  {"round_id": game.id, "player_id": user_id, "xaiAgentType": params["xaiAgentType"]}},
                         broadcast=True
                     )
                     socketio.start_background_task(play_game, game)
@@ -655,8 +650,8 @@ def on_adax(data):
     game = next(iter(GAMES.values()))
     if not game:
         return
-    if use_adax_agent:
-        game.update_adax(adaxplanation)
+    if xai_agent_type in ["StaticX","AdaX"]:
+        game.update_explanation(adaxplanation)
 
 @socketio.on("disconnect")
 def on_disconnect():

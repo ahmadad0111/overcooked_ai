@@ -118,7 +118,7 @@ class Game(ABC):
         self.id = kwargs.get("id", id(self))
         self.lock = Lock()
         self._is_active = False
-        self.adax_explanation = ''
+        self.xai_explanation = ''
 
     @abstractmethod
     def is_full(self):
@@ -244,8 +244,8 @@ class Game(ABC):
         except Full:
             pass
 
-    def update_adax(self, explanation):
-        self.adax_explanation = explanation
+    def update_explanation(self, explanation):
+        self.xai_explanation = explanation
 
     def get_state(self):
         """
@@ -480,7 +480,7 @@ class OvercookedGame(Game):
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
         #self.uid = None
-        self.adax_explanation = 'test'
+        self.xai_explanation = 'test'
         
         
         
@@ -697,8 +697,8 @@ class OvercookedGame(Game):
             player_id, overcooked_action
         )
 
-    # def update_adax(self, explanation):
-    #     super(OvercookedGame, self).update_adax(explanation)
+    # def update_explanation(self, explanation):
+    #     super(OvercookedGame, self).update_explanation(explanation)
 
     def reset(self):
         status = super(OvercookedGame, self).reset()
@@ -710,9 +710,9 @@ class OvercookedGame(Game):
         self.curr_tick += 1
         return super(OvercookedGame, self).tick()
     
-    def update_adax(self, new_adax):
-        self.adax_explanation = new_adax
-        return super(OvercookedGame, self).update_adax(new_adax)
+    def update_explanation(self, new_adax):
+        self.xai_explanation = new_adax
+        return super(OvercookedGame, self).update_explanation(new_adax)
     
     def activate(self):
         super(OvercookedGame, self).activate()
@@ -767,7 +767,7 @@ class OvercookedGame(Game):
         state_dict["time_left"] = max(
             self.max_time - (time() - self.start_time), 0
         )
-        state_dict["adax_explanation"] = self.adax_explanation
+        state_dict["xai_explanation"] = self.xai_explanation
         return state_dict
 
     def to_json(self):
