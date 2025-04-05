@@ -4,6 +4,7 @@ conda create -n overcooked-env1 python=3.7
 
 conda activate overcooked-env1
 
+git clone --recursive https://github.com/ahmadad0111/overcooked_ai.git --branch master --single-branch
 
 pip install -r requirements.txt
 
@@ -13,15 +14,14 @@ sudo apt-get install -y libgl1-mesa-dev
 pip install pylsl
 pip install eventlet
 
-
-git clone --recursive https://github.com/ahmadad0111/overcooked_ai.git --branch master --single-branch
-
 cd overcooked_ai/src/human_aware_rl/
 echo "import os; DATA_DIR=os.path.abspath('.')" >> data_dir.py
 
-cd setup_folder
+// cd setup_folder
 
-pip install -e './overcooked_ai[harl]'
+// pip install -e './overcooked_ai[harl]'
+cd overcooked_ai/
+pip install .
 
 cd overcooked_ai/src/overcooked_demo
 
@@ -37,7 +37,10 @@ export HOST=0.0.0.0
 export PORT=5000
 export CONF_PATH=config.json
 
-cd server
+If conda is installed in Windows, setting the environment variables with: conda env config vars set FLASK_ENV=production
+Listing all set env variables: conda env config vars list
+
+cd src/overcooked_demo/server
 
 python -u app.py
 ```
