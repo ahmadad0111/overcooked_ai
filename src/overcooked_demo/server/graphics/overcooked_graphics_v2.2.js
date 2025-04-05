@@ -25,7 +25,7 @@ var scene_config = {
     cook_time : 20,
     assets_loc : "./static/assets/",
     hud_size : 220,
-    adax_explanation: ''
+    xai_explanation: ''
 };
 
 var game_config = {
@@ -97,7 +97,7 @@ class OvercookedScene extends Phaser.Scene {
             time : config.start_state.time_left,
             bonus_orders : config.start_state.state.bonus_orders,
             all_orders : config.start_state.state.all_orders,
-            adax_explanation: config.adax_explanation
+            xai_explanation: config.xai_explanation
         }
     }
 
@@ -108,7 +108,7 @@ class OvercookedScene extends Phaser.Scene {
         this.hud_data.time = Math.round(state.time_left);
         this.hud_data.bonus_orders = state.state.bonus_orders;
         this.hud_data.all_orders = state.state.all_orders;
-        this.hud_data.adax_explanation = state.adax_explanation;
+        this.hud_data.xai_explanation = state.xai_explanation;
         this.state = state.state;
     }
 
@@ -360,8 +360,8 @@ class OvercookedScene extends Phaser.Scene {
         if (typeof(hud_data.potential) !== 'undefined' && hud_data.potential !== null) {
             this._drawPotential(hud_data.potential, sprites, board_height);
         }
-        if (typeof(hud_data.adax_explanation) !== 'undefined' && hud_data.adax_explanation !== null) {
-            this._drawAdaXplanation(hud_data.adax_explanation, sprites, board_height);
+        if (typeof(hud_data.xai_explanation) !== 'undefined' && hud_data.xai_explanation !== null) {
+            this._drawAdaXplanation(hud_data.xai_explanation, sprites, board_height);
         }
     }
 
@@ -502,14 +502,14 @@ class OvercookedScene extends Phaser.Scene {
         return `soup_${status}_tomato_${num_tomatoes}_onion_${num_onions}.png`
     }
 
-    _drawAdaXplanation(adax_explanation, sprites, board_height) {
-        adax_explanation = "AI Chef's reason: "+ adax_explanation;
-        if (typeof(sprites['adax_explanation']) !== 'undefined') {
-            sprites['adax_explanation'].setText(adax_explanation);
+    _drawAdaXplanation(xai_explanation, sprites, board_height) {
+        xai_explanation = "AI Chef's reason: "+ xai_explanation;
+        if (typeof(sprites['xai_explanation']) !== 'undefined') {
+            sprites['xai_explanation'].setText(xai_explanation);
         }
         else {
-            sprites['adax_explanation'] = this.add.text(
-                5, board_height + 150, adax_explanation,
+            sprites['xai_explanation'] = this.add.text(
+                5, board_height + 150, xai_explanation,
                 {
                     font: "20px Arial",
                     fill: "green",
