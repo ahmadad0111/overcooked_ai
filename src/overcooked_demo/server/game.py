@@ -583,7 +583,7 @@ class OvercookedGame(Game):
         """
         Game is ready to be activated if there are a sufficient number of players and at least one human (spectator or player)
         """
-        info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string', source_id='Overcooked')
         self.outlet = StreamOutlet(info)
         print("Stream outlet created.")
         return super(OvercookedGame, self).is_ready() and not self.is_empty()
@@ -634,7 +634,7 @@ class OvercookedGame(Game):
 
         # Initialize the stream outlet once
         # if not hasattr(self, 'outlet'):  # Check if outlet has already been created
-        #     info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        #     info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string',source_id='Overcooked' )
         #     self.outlet = StreamOutlet(info)
         #     print("Stream outlet created.")
 
@@ -667,7 +667,7 @@ class OvercookedGame(Game):
             "unix_timestamp":  time() #datetime.now(timezone.utc).isoformat(timespec='microseconds') 
         }
 
-        # info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        # info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string', source_id='Overcooked')
                 
         # # Create the stream outlet
         # outlet = StreamOutlet(info)
