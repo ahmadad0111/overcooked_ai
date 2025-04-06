@@ -73,7 +73,6 @@ class GraphicsManager {
         let start_info = graphics_config.start_info;
         scene_config.terrain = start_info.terrain;
         scene_config.start_state = start_info.state;
-        scene_config.isAdaxAgent = start_info.isAdaxAgent;
         scene_config.currentSession = start_info.currentSession;
         scene_config.currentRound = start_info.currentRound;
         scene_config.currentLayout = start_info.currentLayout;
@@ -110,8 +109,8 @@ class OvercookedScene extends Phaser.Scene {
             time : config.start_state.time_left,
             bonus_orders : config.start_state.state.bonus_orders,
             all_orders : config.start_state.state.all_orders,
-            isAdaxAgent: config.isAdaxAgent,
-            adax_explanation: config.adax_explanation,
+            xaiAgentType: config.xaiAgentType,
+            xai_explanation: config.xai_explanation,
             current_round: config.currentRound,
             total_rounds: config.totalRounds,
             current_session: config.currentSession,
@@ -125,7 +124,6 @@ class OvercookedScene extends Phaser.Scene {
         this.hud_data.time = Math.round(state.time_left);
         this.hud_data.bonus_orders = state.state.bonus_orders;
         this.hud_data.all_orders = state.state.all_orders;
-        this.hud_data.adax_explanation = state.adax_explanation;
         this.hud_data.current_round = state.current_round;
         this.hud_data.current_session = state.current_session;
         this.hud_data.current_layout = state.current_layout;
@@ -369,9 +367,6 @@ class OvercookedScene extends Phaser.Scene {
         // console.log("================", hud_data)
         if (["StaticX", "AdaX"].includes(hud_data.xaiAgentType) && typeof(hud_data.xai_explanation) !== 'undefined' && hud_data.xai_explanation !== null) {
             this._drawAdaXplanation(hud_data.xai_explanation, sprites, board_height);
-        // console.log("================", sprites);
-        if (hud_data.isAdaxAgent && typeof(hud_data.adax_explanation) !== 'undefined' && hud_data.adax_explanation !== null) {
-            this._drawAdaXplanation(hud_data.adax_explanation, sprites, board_height);
         }
         if (typeof(hud_data.all_orders) !== 'undefined') {
             this._drawAllOrders(hud_data.all_orders, sprites, board_height);

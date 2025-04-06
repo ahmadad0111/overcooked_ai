@@ -487,7 +487,6 @@ class OvercookedGame(Game):
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
         #self.uid = None
-        self.adax_explanation = 'test'
         self.current_round = current_round
         self.current_session = current_session
         self.total_rounds = total_rounds
@@ -799,7 +798,6 @@ class OvercookedGame(Game):
         state_dict["time_left"] = max(
             self.max_time - (time() - self.start_time), 0
         )
-        state_dict["adax_explanation"] = self.adax_explanation
         state_dict["current_round"] = self.current_round
         state_dict["current_session"] = self.current_session
         state_dict["current_layout"] = self.curr_layout
