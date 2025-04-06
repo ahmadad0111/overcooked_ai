@@ -305,7 +305,6 @@ def _create_game(user_id,
             game.update_explanation('')
             ACTIVE_GAMES.add(game.id)
             start_info = game.to_json()
-            start_info["isAdaxAgent"] = params["adaxAgent"]
             start_info["currentSession"] = current_session
             start_info["currentRound"] = current_round
             start_info["totalRounds"] = CONFIG["total_num_rounds"]
