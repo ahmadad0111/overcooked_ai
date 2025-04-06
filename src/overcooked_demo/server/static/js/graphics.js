@@ -27,7 +27,6 @@ var scene_config = {
     assets_loc : "./static/assets/",
     hud_size : 150 + ADAX_UI_HEIGHT,
     xai_exaplanation: '',
-    adax_explanation: '',
     current_round: 1,
     current_session: 1,
     total_rounds: 1,
