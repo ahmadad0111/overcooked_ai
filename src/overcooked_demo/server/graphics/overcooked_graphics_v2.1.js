@@ -26,7 +26,7 @@ var scene_config = {
     cook_time : 20,
     assets_loc : "./static/assets/",
     hud_size : 200,
-    adax_explanation: ''
+    xai_explanation: ''
 };
 
 var game_config = {
