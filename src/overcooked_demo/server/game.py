@@ -122,7 +122,7 @@ class Game(ABC):
         self.id = kwargs.get("id", id(self))
         self.lock = Lock()
         self._is_active = False
-        self.adax_explanation = ''
+        self.xai_explanation = ''
 
     @abstractmethod
     def is_full(self):
@@ -248,8 +248,8 @@ class Game(ABC):
         except Full:
             pass
 
-    def update_adax(self, explanation):
-        self.adax_explanation = explanation
+    def update_explanation(self, explanation):
+        self.xai_explanation = explanation
 
     def get_state(self):
         """
@@ -491,6 +491,7 @@ class OvercookedGame(Game):
         self.current_round = current_round
         self.current_session = current_session
         self.total_rounds = total_rounds
+        self.xai_explanation = 'test'
         
         
         
@@ -593,7 +594,7 @@ class OvercookedGame(Game):
         """
         Game is ready to be activated if there are a sufficient number of players and at least one human (spectator or player)
         """
-        info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string', source_id='Overcooked')
         self.outlet = StreamOutlet(info)
         print("Stream outlet created.")
         return super(OvercookedGame, self).is_ready() and not self.is_empty()
@@ -644,7 +645,7 @@ class OvercookedGame(Game):
 
         # Initialize the stream outlet once
         # if not hasattr(self, 'outlet'):  # Check if outlet has already been created
-        #     info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        #     info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string',source_id='Overcooked' )
         #     self.outlet = StreamOutlet(info)
         #     print("Stream outlet created.")
 
@@ -677,7 +678,7 @@ class OvercookedGame(Game):
             "unix_timestamp":  time() #datetime.now(timezone.utc).isoformat(timespec='microseconds') 
         }
 
-        # info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string')
+        # info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string', source_id='Overcooked')
                 
         # # Create the stream outlet
         # outlet = StreamOutlet(info)
@@ -707,8 +708,8 @@ class OvercookedGame(Game):
             player_id, overcooked_action
         )
 
-    # def update_adax(self, explanation):
-    #     super(OvercookedGame, self).update_adax(explanation)
+    # def update_explanation(self, explanation):
+    #     super(OvercookedGame, self).update_explanation(explanation)
 
     def reset(self):
         status = super(OvercookedGame, self).reset()
@@ -735,9 +736,9 @@ class OvercookedGame(Game):
         self.curr_tick += 1
         return super(OvercookedGame, self).tick()
     
-    def update_adax(self, new_adax):
-        self.adax_explanation = new_adax
-        return super(OvercookedGame, self).update_adax(new_adax)
+    def update_explanation(self, new_adax):
+        self.xai_explanation = new_adax
+        return super(OvercookedGame, self).update_explanation(new_adax)
     
     def activate(self):
         super(OvercookedGame, self).activate()
@@ -804,6 +805,7 @@ class OvercookedGame(Game):
         state_dict["current_layout"] = self.curr_layout
         state_dict["total_rounds"] = self.total_rounds
         state_dict["layouts"] = self.layouts
+        state_dict["xai_explanation"] = self.xai_explanation
         return state_dict
     
     def set_round(self, new_round):

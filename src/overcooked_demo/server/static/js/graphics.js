@@ -17,7 +17,7 @@ var DIRECTION_TO_NAME = {
     '-1,0': 'WEST'
 };
 
-var ADAX_UI_HEIGHT = 80;
+var ADAX_UI_HEIGHT = 100;
 var scene_config = {
     player_colors : {0: 'blue', 1: 'green'},
     tileSize : 80,
@@ -26,6 +26,7 @@ var scene_config = {
     cook_time : 20,
     assets_loc : "./static/assets/",
     hud_size : 150 + ADAX_UI_HEIGHT,
+    xai_exaplanation: '',
     adax_explanation: '',
     current_round: 1,
     current_session: 1,
@@ -76,9 +77,10 @@ class GraphicsManager {
         scene_config.currentSession = start_info.currentSession;
         scene_config.currentRound = start_info.currentRound;
         scene_config.currentLayout = start_info.currentLayout;
+        scene_config.xaiAgentType = start_info.xaiAgentType;
         game_config.scene = new OvercookedScene(scene_config);
         game_config.width = scene_config.tileSize*scene_config.terrain[0].length;
-        game_config.height = scene_config.tileSize*scene_config.terrain.length  + scene_config.hud_size - (start_info.isAdaxAgent ? 0 : ADAX_UI_HEIGHT);
+        game_config.height = scene_config.tileSize*scene_config.terrain.length  + scene_config.hud_size - (["StaticX", "AdaX"].includes(start_info.xaiAgentType)? 0 : ADAX_UI_HEIGHT);
         game_config.parent = graphics_config.container_id;
         this.game = new Phaser.Game(game_config);
     }
@@ -99,8 +101,9 @@ class OvercookedScene extends Phaser.Scene {
         this.show_post_cook_time = config.show_post_cook_time;
         this.cook_time = config.cook_time;
         this.assets_loc = config.assets_loc;
-        this.hud_size = config.isAdaxAgent ? config.hud_size : config.hud_size - ADAX_UI_HEIGHT;
-        this.agent_msg_size = config.isAdaxAgent ? 80 : 0
+        this.hud_size = ["StaticX", "AdaX"].includes(config.xaiAgentType)  ? config.hud_size : config.hud_size - ADAX_UI_HEIGHT;
+        
+        this.agent_msg_size = ["StaticX", "AdaX"].includes(config.xaiAgentType) ? ADAX_UI_HEIGHT: 0;
         this.hud_data = {
             potential : config.start_state.potential,
             score : config.start_state.score,
@@ -127,6 +130,7 @@ class OvercookedScene extends Phaser.Scene {
         this.hud_data.current_session = state.current_session;
         this.hud_data.current_layout = state.current_layout;
         this.hud_data.total_rounds = state.total_rounds;
+        this.hud_data.xai_explanation = state.xai_explanation;
         this.state = state.state;
     }
 
@@ -362,6 +366,9 @@ class OvercookedScene extends Phaser.Scene {
     }
 
     _drawHUD(hud_data, sprites, board_height) {
+        // console.log("================", hud_data)
+        if (["StaticX", "AdaX"].includes(hud_data.xaiAgentType) && typeof(hud_data.xai_explanation) !== 'undefined' && hud_data.xai_explanation !== null) {
+            this._drawAdaXplanation(hud_data.xai_explanation, sprites, board_height);
         // console.log("================", sprites);
         if (hud_data.isAdaxAgent && typeof(hud_data.adax_explanation) !== 'undefined' && hud_data.adax_explanation !== null) {
             this._drawAdaXplanation(hud_data.adax_explanation, sprites, board_height);
@@ -580,10 +587,10 @@ class OvercookedScene extends Phaser.Scene {
         return `soup_${status}_tomato_${num_tomatoes}_onion_${num_onions}.png`
     }
 
-    _drawAdaXplanation(adax_explanation, sprites, board_height) {
-        // adax_explanation = "AI Chef's msg: "+ adax_explanation;
-        if (typeof(sprites['adax_explanation']) !== 'undefined') {
-            sprites['adax_explanation'].setText(adax_explanation);
+    _drawAdaXplanation(xai_explanation, sprites, board_height) {
+        // xai_explanation = "AI Chef's msg: "+ xai_explanation;
+        if (typeof(sprites['xai_explanation']) !== 'undefined') {
+            sprites['xai_explanation'].setText(xai_explanation);
         }
         else {
             sprites['base_adax_label'] = this.add.text(
@@ -595,8 +602,8 @@ class OvercookedScene extends Phaser.Scene {
                     // wordWrap: { width: this.game.canvas.width - 10, useAdvancedWrap: true }
                 }
             )
-            sprites['adax_explanation'] = this.add.text(
-                5, 30, adax_explanation,
+            sprites['xai_explanation'] = this.add.text(
+                5, 30, xai_explanation,
                 {
                     font: "20px Arial",
                     fill: "black",
