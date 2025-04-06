@@ -270,8 +270,7 @@ def _leave_game(user_id):
 
     return was_active
 
-initial_session = 1
-initial_round = 1
+
 def _create_game(user_id,
                  game_name,
                  params={},
