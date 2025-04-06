@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 
 # Import and patch the production eventlet server if necessary
 if os.getenv("FLASK_ENV", "production") == "production":
@@ -226,6 +227,7 @@ def _leave_game(user_id):
     game after `user_id` is removed
     """
     # Get pointer to current game if it exists
+    print("__Leaving game__")
     game = get_curr_game(user_id)
 
     if not game:
@@ -268,7 +270,22 @@ def _leave_game(user_id):
 
     return was_active
 
-def _create_game(user_id, game_name, params={}):
+initial_session = 1
+initial_round = 1
+def _create_game(user_id,
+                 game_name,
+                 params={},
+                 **kwargs):
+    current_session=kwargs.get("initial_session",1)
+    current_round=kwargs.get("initial_round",1)
+    layouts=kwargs.get("layouts",[])
+    layouts_order=layouts.copy()
+    params.update({
+        "current_session": current_session,
+        "current_round": current_round,
+        "total_rounds": CONFIG["total_num_rounds"],
+        "layouts": layouts
+    })
     game, err = try_create_game(game_name, **params)
     if not game:
         emit("creation_failed", {"error": err.__repr__()})
@@ -289,6 +306,10 @@ def _create_game(user_id, game_name, params={}):
             ACTIVE_GAMES.add(game.id)
             start_info = game.to_json()
             start_info["isAdaxAgent"] = params["adaxAgent"]
+            start_info["currentSession"] = current_session
+            start_info["currentRound"] = current_round
+            start_info["totalRounds"] = CONFIG["total_num_rounds"]
+            start_info["experiment_order_disp"] = " -> ".join(layouts_order)
             emit(
                 "start_game",
                 {"spectating": spectating, "start_info": start_info},
@@ -547,12 +568,25 @@ def on_create(data):
             return
 
         params = data.get("params", {})
-        print("Create game params: ",params)
 
         creation_params(params)
 
         game_name = data.get("game_name", "overcooked")
-        _create_game(user_id, game_name, params)
+        all_layouts = CONFIG["layouts"].copy()
+
+        #Shuffle game layout order
+        all_layouts.remove(params["layout"])
+        random.shuffle(all_layouts)
+        layouts = [params["layout"]] + all_layouts
+        params["layouts"] = layouts
+        print("Create game params: ",params)
+
+        _create_game(user_id=user_id,
+                    game_name=game_name,
+                    params=params,
+                    initial_session=CONFIG["initial_session"],
+                    initial_round=CONFIG["initial_round"],
+                    layouts=layouts)
 
 
 @socketio.on("join")
@@ -576,7 +610,9 @@ def on_join(data):
             params = data.get("params", {})
             creation_params(params)
             game_name = data.get("game_name", "overcooked")
-            _create_game(user_id, game_name, params)
+            _create_game(user_id=user_id,
+                         game_name=game_name,
+                         params=params)
             return
 
         elif not game:
@@ -616,6 +652,7 @@ def on_join(data):
 @socketio.on("leave")
 def on_leave(data):
     user_id = request.sid
+    print("Ending game data: ",data)
     with USERS[user_id]:
         was_active = _leave_game(user_id)
 
@@ -660,7 +697,7 @@ def on_adax(data):
 
 @socketio.on("disconnect")
 def on_disconnect():
-    print("disonnect triggered", file=sys.stderr)
+    print("disconnect triggered", file=sys.stderr)
     # Ensure game data is properly cleaned-up in case of unexpected disconnect
     user_id = request.sid
     if user_id not in USERS:
@@ -674,6 +711,7 @@ def on_disconnect():
 # Exit handler for server
 def on_exit():
     # Force-terminate all games on server termination
+    print("Exiting...")
     for game_id in GAMES:
         socketio.emit(
             "end_game",
