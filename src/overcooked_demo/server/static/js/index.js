@@ -126,6 +126,7 @@ socket.on('start_game', function(data) {
         start_info : data.start_info
     };
     window.spectating = data.spectating;
+    document.getElementById("experiment-order").innerHTML = "Layour Order: " + data.start_info["experiment_order_disp"];
     $('#error-exit').hide();
     $("#overcooked").empty();
     $('#game-over').hide();
@@ -140,6 +141,8 @@ socket.on('start_game', function(data) {
     $('#leave').show();
     $('#leave').attr("disabled", false)
     $('#game-title').show();
+    $('#experiment-order').show();
+    $('#experiment-order').attr("disabled", false)
     
     if (!window.spectating) {
         enable_key_listener();

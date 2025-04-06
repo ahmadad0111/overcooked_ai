@@ -30,6 +30,10 @@ from database import Database
 import uuid
 import hashlib
 
+# Read in global config
+CONF_PATH = os.getenv("CONF_PATH", "config.json")
+with open(CONF_PATH, "r") as f:
+    CONFIG = json.load(f)
 
 def generate_unique_hash():
     user_id = "user123"
@@ -446,6 +450,9 @@ class OvercookedGame(Game):
         showPotential=False,
         randomized=False,
         ticks_per_ai_action=1,
+        current_round=1,
+        current_session=1,
+        total_rounds=1,
         **kwargs
     ):
         super(OvercookedGame, self).__init__(**kwargs)
@@ -481,6 +488,9 @@ class OvercookedGame(Game):
         # self.start_tracking(session_id)
         #self.uid = None
         self.adax_explanation = 'test'
+        self.current_round = current_round
+        self.current_session = current_session
+        self.total_rounds = total_rounds
         
         
         
@@ -681,9 +691,9 @@ class OvercookedGame(Game):
 
 
         #message = json.dumps(dummy_data)
-        print("Pushing sample:", message)  # Debugging message content
+        # print("Pushing sample:", message)  # Debugging message content
         self.outlet.push_sample([message])
-        print("Sample pushed.")
+        # print("Sample pushed.")
         # database1.update_transition(transition, self.commit_hash)
         self.trajectory.append(transition)
         
@@ -702,9 +712,24 @@ class OvercookedGame(Game):
 
     def reset(self):
         status = super(OvercookedGame, self).reset()
-        if status == self.Status.RESET:
-            # Hacky way of making sure game timer doesn't "start" until after reset timeout has passed
-            self.start_time += self.reset_timeout / 1000
+        print("Resetting, moving to new round...")
+        if self.current_round < self.total_rounds:
+            self.set_round(self.current_round + 1)
+        else:
+            print("Moving to new session...")
+            if self.current_session < len(self.layouts):
+                # Resetting to initial round 1 with new session and new layout
+                self.set_round(CONFIG["initial_round"])
+                self.set_session(self.current_session + 1)
+                self.set_layout(self.layouts[self.current_session])
+            else:
+                print("End game")
+                if status == self.Status.RESET:
+                    # Hacky way of making sure game timer doesn't "start" until after reset timeout has passed
+                    self.start_time += self.reset_timeout / 1000
+
+        print(f"Current round {self.current_round} | session: {self.current_session} | layout: {self.curr_layout} | all layouts: {self.layouts}")\
+
 
     def tick(self):
         self.curr_tick += 1
@@ -716,13 +741,14 @@ class OvercookedGame(Game):
     
     def activate(self):
         super(OvercookedGame, self).activate()
+        print("=== activating game ===")
 
         # Sanity check at start of each game
         if not self.npc_players.union(self.human_players) == set(self.players):
             raise ValueError("Inconsistent State")
 
 
-        self.curr_layout = self.layouts.pop()
+        self.curr_layout = self.layouts[0]
         self.mdp = OvercookedGridworld.from_layout_name(
             self.curr_layout, **self.mdp_params
         )
@@ -745,19 +771,24 @@ class OvercookedGame(Game):
             t = Thread(target=self.npc_policy_consumer, args=(npc_policy,))
             self.threads.append(t)
             t.start()
+        print("=== Game activated ===")
 
     def deactivate(self):
         super(OvercookedGame, self).deactivate()
+        print("=== Deactivating game ===")
         # Ensure the background consumers do not hang
         for npc_policy in self.npc_policies:
             self.npc_state_queues[npc_policy].put(self.state)
 
+        print("=== Waiting for all threads to exit ===")
         # Wait for all background threads to exit
         for t in self.threads:
             t.join()
 
+        print("=== All threads exitted. Clearing all action queues ===")
         # Clear all action queues
         self.clear_pending_actions()
+        print("=== Deactivated ===")
 
     def get_state(self):
         state_dict = {}
@@ -768,7 +799,21 @@ class OvercookedGame(Game):
             self.max_time - (time() - self.start_time), 0
         )
         state_dict["adax_explanation"] = self.adax_explanation
+        state_dict["current_round"] = self.current_round
+        state_dict["current_session"] = self.current_session
+        state_dict["current_layout"] = self.curr_layout
+        state_dict["total_rounds"] = self.total_rounds
+        state_dict["layouts"] = self.layouts
         return state_dict
+    
+    def set_round(self, new_round):
+        self.current_round = new_round
+    
+    def set_session(self, new_session):
+        self.current_session = new_session
+
+    def set_layout(self, new_layout):
+        self.curr_layout = new_layout
 
     def to_json(self):
         obj_dict = {}
