@@ -559,7 +559,7 @@ class OvercookedScene extends Phaser.Scene {
     }
 
     _drawCurrentLayout(current_layer, sprites, board_height) {
-        current_layer = "Layer: "+current_layer;
+        current_layer = "Layout: "+current_layer;
         if (typeof(sprites['current_layer']) !== 'undefined') {
             sprites['current_layer'].setText(current_layer);
         }
