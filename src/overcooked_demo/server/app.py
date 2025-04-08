@@ -121,7 +121,7 @@ app.secret_key = 'abc'
 
 global xai_agent_type
 xai_agent_type = 'NoX'
-
+user_id = ''
 #################################
 # Global Coordination Functions #
 #################################
@@ -395,6 +395,8 @@ def get_agent_names():
 def index():
     agent_names = get_agent_names()
     # Check if the form was submitted (POST request)
+
+    print("request.method ", request.method)
     if request.method == "POST":
         # Get the UID from the form
         uid = request.form.get('uid')
@@ -402,7 +404,7 @@ def index():
 
         # Store the UID in the session (Flask's session management)
         session['user_id'] = uid
-
+        print("session['user_id'] ", session['user_id'])
         # Optionally, store the UID in the GameSession class
         OvercookedGame.set_uid(uid)
     else:
@@ -553,10 +555,16 @@ def creation_params(params):
 
 @socketio.on("create")
 def on_create(data):
-    user_id = request.sid
+    global user_id
+    print(user_id)
+
+    user_id = request.sid or user_id
+    print(user_id)
+
     with USERS[user_id]:
         # Retrieve current game if one exists
         curr_game = get_curr_game(user_id)
+        print("curr_game ", curr_game)
         if curr_game:
             # Cannot create if currently in a game
             return
@@ -679,7 +687,7 @@ def on_connect():
     USERS[user_id] = Lock()
 
 # TODO: remove adax UI element if adax is unchecked
-@socketio.on("adax")
+@socketio.on("xai_message")
 def on_adax(data):
     user_id = request.sid
     adaxplanation = data["explanation"]
@@ -779,7 +787,7 @@ def play_game(game: OvercookedGame, fps=6):
 if __name__ == "__main__":
     # Dynamically parse host and port from environment variables (set by docker build)
     host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", 80))
+    port = int(os.getenv("PORT", 5000))
     print("socket ", host, port)
     # Attach exit handler to ensure graceful shutdown
     atexit.register(on_exit)
