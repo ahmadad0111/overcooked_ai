@@ -643,8 +643,8 @@ def on_connect():
     USERS[user_id] = Lock()
 
 # TODO: remove adax UI element if adax is unchecked
-@socketio.on("adax")
-def on_adax(data):
+@socketio.on("xai_message")
+def on_xai_message(data):
     user_id = request.sid
     adaxplanation = data["explanation"]
     game = next(iter(GAMES.values()))
