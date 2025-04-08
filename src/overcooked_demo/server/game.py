@@ -228,6 +228,7 @@ class Game(ABC):
             return self.Status.RESET
 
         self.apply_actions()
+        print("\nself.is_finished() ",self.is_finished())
         return self.Status.DONE if self.is_finished() else self.Status.ACTIVE
 
     def enqueue_action(self, player_id, action):
@@ -540,9 +541,13 @@ class OvercookedGame(Game):
         return cls.uid_value
         
     def _curr_game_over(self):
+        print("time left ", time() - self.start_time)
+        print("max time ", self.max_time)
         return time() - self.start_time >= self.max_time
     
     def needs_reset(self):
+        print("-->self._curr_game_over() ", self._curr_game_over())
+        print("===> self.is_finished() ", self.is_finished())
         return self._curr_game_over() and not self.is_finished()
 
     def add_player(self, player_id, idx=None, buff_size=-1, is_human=True):
@@ -576,7 +581,9 @@ class OvercookedGame(Game):
         return self.num_players >= self.max_players
 
     def is_finished(self):
-        val = not self.layouts and self._curr_game_over()
+        print("self.layouts ", self.layouts)
+        print("====> self._curr_game_over() ",  self._curr_game_over())
+        val = self._curr_game_over()
         return val
 
     def is_empty(self):
@@ -715,13 +722,14 @@ class OvercookedGame(Game):
         print("Resetting, moving to new round...")
         if self.current_round < self.total_rounds:
             self.set_round(self.current_round + 1)
+            self.set_layout(self.layouts[self.current_session])
         else:
             print("Moving to new session...")
             if self.current_session < len(self.layouts):
                 # Resetting to initial round 1 with new session and new layout
                 self.set_round(CONFIG["initial_round"])
-                self.set_session(self.current_session + 1)
                 self.set_layout(self.layouts[self.current_session])
+                self.set_session(self.current_session + 1)
             else:
                 print("End game")
                 if status == self.Status.RESET:
@@ -729,6 +737,30 @@ class OvercookedGame(Game):
                     self.start_time += self.reset_timeout / 1000
 
         print(f"Current round {self.current_round} | session: {self.current_session} | layout: {self.curr_layout} | all layouts: {self.layouts}")\
+
+
+    # def reset(self):
+    #     status = super(OvercookedGame, self).reset()
+    #     print("Resetting, moving to new round...")
+    #     print("self.current_round ",self.current_round)
+    #     print("self.layouts ",self.layouts)
+    #     print("self.current_session ",self.current_session)
+    #     if self.current_round < self.total_rounds:
+    #         self.set_round(self.current_round + 1)
+    #         self.set_layout(self.layouts[self.current_session])
+    #     elif self.current_session < len(self.layouts):
+    #         print("Moving to new session...")
+    #     # if self.current_session < len(self.layouts):
+    #         # Resetting to initial round 1 with new session and new layout
+    #         self.set_round(CONFIG["initial_round"])
+    #         self.set_layout(self.layouts[self.current_session])
+    #         self.set_session(self.current_session + 1)
+    #     print("End game")
+    #     if status == self.Status.RESET:
+    #             # Hacky way of making sure game timer doesn't "start" until after reset timeout has passed
+    #             self.start_time += self.reset_timeout / 1000
+
+    #     print(f"Current round {self.current_round} | session: {self.current_session} | layout: {self.curr_layout} | all layouts: {self.layouts}")\
 
 
     def tick(self):
