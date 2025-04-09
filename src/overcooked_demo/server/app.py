@@ -413,7 +413,11 @@ def index():
     else:
         # Handle the case when GET request is received (initial page load)
         uid = session.get('user_id')  # If the UID is already stored in the session
-    default_layout = CONFIG["default_layout"]
+    
+    # Randomize default layout loading
+    default_layouts = CONFIG["layouts"].copy()
+    random.shuffle(default_layouts)
+    default_layout = default_layouts[0] if CONFIG["randomize_layout"] else CONFIG["default_layout"]
     return render_template(
         "index.html",
         agent_names=agent_names, 
@@ -607,10 +611,8 @@ def process_game_flow():
             # Resetting to initial round 1 with new session and new layout
             GAME_FLOW['current_round'] = 1
             GAME_FLOW['current_session'] = current_session + 1
-        # if current_session == len(GAME_FLOW['all_layouts'])-1:
-            # Game flow for the curent user is about to end
-    if current_session >= len(GAME_FLOW['all_layouts']):
-            GAME_FLOW['is_ending'] = 1
+    if GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
+        GAME_FLOW['is_ending'] = 1
     
 @socketio.on("create")
 def on_create(data):

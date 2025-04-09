@@ -49,12 +49,12 @@
 	  <label for="playerZero" style="color:#1E6A9E">Player 1</label>
 	  <select class="form-control" id="playerZero" name="playerZero">
         <option value="human">Human Keyboard Input</option>
-        {% for agent_name in agent_names %}
+        <!-- {% for agent_name in agent_names %}
           <option
             value={{agent_name}}
             {% if agent_name == default_agent %} selected {% endif %}
           >{{agent_name}}</option>
-        {% endfor %}
+        {% endfor %} -->
 	  </select>
 
   </div>
@@ -65,6 +65,12 @@
         <!-- {% for agent_name in agent_names %}
             <option value={{agent_name}}>{{agent_name}}</option>
         {% endfor %} -->
+        {% for agent_name in agent_names %}
+          <option
+            value={{agent_name}}
+            {% if agent_name == default_agent %} selected {% endif %}
+          >{{agent_name}}</option>
+        {% endfor %}
     </select>
   </div>
 	<div class="form-group col-lg-2">
