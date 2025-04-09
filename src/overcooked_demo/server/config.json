@@ -44,5 +44,7 @@
     },
     "total_num_rounds": 4,
     "initial_round": 1,
-    "initial_session": 1
+    "initial_session": 1,
+    "game_flow_on": 1,
+    "is_ending": 0
 }

@@ -193,7 +193,7 @@ socket.on('creation_failed', function(data) {
 });
 
 socket.on('start_game', function(data) {
-    curr_tutorial_phase = 0;
+    curr_tutorial_phase = 1;
     graphics_config = {
         container_id : "overcooked",
         start_info : data.start_info
@@ -206,7 +206,7 @@ socket.on('start_game', function(data) {
     $('#show-hint').text('Show Hint');
     $('#game-title').text(`Tutorial in Progress, Phase ${curr_tutorial_phase}/${tutorial_instructions.length}`);
     $('#game-title').show();
-    $('#tutorial-instructions').append(tutorial_instructions[curr_tutorial_phase]);
+    $('#tutorial-instructions').append(tutorial_instructions[curr_tutorial_phase-1]);
     $('#instructions-wrapper').show();
     $('#hint').append(tutorial_hints[curr_tutorial_phase]);
     enable_key_listener();
@@ -220,9 +220,9 @@ socket.on('reset_game', function(data) {
     $("#overcooked").empty();
     $('#tutorial-instructions').empty();
     $('#hint').empty();
-    $("#tutorial-instructions").append(tutorial_instructions[curr_tutorial_phase]);
+    $("#tutorial-instructions").append(tutorial_instructions[curr_tutorial_phase-1]);
     $("#hint").append(tutorial_hints[curr_tutorial_phase]);
-    $('#game-title').text(`Tutorial in Progress, Phase ${curr_tutorial_phase + 1}/${tutorial_instructions.length}`);
+    $('#game-title').text(`Tutorial in Progress, Phase ${curr_tutorial_phase}/${tutorial_instructions.length}`);
     
     let button_pressed = $('#show-hint').text() === 'Hide Hint';
     if (button_pressed) {
