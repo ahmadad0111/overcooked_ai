@@ -93,6 +93,8 @@ USERS = ThreadSafeDict()
 # Mapping of user id's to the current game (room) they are in
 USER_ROOMS = ThreadSafeDict()
 
+GAME_FLOW = ThreadSafeDict()
+
 # Mapping of string game names to corresponding classes
 GAME_NAME_TO_CLS = {
     "overcooked": OvercookedGame,
@@ -277,8 +279,10 @@ def _create_game(user_id,
                  **kwargs):
     current_session=kwargs.get("initial_session",1)
     current_round=kwargs.get("initial_round",1)
-    layouts=kwargs.get("layouts",[])
-    layouts_order=layouts.copy()
+    layouts=kwargs.get("layouts",[]) or params.get("layouts", [])
+    layouts_order=kwargs.get("layouts_order",[])
+    game_flow_on = kwargs.get('game_flow_on', 0)
+    is_ending = kwargs.get('is_ending', 0)
     params.update({
         "current_session": current_session,
         "current_round": current_round,
@@ -308,7 +312,8 @@ def _create_game(user_id,
             start_info["currentRound"] = current_round
             start_info["totalRounds"] = CONFIG["total_num_rounds"]
             start_info["experiment_order_disp"] = " -> ".join(layouts_order)
-            start_info["xaiAgentType"] = params["xaiAgentType"]
+            start_info["xaiAgentType"] = params.get("xaiAgentType", xai_agent_type)
+
             emit(
                 "start_game",
                 {"spectating": spectating, "start_info": start_info},
@@ -316,10 +321,10 @@ def _create_game(user_id,
             )
             emit(
                 "start_ecg",
-                {"spectating": spectating, "start_info": {"round_id": game.id, "player_id": user_id, "xaiAgentType": params["xaiAgentType"]}},
+                {"spectating": spectating, "start_info": {"round_id": game.id, "player_id": user_id, "uid": session["user_id"], "xaiAgentType": start_info["xaiAgentType"]}},
                 broadcast=True
             )
-            socketio.start_background_task(play_game, game, fps=6)
+            socketio.start_background_task(play_game, game, fps=6, game_flow_on=game_flow_on, is_ending=is_ending)
         else:
             WAITING_GAMES.put(game.id)
             emit("waiting", {"in_game": True}, room=game.id)
@@ -396,7 +401,6 @@ def index():
     agent_names = get_agent_names()
     # Check if the form was submitted (POST request)
 
-    print("request.method ", request.method)
     if request.method == "POST":
         # Get the UID from the form
         uid = request.form.get('uid')
@@ -404,7 +408,6 @@ def index():
 
         # Store the UID in the session (Flask's session management)
         session['user_id'] = uid
-        print("session['user_id'] ", session['user_id'])
         # Optionally, store the UID in the GameSession class
         OvercookedGame.set_uid(uid)
     else:
@@ -553,18 +556,71 @@ def creation_params(params):
     if "xaiAgentType" in params:
         xai_agent_type = params["xaiAgentType"]
 
-@socketio.on("create")
-def on_create(data):
+@socketio.on("create-next")
+def on_create_next(data):
     global user_id
-    print(user_id)
 
     user_id = request.sid or user_id
-    print(user_id)
 
     with USERS[user_id]:
         # Retrieve current game if one exists
         curr_game = get_curr_game(user_id)
-        print("curr_game ", curr_game)
+        if curr_game:
+            # Cannot create if currently in a game
+            return
+
+        params = data.get("params", {})
+
+        creation_params(params)
+
+        game_name = data.get("game_name", "overcooked")
+        # all_layouts = CONFIG["layouts"].copy()
+
+        layouts = GAME_FLOW['all_layouts']
+
+
+        params["layouts"] = layouts
+        
+        process_game_flow()
+        if GAME_FLOW:
+            _create_game(user_id=user_id,
+                        game_name=game_name,
+                        params=params,
+                        initial_session=GAME_FLOW["current_session"],
+                        initial_round=GAME_FLOW["current_round"],
+                        layouts=[layouts[GAME_FLOW["current_session"]-1]],
+                        layouts_order=GAME_FLOW['all_layouts'],
+                        game_flow_on=1,
+                        is_ending=GAME_FLOW["is_ending"])
+
+
+def process_game_flow():
+    current_round = GAME_FLOW['current_round']
+    current_session = GAME_FLOW['current_session']
+    total_rounds = GAME_FLOW['total_num_rounds']
+    if current_round < total_rounds:
+        GAME_FLOW['current_round'] = current_round + 1
+    else:
+        print("Moving to new session...")
+        #TODO: add post-session questionnaire popup
+        if current_session < len(GAME_FLOW['all_layouts']):
+            # Resetting to initial round 1 with new session and new layout
+            GAME_FLOW['current_round'] = 1
+            GAME_FLOW['current_session'] = current_session + 1
+        # if current_session == len(GAME_FLOW['all_layouts'])-1:
+            # Game flow for the curent user is about to end
+    if current_session >= len(GAME_FLOW['all_layouts']):
+            GAME_FLOW['is_ending'] = 1
+    
+@socketio.on("create")
+def on_create(data):
+    global user_id
+
+    user_id = request.sid or user_id
+
+    with USERS[user_id]:
+        # Retrieve current game if one exists
+        curr_game = get_curr_game(user_id)
         if curr_game:
             # Cannot create if currently in a game
             return
@@ -575,20 +631,27 @@ def on_create(data):
 
         game_name = data.get("game_name", "overcooked")
         all_layouts = CONFIG["layouts"].copy()
-
         #Shuffle game layout order
         all_layouts.remove(params["layout"])
         random.shuffle(all_layouts)
         layouts = [params["layout"]] + all_layouts
+
         params["layouts"] = layouts
         print("Create game params: ",params)
-
+        GAME_FLOW['current_session'] =  CONFIG["initial_session"]
+        GAME_FLOW['current_round'] =  CONFIG["initial_round"]
+        GAME_FLOW['total_num_rounds'] =  CONFIG["total_num_rounds"]
+        GAME_FLOW['all_layouts'] =  layouts
+        GAME_FLOW['prev_params'] = layouts
+        GAME_FLOW['is_ending'] = CONFIG["is_ending"]
         _create_game(user_id=user_id,
                     game_name=game_name,
                     params=params,
                     initial_session=CONFIG["initial_session"],
                     initial_round=CONFIG["initial_round"],
-                    layouts=layouts)
+                    layouts=[layouts[CONFIG["initial_session"]-1]],
+                    layouts_order=layouts, 
+                    game_flow_on=CONFIG['game_flow_on'])
 
 
 @socketio.on("join")
@@ -599,7 +662,6 @@ def on_join(data):
 
         # Retrieve current game if one exists
         curr_game = get_curr_game(user_id)
-        print("curr_game", curr_game)
         if curr_game:
             # Cannot join if currently in a game
             return
@@ -641,7 +703,7 @@ def on_join(data):
                     )
                     emit(
                         "start_ecg",
-                        {"spectating": False, "start_info":  {"round_id": game.id, "player_id": user_id, "xaiAgentType": params["xaiAgentType"]}},
+                        {"spectating": False, "start_info":  {"round_id": game.id, "player_id": user_id, "uid": session["user_id"], "xaiAgentType": params["xaiAgentType"]}},
                         broadcast=True
                     )
                     socketio.start_background_task(play_game, game)
@@ -738,7 +800,7 @@ def on_exit():
 #############
 
 
-def play_game(game: OvercookedGame, fps=6):
+def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
     """
     Asynchronously apply real-time game updates and broadcast state to all clients currently active
     in the game. Note that this loop must be initiated by a parallel thread for each active game
@@ -772,6 +834,9 @@ def play_game(game: OvercookedGame, fps=6):
 
     with game.lock:
         data = game.get_data()
+        
+        data['game_flow_on'] = 0 if is_ending  else game_flow_on 
+        data['is_ending'] = is_ending
         socketio.emit(
             "end_game", {"status": status, "data": data}, room=game.id
         )
