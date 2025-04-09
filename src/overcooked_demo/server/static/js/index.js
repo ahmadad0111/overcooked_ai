@@ -75,10 +75,10 @@ $(function() {
         var layout = document.getElementById("layout").value;
         var agentMapping = window.config_data["layout_agent_mapping"];
         try {
-            document.getElementById("playerZero").value = agentMapping[layout];
-            // document.getElementById("playerZero").text = agentMapping[layout];
+            document.getElementById("playerOne").value = agentMapping[layout];
+            // document.getElementById("playerOne").text = agentMapping[layout];
         }
-        catch(err) {document.getElementById("playerZero").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
+        catch(err) {document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
     });
 });
 
