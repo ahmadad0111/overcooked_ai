@@ -1,5 +1,5 @@
 {
-    "host": "192.168.1.100",
+    "host": "localhost",
     "port": 5432,
     "dbname": "experiments",
     "user": "postgres",
