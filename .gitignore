@@ -171,9 +171,10 @@ node_modules/
 **/master_agents/
 **/__pycache__/
 
-src/overcooked_demo/server/db.json
 
 #manually correcting for demo 
 !**/static/**/*.png
 !src/overcooked_demo/server/static/lib
 
+# remove later DB configs
+src/overcooked_demo/server/db.json

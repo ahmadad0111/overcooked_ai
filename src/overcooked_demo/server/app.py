@@ -619,7 +619,7 @@ def process_game_flow():
             GAME_FLOW['current_round'] = 1
             GAME_FLOW['current_session'] = current_session + 1
     if GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
-        GAME_FLOW['is_ending'] = True
+        GAME_FLOW['is_ending'] = 1
     
 @socketio.on("create")
 def on_create(data):
