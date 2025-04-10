@@ -77,6 +77,8 @@ $(function() {
         try {
             document.getElementById("playerOne").value = agentMapping[layout];
             // document.getElementById("playerOne").text = agentMapping[layout];
+            $('#current-layout').html(layout)
+
         }
         catch(err) {document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
     });
@@ -152,7 +154,8 @@ socket.on('start_game', function(data) {
         start_info : data.start_info
     };
     window.spectating = data.spectating;
-    document.getElementById("experiment-order").innerHTML = "Layour Order: " + data.start_info["experiment_order_disp"];
+    document.getElementById("experiment-order").innerHTML = "<b>Layout Order:</b> " + data.start_info["experiment_order_disp"];
+    $('#current-layout').html(data.start_info["current_layout"])
     $('#error-exit').hide();
     $("#overcooked").empty();
     $('#game-over').hide();

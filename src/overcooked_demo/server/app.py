@@ -313,6 +313,7 @@ def _create_game(user_id,
             start_info["totalRounds"] = CONFIG["total_num_rounds"]
             start_info["experiment_order_disp"] = " -> ".join(layouts_order)
             start_info["xaiAgentType"] = params.get("xaiAgentType", xai_agent_type)
+            start_info["current_layout"] = game.curr_layout
 
             emit(
                 "start_game",
