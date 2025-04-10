@@ -20,6 +20,30 @@ $(function() {
         $('#join').attr("disabled", true);
         $('#create').hide();
         $('#create').attr("disabled", true)
+        $('#create-next').hide();
+        $('#create-next').attr("disabled", true)
+        $("#instructions").hide();
+        $('#tutorial').hide();
+    });
+});
+
+$(function() {
+    $('#create-next').click(function () {
+        params = arrToJSON($('form').serializeArray());
+        params.layouts = [params.layout]
+        data = {
+            "params" : params,
+            "game_name" : "overcooked",
+            "create_if_not_found" : false
+        };
+        socket.emit("create-next", data);
+        $('#waiting').show();
+        $('#join').hide();
+        $('#join').attr("disabled", true);
+        $('#create').hide();
+        $('#create').attr("disabled", true)
+        $('#create-next').hide();
+        $('#create-next').attr("disabled", true)
         $("#instructions").hide();
         $('#tutorial').hide();
     });
@@ -51,10 +75,12 @@ $(function() {
         var layout = document.getElementById("layout").value;
         var agentMapping = window.config_data["layout_agent_mapping"];
         try {
-            document.getElementById("playerZero").value = agentMapping[layout];
-            // document.getElementById("playerZero").text = agentMapping[layout];
+            document.getElementById("playerOne").value = agentMapping[layout];
+            // document.getElementById("playerOne").text = agentMapping[layout];
+            $('#current-layout').html(layout)
+
         }
-        catch(err) {document.getElementById("playerZero").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
+        catch(err) {document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
     });
 });
 
@@ -109,9 +135,11 @@ socket.on('creation_failed', function(data) {
     $('#tutorial').show();
     $('#waiting').hide();
     $('#join').show();
-    $('#join').attr("disabled", false);
+    $('#join').attr("disabled", true);
     $('#create').show();
     $('#create').attr("disabled", false);
+    $('#create-next').show();
+    $('#create-next').attr("disabled", false);
     $('#overcooked').append(`<h4>Sorry, game creation code failed with error: ${JSON.stringify(err)}</>`);
 });
 
@@ -126,6 +154,8 @@ socket.on('start_game', function(data) {
         start_info : data.start_info
     };
     window.spectating = data.spectating;
+    document.getElementById("experiment-order").innerHTML = "<b>Layout Order:</b> " + data.start_info["experiment_order_disp"];
+    $('#current-layout').html(data.start_info["current_layout"])
     $('#error-exit').hide();
     $("#overcooked").empty();
     $('#game-over').hide();
@@ -140,6 +170,8 @@ socket.on('start_game', function(data) {
     $('#leave').show();
     $('#leave').attr("disabled", false)
     $('#game-title').show();
+    $('#experiment-order').show();
+    $('#experiment-order').attr("disabled", false)
     
     if (!window.spectating) {
         enable_key_listener();
@@ -183,9 +215,22 @@ socket.on('end_game', function(data) {
     $('#game-title').hide();
     $('#game-over').show();
     $("#join").show();
-    $('#join').attr("disabled", false);
-    $("#create").show();
-    $('#create').attr("disabled", false)
+    $('#join').attr("disabled", true);
+    if (data.data && !data.data.game_flow_on) {
+        $("#create").show();
+        $('#create').attr("disabled", false)
+    } else {
+        $("#create-next").show();
+        $('#create-next').attr("disabled", false)
+    }
+    if (data.data && data.data.is_ending) {
+        $("#create").show();
+        $('#create').attr("disabled", true)
+
+        $("#create-next").hide();
+        $('#create-next').attr("disabled", true)
+        window.alert("Please enter UID for the next player!!")
+    }
     $("#instructions").show();
     $('#tutorial').show();
     $("#leave").hide();
@@ -196,24 +241,6 @@ socket.on('end_game', function(data) {
         $('#error-exit').show();
     }
 });
-
-socket.on('end_lobby', function() {
-    // Hide lobby
-    $('#lobby').hide();
-    $("#join").show();
-    $('#join').attr("disabled", false);
-    $("#create").show();
-    $('#create').attr("disabled", false)
-    $("#leave").hide();
-    $('#leave').attr("disabled", true)
-    $("#instructions").show();
-    $('#tutorial').show();
-
-    // Stop trying to join
-    clearInterval(window.intervalID);
-    window.intervalID = -1;
-})
-
 
 /* * * * * * * * * * * * * * 
  * Game Key Event Listener *
