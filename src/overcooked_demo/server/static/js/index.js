@@ -229,6 +229,7 @@ socket.on('end_game', function(data) {
 
         $("#create-next").hide();
         $('#create-next').attr("disabled", true)
+        // socket.emit('leave', {});
         window.alert("Please enter UID for the next player!!")
     }
     $("#instructions").show();
