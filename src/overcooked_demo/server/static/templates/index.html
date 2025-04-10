@@ -80,13 +80,13 @@
             <option
               value={{layout}}
               {% if layout == default_layout %} selected {% endif %}
-            >{{layout}}</option>
+            >{{layout.replace('_', ' ').title()}}</option>
         {% endfor %}
 	  </select>
 	</div>
   <div class="form-group col-lg-2">
     <label for="gameTime">Game Length (sec)</label>
-    <input type="number" id="gameTime" value="5" min="1" max="1800" name="gameTime">
+    <input type="number" id="gameTime" value="80" min="1" max="1800" name="gameTime">
   </div>
   <div class="form-group col-lg-2">
     <label for="showPotential">Show Potential?</label>
@@ -120,7 +120,7 @@
     {% if default_layout %}
     <div id="current-layout-container" class="text-center" style="display: flex; justify-content: center; align-items: center;" >
       <label for="current-layout">Current Layout: &nbsp;</label>
-      <p id="current-layout" style="margin: 0; position: relative; top: -2px;">{{default_layout}}</p>
+      <p id="current-layout" style="margin: 0; position: relative; top: -2px;">{{default_layout.replace('_', ' ').title()}}</p>
     </div>
     {% endif %}
     <div id="overcooked-container" class="text-center">

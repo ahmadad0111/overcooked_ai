@@ -97,5 +97,3 @@ def assignXAIAgents(user_id, seed=None):
     print("\nFinal Agent Counts:", current_counts)
     validate_agent_counts(current_counts)
     return sessions
-
-print(assignXAIAgents(user_id="P007", seed=42))

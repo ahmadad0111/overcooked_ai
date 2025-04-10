@@ -155,8 +155,11 @@ socket.on('start_game', function(data) {
     };
     window.spectating = data.spectating;
     document.getElementById("experiment-order").innerHTML = "<b>Layout Order:</b> " + data.start_info["experiment_order_disp"];
-    $('#current-layout').html(data.start_info["current_layout"])
-    $('#xaiAgentType').val(data.start_info["xaiAgentType"]);
+
+    let currentLayout = data.start_info.current_layout.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    console.log(currentLayout)
+    $('#current-layout').html(currentLayout);
+        $('#xaiAgentType').val(data.start_info["xaiAgentType"]);
     $('#error-exit').hide();
     $("#overcooked").empty();
     $('#game-over').hide();
