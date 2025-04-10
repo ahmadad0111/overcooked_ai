@@ -654,7 +654,7 @@ def on_create(data):
         # Retrieve randomized XAI agent order
         xai_agent_assignment = None
         if CONFIG["randomize_xai"]:
-            xai_agent_assignment = assignXAIAgents()
+            xai_agent_assignment = assignXAIAgents(user_id)
             print("XAI Agent order: ", xai_agent_assignment)
 
         params["layouts"] = layouts
