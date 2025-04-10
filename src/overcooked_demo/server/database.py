@@ -16,15 +16,15 @@ class Database:
         """Inserts new records and their transition data into the database."""
         try:
             transition_list = data["trajectory"]
-            commit_hash = data["round_id"]
+            commit_hash = data["round_hash"]
 
             # Prepare insert query for the trajectories table
             insert_trajectory_query = """
             INSERT INTO trajectories (
-                round_id, state, joint_action, reward, time_left, score, time_elapsed, 
+                uid, round_id, round_hash, state, joint_action, reward, time_left, score, time_elapsed, 
                 cur_gameloop, layout, layout_name, trial_id, player_0_id, 
                 player_1_id, player_0_is_human, player_1_is_human, collision, num_collisions,  unix_timestamp
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s, %s)
             RETURNING id;
             """
 
@@ -33,6 +33,8 @@ class Database:
                 self.cursor.execute(
                     insert_trajectory_query,
                     (
+                        data["uid"],
+                        data["round_id"],
                         commit_hash,  # Insert hash_key first
                         transition['state'],
                         transition["joint_action"],
