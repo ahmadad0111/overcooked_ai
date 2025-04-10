@@ -388,9 +388,9 @@ class OvercookedScene extends Phaser.Scene {
         if (typeof(hud_data.current_session) !== 'undefined') {
             this._drawCurrentSession(hud_data.current_session, sprites, board_height);
         }
-        if (typeof(hud_data.current_layout) !== 'undefined') {
-            this._drawCurrentLayout(hud_data.current_layout, sprites, board_height);
-        }
+        // if (typeof(hud_data.current_layout) !== 'undefined') {
+        //     this._drawCurrentLayout(hud_data.current_layout, sprites, board_height);
+        // }
     }
 
     _drawBonusOrders(orders, sprites, board_height) {

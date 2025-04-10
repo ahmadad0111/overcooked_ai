@@ -116,6 +116,13 @@
     </div>
     <div id="experiment-order", class="text-center" style="display:none">
     </div>
+    
+    {% if default_layout %}
+    <div id="current-layout-container" class="text-center" style="display: flex; justify-content: center; align-items: center;" >
+      <label for="current-layout">Current Layout: &nbsp;</label>
+      <p id="current-layout" style="margin: 0; position: relative; top: -2px;">{{default_layout}}</p>
+    </div>
+    {% endif %}
     <div id="overcooked-container" class="text-center">
         <h4 id="game-title" style="display:none">Game in Progress</h4>
         <h4 id="game-over" style="display:none">Game Over</h4>
