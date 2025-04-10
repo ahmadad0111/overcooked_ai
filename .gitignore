@@ -178,3 +178,5 @@ node_modules/
 
 # remove later DB configs
 src/overcooked_demo/server/db.json
+
+xai_logs

@@ -32,7 +32,7 @@ cp -r ./server/static ./static
 cp ./server/graphics/overcooked_graphics_v2.2.js ./static/js/graphics.js
 
 
-export FLASK_ENV=production 
+export FLASK_ENV=production # Or your desired environment
 export HOST=0.0.0.0
 export PORT=5000
 export CONF_PATH=config.json
