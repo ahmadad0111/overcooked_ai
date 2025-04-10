@@ -170,8 +170,13 @@ node_modules/
 **/old/
 **/master_agents/
 **/__pycache__/
+
+
 #manually correcting for demo 
 !**/static/**/*.png
 !src/overcooked_demo/server/static/lib
 
+# remove later DB configs
 src/overcooked_demo/server/db.json
+
+xai_logs

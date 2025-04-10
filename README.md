@@ -32,10 +32,17 @@ cp -r ./server/static ./static
 cp ./server/graphics/overcooked_graphics_v2.2.js ./static/js/graphics.js
 
 
-export FLASK_ENV=production  # Or your desired environment
+export FLASK_ENV=production # Or your desired environment
 export HOST=0.0.0.0
 export PORT=5000
 export CONF_PATH=config.json
+
+or 
+
+conda env config vars set export FLASK_ENV=production  # Or your desired environment
+conda env config vars set export HOST=0.0.0.0
+conda env config vars set export PORT=5000
+conda env config vars set export CONF_PATH=config.json
 
 If conda is installed in Windows, setting the environment variables with: conda env config vars set FLASK_ENV=production
 Listing all set env variables: conda env config vars list
