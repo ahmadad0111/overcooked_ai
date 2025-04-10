@@ -23,6 +23,7 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for, s
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from game import Game, OvercookedGame, OvercookedTutorial
 from utils import ThreadSafeDict, ThreadSafeSet
+from xai_agent import assignXAIAgents
 
 ### Thoughts -- where I'll log potential issues/ideas as they come up
 # Should make game driver code more error robust -- if overcooked randomlly errors we should catch it and report it to user
@@ -283,6 +284,7 @@ def _create_game(user_id,
     layouts_order=kwargs.get("layouts_order",[])
     game_flow_on = kwargs.get('game_flow_on', 0)
     is_ending = kwargs.get('is_ending', 0)
+    xai_agent_assignment = kwargs.get('xai_agent_assignment', [])
     params.update({
         "current_session": current_session,
         "current_round": current_round,
@@ -311,9 +313,18 @@ def _create_game(user_id,
             start_info["currentSession"] = current_session
             start_info["currentRound"] = current_round
             start_info["totalRounds"] = CONFIG["total_num_rounds"]
-            start_info["experiment_order_disp"] = " -> ".join(layouts_order)
-            start_info["xaiAgentType"] = params.get("xaiAgentType", xai_agent_type)
+            
+            # Transform each element: replace underscores with spaces, then title-case
+            display_order = [layout.replace("_", " ").title() for layout in layouts_order]
+
+            start_info["experiment_order_disp"] = " => ".join(display_order)
+            if xai_agent_assignment:
+                start_info["xaiAgentType"] = xai_agent_assignment[current_session-1][current_round-1]
+            else:
+                start_info["xaiAgentType"] = params.get("xaiAgentType", xai_agent_type)
             start_info["current_layout"] = game.curr_layout
+            print(f"Current session: {current_session} & Current round: {current_round}\n")
+            print("[XAI] Agent type: ", start_info["xaiAgentType"])
 
             emit(
                 "start_game",
@@ -596,7 +607,8 @@ def on_create_next(data):
                         layouts=[layouts[GAME_FLOW["current_session"]-1]],
                         layouts_order=GAME_FLOW['all_layouts'],
                         game_flow_on=1,
-                        is_ending=GAME_FLOW["is_ending"])
+                        is_ending=GAME_FLOW["is_ending"],
+                        xai_agent_assignment=GAME_FLOW['xai_agent_assignment'])
 
 
 def process_game_flow():
@@ -639,6 +651,12 @@ def on_create(data):
         random.shuffle(all_layouts)
         layouts = [params["layout"]] + all_layouts
 
+        # Retrieve randomized XAI agent order
+        xai_agent_assignment = None
+        if CONFIG["randomize_xai"]:
+            xai_agent_assignment = assignXAIAgents(user_id)
+            print("XAI Agent order: ", xai_agent_assignment)
+
         params["layouts"] = layouts
         print("Create game params: ",params)
         GAME_FLOW['current_session'] =  CONFIG["initial_session"]
@@ -647,6 +665,7 @@ def on_create(data):
         GAME_FLOW['all_layouts'] =  layouts
         GAME_FLOW['prev_params'] = layouts
         GAME_FLOW['is_ending'] = CONFIG["is_ending"]
+        GAME_FLOW['xai_agent_assignment'] = xai_agent_assignment
         _create_game(user_id=user_id,
                     game_name=game_name,
                     params=params,
@@ -654,7 +673,8 @@ def on_create(data):
                     current_round=CONFIG["initial_round"],
                     layouts=[layouts[CONFIG["initial_session"]-1]],
                     layouts_order=layouts, 
-                    game_flow_on=CONFIG['game_flow_on'])
+                    game_flow_on=CONFIG['game_flow_on'],
+                    xai_agent_assignment=xai_agent_assignment)
 
 
 @socketio.on("join")
@@ -697,7 +717,7 @@ def on_join(data):
                     game.activate()
                     game.update_explanation('')
                     start_info = game.to_json()
-                    start_info["xaiAgentType"] = params["xaiAgentType"]
+                    start_info["xaiAgentType"] = params["xaiAgentType"] #May be not need in tutorial
                     ACTIVE_GAMES.add(game.id)
                     emit(
                         "start_game",

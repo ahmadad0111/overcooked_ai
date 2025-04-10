@@ -80,7 +80,7 @@
             <option
               value={{layout}}
               {% if layout == default_layout %} selected {% endif %}
-            >{{layout}}</option>
+            >{{layout.replace('_', ' ').title()}}</option>
         {% endfor %}
 	  </select>
 	</div>
@@ -96,7 +96,7 @@
     <label for="dataCollection" data-toggle="tooltip" data-placement="top" title="Whether to store the trajectories of both agents that will participate in this game">Collect Data?</label>
     <input type="checkbox" id="dataCollection" name="dataCollection" checked>
     <label for="xaiAgentType" data-toggle="tooltip" data-placement="top" title="Which XAI agent to use for explanations">XAI Agent type</label>
-    <select name="xaiAgentType" id=""xaiAgentType> 
+    <select name="xaiAgentType" id="xaiAgentType"> 
       <option value="NoX">NoX</option>
       <option value="StaticX">StaticX</option>
       <option value="AdaX">AdaX</option>
@@ -120,7 +120,7 @@
     {% if default_layout %}
     <div id="current-layout-container" class="text-center" style="display: flex; justify-content: center; align-items: center;" >
       <label for="current-layout">Current Layout: &nbsp;</label>
-      <p id="current-layout" style="margin: 0; position: relative; top: -2px;">{{default_layout}}</p>
+      <p id="current-layout" style="margin: 0; position: relative; top: -2px;">{{default_layout.replace('_', ' ').title()}}</p>
     </div>
     {% endif %}
     <div id="overcooked-container" class="text-center">

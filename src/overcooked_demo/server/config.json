@@ -47,5 +47,6 @@
     "initial_session": 1,
     "game_flow_on": 1,
     "is_ending": 0,
-    "randomize_layout": true
+    "randomize_layout": true,
+    "randomize_xai": 1
 }

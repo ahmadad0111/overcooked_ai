@@ -155,7 +155,10 @@ socket.on('start_game', function(data) {
     };
     window.spectating = data.spectating;
     document.getElementById("experiment-order").innerHTML = "<b>Layout Order:</b> " + data.start_info["experiment_order_disp"];
-    $('#current-layout').html(data.start_info["current_layout"])
+
+    let currentLayout = data.start_info.current_layout.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    $('#current-layout').html(currentLayout);
+        $('#xaiAgentType').val(data.start_info["xaiAgentType"]);
     $('#error-exit').hide();
     $("#overcooked").empty();
     $('#game-over').hide();
@@ -229,6 +232,7 @@ socket.on('end_game', function(data) {
 
         $("#create-next").hide();
         $('#create-next').attr("disabled", true)
+        // socket.emit('leave', {});
         window.alert("Please enter UID for the next player!!")
     }
     $("#instructions").show();
