@@ -830,11 +830,12 @@ class OvercookedGame(Game):
         """
         #datetime.now(timezone.utc).isoformat(timespec='microseconds'),
         print("UID is:", self.get_uid())
+        print("Current round Id: ", self.current_round)
         data = {
             "uid": self.get_uid(),#str(time()),
             "trajectory": self.trajectory,
             "unix_timestamp":  time(), #datetime.now(timezone.utc).isoformat(timespec='microseconds'),# str(time.time()),
-            "round_id": str(generate_unique_hash()),
+            "round_id": self.current_round,
             "round_hash": str(generate_unique_hash())
         }
         self.trajectory = []
