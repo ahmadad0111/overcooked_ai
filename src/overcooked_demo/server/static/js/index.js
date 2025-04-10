@@ -133,7 +133,7 @@ socket.on('creation_failed', function(data) {
     $('#tutorial').show();
     $('#waiting').hide();
     $('#join').show();
-    $('#join').attr("disabled", false);
+    $('#join').attr("disabled", true);
     $('#create').show();
     $('#create').attr("disabled", false);
     $('#create-next').show();
@@ -212,7 +212,7 @@ socket.on('end_game', function(data) {
     $('#game-title').hide();
     $('#game-over').show();
     $("#join").show();
-    $('#join').attr("disabled", false);
+    $('#join').attr("disabled", true);
     if (data.data && !data.data.game_flow_on) {
         $("#create").show();
         $('#create').attr("disabled", false)

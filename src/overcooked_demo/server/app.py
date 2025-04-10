@@ -279,6 +279,7 @@ def _create_game(user_id,
                  **kwargs):
     current_session=kwargs.get("current_session",1)
     current_round=kwargs.get("current_round",1)
+    layouts=kwargs.get("layouts",[]) or params.get("layouts", [])
     layouts_order=kwargs.get("layouts_order",[])
     game_flow_on = kwargs.get('game_flow_on', 0)
     is_ending = kwargs.get('is_ending', 0)
@@ -286,7 +287,7 @@ def _create_game(user_id,
         "current_session": current_session,
         "current_round": current_round,
         "total_rounds": CONFIG["total_num_rounds"],
-        "layouts": [layouts_order[current_session-1]]
+        "layouts": layouts
     })
     game, err = try_create_game(game_name, **params)
     if not game:
@@ -591,6 +592,7 @@ def on_create_next(data):
                         params=params,
                         current_round=GAME_FLOW["current_round"],
                         current_session=GAME_FLOW["current_session"],
+                        layouts=[layouts[GAME_FLOW["current_session"]-1]],
                         layouts_order=GAME_FLOW['all_layouts'],
                         game_flow_on=1,
                         is_ending=GAME_FLOW["is_ending"])
@@ -649,6 +651,7 @@ def on_create(data):
                     params=params,
                     current_session=CONFIG["initial_session"],
                     current_round=CONFIG["initial_round"],
+                    layouts=[layouts[CONFIG["initial_session"]-1]],
                     layouts_order=layouts, 
                     game_flow_on=CONFIG['game_flow_on'])
 
