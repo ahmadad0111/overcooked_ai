@@ -30,6 +30,10 @@ from database import Database
 import uuid
 import hashlib
 
+# Read in global config
+CONF_PATH = os.getenv("CONF_PATH", "config.json")
+with open(CONF_PATH, "r") as f:
+    CONFIG = json.load(f)
 
 def generate_unique_hash():
     user_id = "user123"
@@ -446,6 +450,9 @@ class OvercookedGame(Game):
         showPotential=False,
         randomized=False,
         ticks_per_ai_action=1,
+        current_round=1,
+        current_session=1,
+        total_rounds=1,
         **kwargs
     ):
         super(OvercookedGame, self).__init__(**kwargs)
@@ -480,6 +487,9 @@ class OvercookedGame(Game):
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
         #self.uid = None
+        self.current_round = current_round
+        self.current_session = current_session
+        self.total_rounds = total_rounds
         self.xai_explanation = 'test'
         
         
@@ -530,6 +540,7 @@ class OvercookedGame(Game):
         return cls.uid_value
         
     def _curr_game_over(self):
+
         return time() - self.start_time >= self.max_time
     
     def needs_reset(self):
@@ -566,7 +577,8 @@ class OvercookedGame(Game):
         return self.num_players >= self.max_players
 
     def is_finished(self):
-        val = not self.layouts and self._curr_game_over()
+        # val = not self.layouts and self._curr_game_over()
+        val = self._curr_game_over()
         return val
 
     def is_empty(self):
@@ -681,9 +693,9 @@ class OvercookedGame(Game):
 
 
         #message = json.dumps(dummy_data)
-        print("Pushing sample:", message)  # Debugging message content
+        # print("Pushing sample:", message)  # Debugging message content
         self.outlet.push_sample([message])
-        print("Sample pushed.")
+        # print("Sample pushed.")
         # database1.update_transition(transition, self.commit_hash)
         self.trajectory.append(transition)
         
@@ -697,15 +709,11 @@ class OvercookedGame(Game):
             player_id, overcooked_action
         )
 
-    # def update_explanation(self, explanation):
-    #     super(OvercookedGame, self).update_explanation(explanation)
-
     def reset(self):
         status = super(OvercookedGame, self).reset()
         if status == self.Status.RESET:
             # Hacky way of making sure game timer doesn't "start" until after reset timeout has passed
             self.start_time += self.reset_timeout / 1000
-
     def tick(self):
         self.curr_tick += 1
         return super(OvercookedGame, self).tick()
@@ -716,13 +724,13 @@ class OvercookedGame(Game):
     
     def activate(self):
         super(OvercookedGame, self).activate()
+        print("=== activating game ===")
 
         # Sanity check at start of each game
         if not self.npc_players.union(self.human_players) == set(self.players):
             raise ValueError("Inconsistent State")
 
-
-        self.curr_layout = self.layouts.pop()
+        self.curr_layout = self.layouts[0]
         self.mdp = OvercookedGridworld.from_layout_name(
             self.curr_layout, **self.mdp_params
         )
@@ -745,19 +753,24 @@ class OvercookedGame(Game):
             t = Thread(target=self.npc_policy_consumer, args=(npc_policy,))
             self.threads.append(t)
             t.start()
+        print("=== Game activated ===")
 
     def deactivate(self):
         super(OvercookedGame, self).deactivate()
+        print("=== Deactivating game ===")
         # Ensure the background consumers do not hang
         for npc_policy in self.npc_policies:
             self.npc_state_queues[npc_policy].put(self.state)
 
+        print("=== Waiting for all threads to exit ===")
         # Wait for all background threads to exit
         for t in self.threads:
             t.join()
 
+        print("=== All threads exitted. Clearing all action queues ===")
         # Clear all action queues
         self.clear_pending_actions()
+        print("=== Deactivated ===")
 
     def get_state(self):
         state_dict = {}
@@ -767,8 +780,22 @@ class OvercookedGame(Game):
         state_dict["time_left"] = max(
             self.max_time - (time() - self.start_time), 0
         )
+        state_dict["current_round"] = self.current_round
+        state_dict["current_session"] = self.current_session
+        state_dict["current_layout"] = self.curr_layout
+        state_dict["total_rounds"] = self.total_rounds
+        state_dict["layouts"] = self.layouts
         state_dict["xai_explanation"] = self.xai_explanation
         return state_dict
+    
+    def set_round(self, new_round):
+        self.current_round = new_round
+    
+    def set_session(self, new_session):
+        self.current_session = new_session
+
+    def set_layout(self, new_layout):
+        self.curr_layout = new_layout
 
     def to_json(self):
         obj_dict = {}
@@ -871,16 +898,12 @@ class OvercookedTutorial(OvercookedGame):
         return 1
 
     def needs_reset(self):
-        if self.curr_phase == 0:
+        if self.curr_phase <= len(self.layouts):
             return self.score > 0
-        elif self.curr_phase == 1:
-            return self.score > 0
-        elif self.curr_phase == 2:
-            return self.phase_two_finished
         return False
     
     def is_finished(self):
-        return not self.layouts and self.score >= 0 # changed to 0 from  float("inf") TODO: game ends early fix
+        return self.curr_phase > 3 and self.score >= 0 # changed to 0 from  float("inf") TODO: game ends early fix
 
     def reset(self):
         super(OvercookedTutorial, self).reset()
@@ -899,10 +922,10 @@ class OvercookedTutorial(OvercookedGame):
         # We only want to keep track of the human's score in the tutorial
         self.score -= ai_reward
         # Phase two requires a specific reward to complete
-        if self.curr_phase == 2:
-            self.score = 0
-            if human_reward == self.phase_two_score:
-                self.phase_two_finished = True
+        # if self.curr_phase == 2:
+        #     self.score = 0
+            # if human_reward == self.phase_two_score:
+            #     self.phase_two_finished = True
 
 
 class DummyOvercookedGame(OvercookedGame):

@@ -29,13 +29,19 @@
       <div class="container">
 <!--       <h2 class="text-center">UID</h2> -->
       <!-- Form to Enter UID -->
-      <form action="/" method="POST">
+      <form action="/" method="POST" id="uid-form">
         <div class="form-group">
           <label for="uid">Enter UID:</label>
           <input type="text" id="uid" name="uid" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>	
+      {% if uid %}
+      <div>
+        <br>
+        <label for="uid">UID :{{uid}}</label>
+      </div>
+      {% endif %}
 	<form>
       <div class="row text-center">     
 	      
@@ -43,12 +49,12 @@
 	  <label for="playerZero" style="color:#1E6A9E">Player 1</label>
 	  <select class="form-control" id="playerZero" name="playerZero">
         <option value="human">Human Keyboard Input</option>
-        {% for agent_name in agent_names %}
+        <!-- {% for agent_name in agent_names %}
           <option
             value={{agent_name}}
             {% if agent_name == default_agent %} selected {% endif %}
           >{{agent_name}}</option>
-        {% endfor %}
+        {% endfor %} -->
 	  </select>
 
   </div>
@@ -59,6 +65,12 @@
         <!-- {% for agent_name in agent_names %}
             <option value={{agent_name}}>{{agent_name}}</option>
         {% endfor %} -->
+        {% for agent_name in agent_names %}
+          <option
+            value={{agent_name}}
+            {% if agent_name == default_agent %} selected {% endif %}
+          >{{agent_name}}</option>
+        {% endfor %}
     </select>
   </div>
 	<div class="form-group col-lg-2">
@@ -102,6 +114,15 @@
     <div id="waiting", class="text-center" style="display:none">
       Waiting for game to be created. Please be patient...
     </div>
+    <div id="experiment-order", class="text-center" style="display:none">
+    </div>
+    
+    {% if default_layout %}
+    <div id="current-layout-container" class="text-center" style="display: flex; justify-content: center; align-items: center;" >
+      <label for="current-layout">Current Layout: &nbsp;</label>
+      <p id="current-layout" style="margin: 0; position: relative; top: -2px;">{{default_layout}}</p>
+    </div>
+    {% endif %}
     <div id="overcooked-container" class="text-center">
         <h4 id="game-title" style="display:none">Game in Progress</h4>
         <h4 id="game-over" style="display:none">Game Over</h4>
@@ -110,7 +131,8 @@
     </div>
     <div id="control" class="text-center">
         <button id="create">Create Game</button>
-        <button id="join">Join Existing Game</button>
+        <button id="create-next" style="display:none">Next Game</button>
+        <button id="join" disabled>Join Existing Game</button>
         <button id="leave" style="display:none;">Leave</button>
     </div>
     
