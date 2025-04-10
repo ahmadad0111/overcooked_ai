@@ -18,19 +18,23 @@ def select_double_agent():
 def assignXAIAgents():
     print("Creating XAI agent assignment...")
     sessions = []
+    double_agent = None
     for _ in range(5):
         trial = 0
-        while trial < 2: 
+        while trial < 3: 
+            print(trial)
             double_agent = select_double_agent()
+            trial+=1
             if not double_agent:
                 # try again
                 print("[XAI] Retrying. No agent can be doubled without violating target counts.")
                 continue
-            trial=+1
+            else:
+                break
+            
         
         if not double_agent:
             print("[XAI] Trials failed. No agent can be doubled without violating target counts.")
-            double_agent = fallback_order
 
         session = [double_agent, double_agent]
         others = [a for a in agent_types if a != double_agent]

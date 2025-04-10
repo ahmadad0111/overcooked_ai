@@ -313,13 +313,18 @@ def _create_game(user_id,
             start_info["currentSession"] = current_session
             start_info["currentRound"] = current_round
             start_info["totalRounds"] = CONFIG["total_num_rounds"]
-            start_info["experiment_order_disp"] = " -> ".join(layouts_order)
-            print(current_session, current_round)
+            
+            # Transform each element: replace underscores with spaces, then title-case
+            display_order = [layout.replace("_", " ").title() for layout in layouts_order]
+
+            start_info["experiment_order_disp"] = " => ".join(display_order)
             if xai_agent_assignment:
                 start_info["xaiAgentType"] = xai_agent_assignment[current_session-1][current_round-1]
             else:
                 start_info["xaiAgentType"] = params.get("xaiAgentType", xai_agent_type)
             start_info["current_layout"] = game.curr_layout
+            print(f"Current session: {current_session} & Current round: {current_round}\n")
+            print("[XAI] Agent type: ", start_info["xaiAgentType"])
 
             emit(
                 "start_game",
@@ -602,7 +607,8 @@ def on_create_next(data):
                         layouts=[layouts[GAME_FLOW["current_session"]-1]],
                         layouts_order=GAME_FLOW['all_layouts'],
                         game_flow_on=1,
-                        is_ending=GAME_FLOW["is_ending"])
+                        is_ending=GAME_FLOW["is_ending"],
+                        xai_agent_assignment=GAME_FLOW['xai_agent_assignment'])
 
 
 def process_game_flow():
