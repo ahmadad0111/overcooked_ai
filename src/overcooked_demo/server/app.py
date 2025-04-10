@@ -753,7 +753,7 @@ def on_connect():
 
 # TODO: remove adax UI element if adax is unchecked
 @socketio.on("xai_message")
-def on_adax(data):
+def on_xai_message(data):
     user_id = request.sid
     adaxplanation = data["explanation"]
     game = next(iter(GAMES.values()))
