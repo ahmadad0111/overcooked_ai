@@ -867,24 +867,23 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
         data['game_flow_on'] = 0 if is_ending  else game_flow_on 
         data['is_ending'] = is_ending
 
-        print("game data ", data)
-        data['session_id'] = GAME_FLOW['current_session']
-        data['layout'] = GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1]
-        data['xai_agent'] = GAME_FLOW['xai_agent_assignment'][GAME_FLOW['current_session']-1][GAME_FLOW['current_round']-1]
+        data['session_id'] = GAME_FLOW['current_session'] if GAME_FLOW else ''
+        tut_config = json.loads(TUTORIAL_CONFIG)
+        data['layout'] = GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1] if GAME_FLOW else tut_config['tutorialParams']['layouts'][0]
+        data['xai_agent'] = GAME_FLOW['xai_agent_assignment'][GAME_FLOW['current_session']-1][GAME_FLOW['current_round']-1] if GAME_FLOW else ''
         data['session_ended'] = False
         data['game_ended'] = False
         data['survey_baseurl'] = None
         # check session end status
-        if(GAME_FLOW['current_round'] == GAME_FLOW['total_num_rounds']):
+        if(GAME_FLOW and GAME_FLOW['current_round'] == GAME_FLOW['total_num_rounds']):
             data['session_ended'] = True
             data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session']
 
         # check game end status
-        if(GAME_FLOW['current_session'] == len(GAME_FLOW['all_layouts']) and data['session_ended']):
+        if(GAME_FLOW and GAME_FLOW['current_session'] == len(GAME_FLOW['all_layouts']) and data['session_ended']):
             data['game_ended'] = True  
             data['survey_baseurl'] = CONFIG['questionnaire_links']['post_game']
 
-        print("end data ", data)
         socketio.emit(
             "end_game", {"status": status, "data": data}, room=game.id
         )

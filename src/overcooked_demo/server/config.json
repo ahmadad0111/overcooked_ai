@@ -24,7 +24,11 @@
             "oldDynamics": "on"
         },
         "tomato_value" : 13,
-        "onion_value" : 21
+        "onion_value" : 21,
+        "questionnaire_links": {
+            "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_6fEEYHO7vmkBu9U",
+            "pre_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eXM1EEX2EeSLIaO"
+            }
     },
     "layout_globals" : {
         "onion_value" : 21,
