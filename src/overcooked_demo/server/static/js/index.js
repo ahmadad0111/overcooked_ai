@@ -95,6 +95,35 @@ window.onload = function() {
 
 
 /* * * * * * * * * * * * * 
+ * Qualtrics handlers    *
+ * * * * * * * * * * * * */
+// JavaScript logic to control Qualtrics iframe modal
+function showQualtricsSurvey(url, next=null) {
+    const modal = document.getElementById('qualtrics-modal');
+    const iframe = document.getElementById('qualtrics-frame');
+    iframe.src = url;  // dynamically set URL based on participant/layout
+    modal.style.display = 'block';
+    if(next){
+        socket.emit('show_pregame_survey', {})
+    }
+}
+
+function closeQualtricsSurvey() {
+    const modal = document.getElementById('qualtrics-modal');
+    const iframe = document.getElementById('qualtrics-frame');
+    iframe.src = "";  // clear iframe to reset survey
+    modal.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const closeBtn = document.getElementById('close-qualtrics');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeQualtricsSurvey);
+    }
+  });
+  
+
+/* * * * * * * * * * * * * 
  * Socket event handlers *
  * * * * * * * * * * * * */
 
@@ -244,8 +273,41 @@ socket.on('end_game', function(data) {
     if (data.status === 'inactive') {
         $('#error-exit').show();
     }
+    console.log(data)
+    if(data.data && data.data.session_ended){
+        let surveyURL = `${data.data.survey_baseurl}?round_d=${data.data.round_id}&player_Id=${data.data.player_id}&uid=${data.data.uid}&session_Id=${data.data.session_id}&xai_agent=${data.data.xaiAgentType}&layout=${data.data.layout}`;
+        showQualtricsSurvey(surveyURL)
+    }
+    if(data.data && data.data.game_ended){
+        let surveyURL = `${data.data.survey_baseurl}?round_d=${data.data.round_id}&player_Id=${data.data.player_id}&uid=${data.data.uid}&session_Id=${data.data.session_id}&xai_agent=${data.data.xaiAgentType}&layout=${data.data.layout}`;
+        showQualtricsSurvey(surveyURL)
+    }
 });
+    //    print( {"round_Id": current_round, "player_Id": user_id, "uid": session["user_id"], "session_Id": current_session, "xai_agent": params["xaiAgentType"], "layout": GAME_FLOW['all_layouts'][current_session-1]})
+    //     #TODO: add post-session questionnaire popup
+    //     emit(
+    //         "show_survey",
+    //         {"round_id": current_round, "player_id": user_id, "uid": session["user_id"], "session_id": current_session, "xai_agent": params["xaiAgentType"], "layout": GAME_FLOW['all_layouts'][current_session-1]},
+    //         broadcast=True
+    //         )
 
+  
+$(document).ready(function () {
+  const showModal = $('#instruction-modal').data('show-modal');
+  console.log(showModal)
+  if (showModal === true || showModal === 'true') {
+    $('#instruction-modal').fadeIn();  // Show modal
+  }
+
+  $('#close-instructions').on('click', function () {
+    $('#instruction-modal').fadeOut();
+  });
+  // Optional: if you use a button to trigger the instructions later
+  $('#show-instructions').on('click', function () {
+    $('#instruction-modal').fadeIn();
+  });
+});
+  
 /* * * * * * * * * * * * * * 
  * Game Key Event Listener *
  * * * * * * * * * * * * * */

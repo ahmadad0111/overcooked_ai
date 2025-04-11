@@ -48,5 +48,12 @@
     "game_flow_on": 1,
     "is_ending": 0,
     "randomize_layout": true,
-    "randomize_xai": 1
+    "randomize_xai": 1,
+    "questionnaire_links": {
+        "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_6fEEYHO7vmkBu9U",
+        "pre_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eXM1EEX2EeSLIaO",
+        "post_session": "https://researchsurveys.deakin.edu.au/jfe/form/SV_72RCeM76OoZH4Lc",
+        "post_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eyaYl7WnQ2YsCUK"
+    },
+    "disable_close": true
 }

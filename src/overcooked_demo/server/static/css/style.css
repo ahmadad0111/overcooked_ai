@@ -251,3 +251,144 @@ h1 {
 .tooltip.top .tooltip-inner {
   font-size: 30px; /* Adjust font size here */
 }
+
+/* Button styles */
+
+button {
+  background-color: #4a90e2;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Segoe UI', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:hover:not(:disabled) {
+  background-color: #357ABD;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+button:disabled {
+  background-color: #aaa;
+  color: #eee;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+
+
+/* Instructional modal */
+/* Modal styling */
+#instruction-modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 12px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.modal-content ol {
+  padding-left: 20px;
+}
+
+.close-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  float: right;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background-color: #0056b3;
+}
+
+#leave {
+  background-color: #e74c3c; /* Soft danger red */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Segoe UI', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+#leave:hover {
+  background-color: #c0392b; /* Darker red on hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#leave:disabled {
+  background-color: #f5b7b1;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#game-over {
+  color: rgb(188, 34, 34);
+}
+
+#game-title {
+  color: rgb(24, 159, 58);
+}
+
+/* Tutorial */
+.start-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: none; /* Hidden by default */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.start-modal-content {
+  background-color: #4a90e2;
+  color: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
