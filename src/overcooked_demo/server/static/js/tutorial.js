@@ -133,6 +133,7 @@ var curr_tutorial_phase;
 // Read in game config provided by server
 $(function() {
     config = JSON.parse($('#config').text());
+    window.config_tut = config
     tutorial_instructions = tutorial_instructions();
     tutorial_hints = tutorial_hints();
     $('#quit').show();
@@ -217,7 +218,7 @@ socket.on('start_game', function(data) {
     $('#show-hint').text('Show Hint');
     $('#game-title').text(`Tutorial in Progress, Phase ${curr_tutorial_phase}/${tutorial_instructions.length}`);
     $('#game-title').show();
-    $('#tutorial-instructions').append(tutorial_instructions[curr_tutorial_phase-1]);
+    $('#tutorial-instructions').html(tutorial_instructions[curr_tutorial_phase-1]);
     $('#instructions-wrapper').show();
     $('#hint').append(tutorial_hints[curr_tutorial_phase]);
     showStartModal(message=`Game Started! Phase ${curr_tutorial_phase}`);
@@ -232,13 +233,14 @@ socket.on('reset_game', function(data) {
     $("#overcooked").empty();
     $('#tutorial-instructions').empty();
     $('#hint').empty();
-    $("#tutorial-instructions").append(tutorial_instructions[curr_tutorial_phase-1]);
+    $("#tutorial-instructions").html(tutorial_instructions[curr_tutorial_phase-1]);
     $("#hint").append(tutorial_hints[curr_tutorial_phase]);
     if (curr_tutorial_phase <= data.state.state.total_rounds) {
       $('#game-title').text(`Tutorial in Progress, Phase ${curr_tutorial_phase}/${tutorial_instructions.length}`);
       showStartModal(message=`Game Started! Phase ${curr_tutorial_phase}`);
     } else {
       $('#game-title').hide();
+      showStartModal(message=`Tutorial Ended!`);
     }
     console.log(data)
     let button_pressed = $('#show-hint').text() === 'Hide Hint';
@@ -280,34 +282,92 @@ socket.on('end_game', function(data) {
     }
 
     $('#finish').show();
-    socket.emit("show_demographic", {});
+    console.log(data)
+    // Extract layout
+    const layoutName = data.data.trajectory[0].layout_name;
+
+    // Determine human player ID
+    let humanPlayerId = '';
+    const t = data.data.trajectory[0];
+
+    if (t.player_0_is_human) {
+      humanPlayerId = t.player_0_id;
+    } else if (t.player_1_is_human) {
+      humanPlayerId = t.player_1_id;
+    }
+    window.surveyParams = {
+      player_id: humanPlayerId,
+      uid: data.data.uid,
+      pre_game: true,
+      pre_game_link: config.questionnaire_links.pre_game
+    }
+    let surveyURL = `${config.questionnaire_links.demographic}?player_Id=${humanPlayerId}&uid=${data.data.uid}&layout=${layoutName}`;
+    showQualtricsSurvey(surveyURL)
 });
 
 /* * * * * * * * * * * * * 
  * Qualtrics handlers    *
  * * * * * * * * * * * * */
 // JavaScript logic to control Qualtrics iframe modal
-function showQualtricsSurvey(url, next=null) {
+window.addEventListener('message', function (event) {
+  console.log(event.data)
+  if (event.data === 'qualtricsSubmitted') {
+    console.log("Survey completed. Showing Close button.");
+    // $('#close-qualtrics').removeAttr('hidden');
+     // 1. Close the modal and clear the iframe
+    const modal = document.getElementById('qualtrics-modal');
+    const iframe = document.getElementById('qualtrics-frame');
+    modal.style.display = 'none';
+    iframe.src = '';  // Optional: clear iframe
+    setTimeout(() => {
+      if (window.surveyParams["pre_game"]) {
+        // open next suevry
+        console.log(" show pre-game")
+        let surveyURL = `${window.surveyParams.pre_game_link}?player_Id=${window.surveyParams.player_id}&uid=${window.surveyParams.uid}`;
+        showQualtricsSurvey(surveyURL)
+      }
+      delete window.surveyParams.player_id
+      delete window.surveyParams.uid
+      delete window.surveyParams['pre_game']
+      delete window.surveyParams['pre_game_link']
+    }, 500); // Delay to make the transition smooth
+ 
+  }
+});
+
+function showQualtricsSurvey(url) {
+  $('#close-qualtrics').attr('hidden');
   const modal = document.getElementById('qualtrics-modal');
   const iframe = document.getElementById('qualtrics-frame');
   iframe.src = url;  // dynamically set URL based on participant/layout
   modal.style.display = 'block';
-  if(next){
-      socket.emit('show_pregame_survey', {})
-  }
 }
 
-socket.on('show_demographic', function(data){
-  console.log("emitted show demographic")
-  let surveyURL = `${window.config_data.questionnaire_links.demographic}?player_Id=${data.player_id}&uid=${data.uid}`;
-  showQualtricsSurvey(surveyURL, next='show_pregame_survey')
-})
+function closeQualtricsSurvey() {
+  const modal = document.getElementById('qualtrics-modal');
+  const iframe = document.getElementById('qualtrics-frame');
+  iframe.src = "";  // clear iframe to reset survey
+  modal.style.display = 'none';
+  if (window.surveyParams["pre_game"]) {
+    // open next suevry
+    let surveyURL = `${window.surveyParams.pre_game_link}?player_Id=${window.surveyParams.player_id}&uid=${window.surveyParams.uid}`;
+    showQualtricsSurvey(surveyURL)
+  }
 
-socket.on('show_pregame_survey', function(data){
-  console.log("emitted show demographic")
-  let surveyURL = `${window.config_data.questionnaire_links.pre_game}?player_Id=${data.player_id}&uid=${data.uid}`;
-  showQualtricsSurvey(surveyURL)
-})
+  delete window.surveyParams.player_id
+  delete window.surveyParams.uid
+  delete window.surveyParams['pre_game']
+  delete window.surveyParams['pre_game_link']
+  
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const closeBtn = document.getElementById('close-qualtrics');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeQualtricsSurvey);
+  }
+});
+
 
 
 /* * * * * * * * * * * * * * 
@@ -356,6 +416,7 @@ function disable_key_listener() {
 
 socket.on("connect", function() {
     // Config for this specific game
+    config = JSON.parse($('#config').text());
     let data = {
         "params" : config['tutorialParams'],
         "game_name" : "tutorial"
