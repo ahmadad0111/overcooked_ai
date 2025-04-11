@@ -172,12 +172,23 @@ $(function() {
 
 $(function() {
     $('#finish').click(function() {
-        $('finish').attr("disable", true);
-        window.location.href = "./";
+        $('#finish').attr("disable", true);
+         window.location.href = "./";
     });
 });
 
+function showStartModal(message = null) {
+  const modal = $('#start-modal');
+  if (message) {
+    modal.find('.start-modal-content').text(message);
 
+  }
+  modal.fadeIn(300);
+
+  setTimeout(() => {
+    modal.fadeOut(300);
+  }, 1000);
+}
 
 /* * * * * * * * * * * * * 
  * Socket event handlers *
@@ -209,6 +220,7 @@ socket.on('start_game', function(data) {
     $('#tutorial-instructions').append(tutorial_instructions[curr_tutorial_phase-1]);
     $('#instructions-wrapper').show();
     $('#hint').append(tutorial_hints[curr_tutorial_phase]);
+    showStartModal(message=`Game Started! Phase ${curr_tutorial_phase}`);
     enable_key_listener();
     graphics_start(graphics_config);
 });
@@ -222,8 +234,13 @@ socket.on('reset_game', function(data) {
     $('#hint').empty();
     $("#tutorial-instructions").append(tutorial_instructions[curr_tutorial_phase-1]);
     $("#hint").append(tutorial_hints[curr_tutorial_phase]);
-    $('#game-title').text(`Tutorial in Progress, Phase ${curr_tutorial_phase}/${tutorial_instructions.length}`);
-    
+    if (curr_tutorial_phase <= data.state.state.total_rounds) {
+      $('#game-title').text(`Tutorial in Progress, Phase ${curr_tutorial_phase}/${tutorial_instructions.length}`);
+      showStartModal(message=`Game Started! Phase ${curr_tutorial_phase}`);
+    } else {
+      $('#game-title').hide();
+    }
+    console.log(data)
     let button_pressed = $('#show-hint').text() === 'Hide Hint';
     if (button_pressed) {
         $('#show-hint').click();
@@ -263,7 +280,34 @@ socket.on('end_game', function(data) {
     }
 
     $('#finish').show();
+    socket.emit("show_demographic", {});
 });
+
+/* * * * * * * * * * * * * 
+ * Qualtrics handlers    *
+ * * * * * * * * * * * * */
+// JavaScript logic to control Qualtrics iframe modal
+function showQualtricsSurvey(url, next=null) {
+  const modal = document.getElementById('qualtrics-modal');
+  const iframe = document.getElementById('qualtrics-frame');
+  iframe.src = url;  // dynamically set URL based on participant/layout
+  modal.style.display = 'block';
+  if(next){
+      socket.emit('show_pregame_survey', {})
+  }
+}
+
+socket.on('show_demographic', function(data){
+  console.log("emitted show demographic")
+  let surveyURL = `${window.config_data.questionnaire_links.demographic}?player_Id=${data.player_id}&uid=${data.uid}`;
+  showQualtricsSurvey(surveyURL, next='show_pregame_survey')
+})
+
+socket.on('show_pregame_survey', function(data){
+  console.log("emitted show demographic")
+  let surveyURL = `${window.config_data.questionnaire_links.pre_game}?player_Id=${data.player_id}&uid=${data.uid}`;
+  showQualtricsSurvey(surveyURL)
+})
 
 
 /* * * * * * * * * * * * * * 

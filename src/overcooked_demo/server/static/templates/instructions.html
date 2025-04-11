@@ -38,7 +38,7 @@
   </head>
   <body>
     <div class="container" style="padding-top: 30px; max-width: 600px;">
-      <h4 class="text-center"><a href="./">Back to game</a></h4>
+      <h4 class="text-center"><button id="back">Back to game</button></h4>
       <h2 class="text-center">Instructions</h2>
       <p class="inst_left_text">
         Hello! <br>
@@ -118,7 +118,7 @@
         within the provided time. Each round will last 80 seconds.
       </p>
       <div id="control" class="text-center" style="margin-top: 60px;">
-        <a class="btn-cta sd-btn sd-btn--action sd-navigation__complete-btn" href="./tutorial">Go to Tutorial</a>
+        <button id="tutorial"href="./tutorial">Go to Tutorial</a>
       </div>
       <br>
       <br>
@@ -129,6 +129,12 @@
         $this.attr({
             href: $this.attr("href") + window.location.search
         });
+    });
+    $('#tutorial').click(function(i, el){
+      window.location.href = "./tutorial";
+    });
+    $('#back').click(function(i, el){
+      window.location.href = "./";
     });
   </script>
   </body>
