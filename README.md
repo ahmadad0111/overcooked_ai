@@ -49,6 +49,8 @@ Listing all set env variables: conda env config vars list
 
 cd src/overcooked_demo/server
 
+In Debug mode, set ``` "enable_survey": false``` to avoid survey questions.
+
 python -u app.py
 ```
 

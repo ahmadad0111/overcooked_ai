@@ -412,7 +412,7 @@ def get_agent_names():
 def index():
     agent_names = get_agent_names()
     # Check if the form was submitted (POST request)
-
+    show_modal = False
     if request.method == "POST":
         # Get the UID from the form
         uid = request.form.get('uid')
@@ -422,6 +422,7 @@ def index():
         session['user_id'] = uid
         # Optionally, store the UID in the GameSession class
         OvercookedGame.set_uid(uid)
+        show_modal = True  # signal to show modal after post
     else:
         # Handle the case when GET request is received (initial page load)
         uid = session.get('user_id')  # If the UID is already stored in the session
@@ -430,19 +431,30 @@ def index():
     default_layouts = CONFIG["layouts"].copy()
     random.shuffle(default_layouts)
     default_layout = default_layouts[0] if CONFIG["randomize_layout"] else CONFIG["default_layout"]
+
     return render_template(
         "index.html",
         agent_names=agent_names, 
         layouts=LAYOUTS,
         uid = uid,
+        show_modal=show_modal,  # <== pass to frontend
         default_agent=CONFIG["layout_agent_mapping"][default_layout],
-        default_layout=default_layout
+        default_layout=default_layout,
+        enable_survey=CONFIG['enable_survey'],
+        disable_close=CONFIG['disable_close']
     )
 
 @app.route("/get_config", methods=["GET"])
 def get_config():
     resp = {"config_data":CONFIG}
     return jsonify(resp)
+
+from flask import jsonify
+
+@app.route("/reset_uid", methods=["POST"])
+def reset_uid():
+    session.pop('user_id', None)
+    return jsonify({"status": "success", "message": "User ID reset."})
 
 # @app.route('/set_user', methods=['POST'])
 # def set_user():
@@ -475,10 +487,16 @@ def predefined():
 def instructions():
     return render_template("instructions.html", layout_conf=LAYOUT_GLOBALS)
 
-
+import time
 @app.route("/tutorial")
 def tutorial():
-    return render_template("tutorial.html", config=TUTORIAL_CONFIG)
+    time.sleep(0.5)
+    print("TUTORIAL_CONFIG ", TUTORIAL_CONFIG)
+    return render_template("tutorial.html", 
+                           config=TUTORIAL_CONFIG, 
+                           enable_survey=CONFIG['enable_survey'],
+                           disable_close=CONFIG['disable_close']
+                           )
 
 
 @app.route("/debug")
@@ -586,7 +604,7 @@ def on_create_next(data):
             return
 
         params = data.get("params", {})
-
+        print("params ", params)
         creation_params(params)
 
         game_name = data.get("game_name", "overcooked")
@@ -597,7 +615,7 @@ def on_create_next(data):
 
         params["layouts"] = layouts
         
-        process_game_flow()
+        process_game_flow(curr_game, params)
         if GAME_FLOW:
             _create_game(user_id=user_id,
                         game_name=game_name,
@@ -611,7 +629,7 @@ def on_create_next(data):
                         xai_agent_assignment=GAME_FLOW['xai_agent_assignment'])
 
 
-def process_game_flow():
+def process_game_flow(curr_game, params):
     current_round = GAME_FLOW['current_round']
     current_session = GAME_FLOW['current_session']
     total_rounds = GAME_FLOW['total_num_rounds']
@@ -619,7 +637,7 @@ def process_game_flow():
         GAME_FLOW['current_round'] = current_round + 1
     else:
         print("Moving to new session...")
-        #TODO: add post-session questionnaire popup
+
         if current_session < len(GAME_FLOW['all_layouts']):
             # Resetting to initial round 1 with new session and new layout
             GAME_FLOW['current_round'] = 1
@@ -860,6 +878,24 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
         
         data['game_flow_on'] = 0 if is_ending  else game_flow_on 
         data['is_ending'] = is_ending
+
+        data['session_id'] = GAME_FLOW['current_session'] if GAME_FLOW else ''
+        tut_config = json.loads(TUTORIAL_CONFIG)
+        data['layout'] = GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1] if GAME_FLOW else tut_config['tutorialParams']['layouts'][0]
+        data['xai_agent'] = GAME_FLOW['xai_agent_assignment'][GAME_FLOW['current_session']-1][GAME_FLOW['current_round']-1] if GAME_FLOW else ''
+        data['session_ended'] = False
+        data['game_ended'] = False
+        data['survey_baseurl'] = None
+        # check session end status
+        if(GAME_FLOW and GAME_FLOW['current_round'] == GAME_FLOW['total_num_rounds']):
+            data['session_ended'] = True
+            data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session']
+
+        # check game end status
+        if(GAME_FLOW and GAME_FLOW['current_session'] == len(GAME_FLOW['all_layouts']) and data['session_ended']):
+            data['game_ended'] = True  
+            data['survey_baseurl_end'] = CONFIG['questionnaire_links']['post_game']
+
         socketio.emit(
             "end_game", {"status": status, "data": data}, room=game.id
         )
