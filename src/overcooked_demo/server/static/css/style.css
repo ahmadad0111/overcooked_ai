@@ -369,7 +369,7 @@ button:disabled {
 }
 
 /* Tutorial */
-.start-modal {
+.start-modal, .tutover-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -382,7 +382,7 @@ button:disabled {
   z-index: 9999;
 }
 
-.start-modal-content {
+.start-modal-content, .tutover-modal-content {
   background-color: #4a90e2;
   color: white;
   padding: 20px 30px;

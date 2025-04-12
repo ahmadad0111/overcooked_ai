@@ -37,12 +37,13 @@
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>	
       {% if uid %}
-      <div>
+      <div id="uid-value">
         <br>
-        <label for="uid">UID :{{uid}}</label>
+        <label for="uid">UID (Participant ID) :{{uid}}</label>
       </div>
       {% endif %}
       <!-- Trigger Button (Optional) -->
+       <br>
     <button id="show-instructions">Show Instructions</button>
     <br></br>
 
@@ -140,12 +141,10 @@
         <button id="leave" style="display:none;">Leave</button>
     </div>
     <!-- Qualtrics Modal -->
-    <!-- {% if disable_close %} -->
     <div id="qualtrics-modal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background-color: rgba(0,0,0,0.8);">
       <iframe id="qualtrics-frame" src="" style="width:80%; height:80%; border:none; position:absolute; top:10%; left:10%;"></iframe>
       <button id="close-qualtrics" style="position:absolute; top:5%; right:5%; padding:10px; cursor:pointer;" {% if disable_close %} hidden {% endif %}>Close</button>
     </div>
-    <!-- {% endif %} -->
 
     <div id="end-modal" style="display: none;" class="end-modal">
       <div class="end-modal-content">
