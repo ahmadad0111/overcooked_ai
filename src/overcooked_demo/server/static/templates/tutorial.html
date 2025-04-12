@@ -45,6 +45,24 @@
         <button id="finish" class="text-center" style="display:none">Back To Game</button>
         <div id="error-exit" style="display:none">Tutorial ended unexpectedly (probably due to server side error)</div>
     </div>
+    <!-- Qualtrics Modal -->
+    <div id="qualtrics-modal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background-color: rgba(0,0,0,0.8);">
+      <iframe id="qualtrics-frame" src="" style="width:80%; height:80%; border:none; position:absolute; top:10%; left:10%;"></iframe>
+      <button id="close-qualtrics" style="position:absolute; top:5%; right:5%; padding:10px; cursor:pointer;" {% if disable_close %} hidden {% endif %}>Close</button>
+    </div>
+
+    <div id="start-modal" class="start-modal">
+      <div class="start-modal-content">
+        Game Started!
+      </div>
+    </div>
+    <div id="tutover-modal" class="tutover-modal">
+      <div class="tutover-modal-content" style=" background-color: #e24a4a">
+        Tutorial Complete! Please Return to the Game.
+      </div>
+    </div>
+    
+    
     <div id="soup-icons" class="text-center">
         <h4>Soup Legend</h4>
         <img src="static/images/onion_soup_icons.png" style="width:200px">

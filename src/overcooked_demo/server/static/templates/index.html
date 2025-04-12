@@ -37,11 +37,16 @@
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>	
       {% if uid %}
-      <div>
+      <div id="uid-value">
         <br>
-        <label for="uid">UID :{{uid}}</label>
+        <label for="uid">UID (Participant ID) :{{uid}}</label>
       </div>
       {% endif %}
+      <!-- Trigger Button (Optional) -->
+       <br>
+    <button id="show-instructions">Show Instructions</button>
+    <br></br>
+
 	<form>
       <div class="row text-center">     
 	      
@@ -86,7 +91,7 @@
 	</div>
   <div class="form-group col-lg-2">
     <label for="gameTime">Game Length (sec)</label>
-    <input type="number" id="gameTime" value="80" min="1" max="1800" name="gameTime">
+    <input type="number" id="gameTime" value="1" min="1" max="1800" name="gameTime">
   </div>
   <div class="form-group col-lg-2">
     <label for="showPotential">Show Potential?</label>
@@ -105,8 +110,8 @@
       </div>
       </div>
     </form>
-    <h4 id="instructions" class="text-center"><a href="./instructions">Instructions</a></h4>
-    <h4 id="tutorial" class="text-center"><a href="./tutorial">Tutorial</a></h4>
+    <h4 id="instructions" class="text-center"><b><a href="./instructions">Instructions</a></b></h4>
+    <h4 id="tutorial" class="text-center"><b><a href="./tutorial">Tutorial</a></b></h4>
     <div id="lobby", class="text-center" style="display:none">
         <h4 class="text-center">Game Lobby</h4>
         Waiting for game to start...
@@ -124,8 +129,8 @@
     </div>
     {% endif %}
     <div id="overcooked-container" class="text-center">
-        <h4 id="game-title" style="display:none">Game in Progress</h4>
-        <h4 id="game-over" style="display:none">Game Over</h4>
+        <h4 id="game-title" style="display:none"><b>Game in Progress</b></h4>
+        <h4 id="game-over" style="display:none"><b>Game Over</b></h4>
         <div id="overcooked"></div>
         <div id="error-exit" style="display:none">Game ended unexpectedly (probably due to another user disconnecting)</div>
     </div>
@@ -135,8 +140,38 @@
         <button id="join" disabled>Join Existing Game</button>
         <button id="leave" style="display:none;">Leave</button>
     </div>
-    
+    <!-- Qualtrics Modal -->
+    <div id="qualtrics-modal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background-color: rgba(0,0,0,0.8);">
+      <iframe id="qualtrics-frame" src="" style="width:80%; height:80%; border:none; position:absolute; top:10%; left:10%;"></iframe>
+      <button id="close-qualtrics" style="position:absolute; top:5%; right:5%; padding:10px; cursor:pointer;" {% if disable_close %} hidden {% endif %}>Close</button>
+    </div>
 
+    <div id="end-modal" style="display: none;" class="end-modal">
+      <div class="end-modal-content">
+        <p id="end-modal-message">...</p>
+        <button id="end-modal-btn" style="margin-top: 20px;">OK</button>
+      </div>
+    </div>
+    
+    
+  <!-- Instruction Modal -->
+  <div id="instruction-modal" data-show-modal="{{ 'true' if show_modal else 'false' }}">
+    <div class="modal-content">
+      <h2>Welcome to the Study!</h2><br/>
+      <ol>
+        <li>Click <strong>Instructions</strong> and read game details.</li>
+        <li>Next click <strong>Tutorial</strong> and complete the tutorial till the end.</li>
+        <li>Complete <strong>Demographics survey</strong>.</li>
+        <li>Then complete <strong>Pre-game survey</strong> based on your tutorial experience.</li>
+        <li>Then begin game rounds by clicking <strong>'Create Game'</strong> button.</li>
+        <li>Continue rounds by clicking <strong>'Next Game'</strong> button.</li>
+        <li>You will see five <strong>end-of-session surveys</strong> after completing every 4 game rounds. Complete them to proceed.</li>
+        <li>At the end of the game complete the <strong>Post-game survey</strong>.</li>
+      </ol>
+      <p>Thank you.</p><br/>
+      <button class="close-btn" id="close-instructions">Got it</button>
+    </div>
+  </div>
     <noscript>
       <h1>Warning: Javascript seems to be disabled</h1>
       <p>This website requires that Javascript be enabled on your browser.</p>
