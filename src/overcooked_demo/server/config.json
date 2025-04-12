@@ -59,5 +59,6 @@
         "post_session": "https://researchsurveys.deakin.edu.au/jfe/form/SV_72RCeM76OoZH4Lc",
         "post_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eyaYl7WnQ2YsCUK"
     },
+    "enable_survey": true,
     "disable_close": true
 }

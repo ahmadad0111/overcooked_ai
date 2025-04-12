@@ -110,10 +110,22 @@ window.addEventListener('message', function (event) {
         modal.style.display = 'none';
         iframe.src = '';  // Optional: clear iframe
 
-        if (window.showend) {
-            showEndingSequence();
-            delete window['showend']
+        setTimeout(() => {
+        if (window.surveyParams && window.surveyParams["post_game"]) {
+          // open next suevry
+          let surveyURL = window.surveyParams.post_game_link;
+          showQualtricsSurvey(surveyURL)
+          window.surveyParams.showend = true
+          delete window.surveyParams['post_game']
+          delete window.surveyParams['post_game_link']
         }
+        
+      }, 500); // Delay to make the transition smooth
+
+    if (window.surveyParams.showend) {
+        showEndingSequence();
+        delete window.surveyParams['showend']
+    }
       }, 500); // Delay to make the transition smooth
 
     }
@@ -121,7 +133,6 @@ window.addEventListener('message', function (event) {
 
 function showQualtricsSurvey(url) {
     console.log(url)
-    $('#close-qualtrics').attr('hidden');
     const modal = document.getElementById('qualtrics-modal');
     const iframe = document.getElementById('qualtrics-frame');
     iframe.src = url;  // dynamically set URL based on participant/layout
@@ -133,6 +144,22 @@ function closeQualtricsSurvey() {
     const iframe = document.getElementById('qualtrics-frame');
     iframe.src = "";  // clear iframe to reset survey
     modal.style.display = 'none';
+    setTimeout(() => {
+        if (window.surveyParams && window.surveyParams["post_game"]) {
+          // open next suevry
+          let surveyURL = window.surveyParams.post_game_link;
+          showQualtricsSurvey(surveyURL)
+          window.surveyParams.showend = true
+          delete window.surveyParams['post_game']
+          delete window.surveyParams['post_game_link']
+        }
+        
+      }, 500); // Delay to make the transition smooth
+
+    if (window.surveyParams.showend) {
+        showEndingSequence();
+        delete window.surveyParams['showend']
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -303,17 +330,19 @@ socket.on('end_game', function(data) {
     } else if (t.player_1_is_human) {
       humanPlayerId = t.player_1_id;
     }
-    survey_enabled = window.config_data.disable_close
-    if(!survey_enabled && data.data && data.data.session_ended){
+    enable_survey = window.config_data.enable_survey
+    if(enable_survey && data.data && data.data.session_ended){
         let surveyURL = `${data.data.survey_baseurl}?round_d=${data.data.round_id}&player_Id=${humanPlayerId}&uid=${data.data.uid}&session_Id=${data.data.session_id}&xai_agent=${data.data.xai_agent}&layout=${data.data.layout}`;
         showQualtricsSurvey(surveyURL)
         setTimeout(function(){}, 100)
 
     }
-    if(survey_enabled && data.data && data.data.game_ended){
-        window.showend = true
-        let surveyURL = `${data.data.survey_baseurl}?round_d=${data.data.round_id}&player_Id=${humanPlayerId}&uid=${data.data.uid}&session_Id=${data.data.session_id}&xai_agent=${data.data.xai_agent}&layout=${data.data.layout}`;
-        showQualtricsSurvey(surveyURL, showend=true)
+    if(enable_survey && data.data && data.data.game_ended){
+        let endSurveyURL = `${data.data.survey_baseurl_end}?round_d=${data.data.round_id}&player_Id=${humanPlayerId}&uid=${data.data.uid}&session_Id=${data.data.session_id}&xai_agent=${data.data.xai_agent}&layout=${data.data.layout}`;
+        window.surveyParams = {
+            post_game: true,
+            post_game_link: endSurveyURL
+          }
         setTimeout(function(){}, 100)
     }
     // if (data.data && data.data.is_ending) {
@@ -338,6 +367,24 @@ $(document).ready(function () {
 });
 
 
+function resetUID() {
+    fetch("/reset_uid", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Reset successful:", data);
+        // Optional: reload page or update UI
+        $('#uid-value').css('display', 'none');
+    })
+    .catch(error => {
+        console.error("Error resetting UID:", error);
+    });
+}
+
 function showEndingSequence() {
     const modal = document.getElementById('end-modal');
     const message = document.getElementById('end-modal-message');
@@ -350,20 +397,20 @@ function showEndingSequence() {
   
     // Step 2: On first OK click
     button.onclick = function () {
-      message.textContent = "Please enter UID for the next player!!";
-      button.style.display = 'none';  // Hide temporarily
   
       // Step 3: After delay, show OK again (or handle further logic)
       setTimeout(() => {
+        message.textContent = "Please enter UID for the next player!!";
+
         button.style.display = 'inline-block';
         button.textContent = 'OK'; // Or "Continue"
         button.onclick = function () {
           // Close modal or move to UID input
           modal.style.display = 'none';
+          resetUID()
           // Optionally trigger UID entry or refresh
-          console.log("Proceed to UID entry.");
         };
-      }, 2000);
+      }, 200);
     };
   }
   

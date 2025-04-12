@@ -440,6 +440,7 @@ def index():
         show_modal=show_modal,  # <== pass to frontend
         default_agent=CONFIG["layout_agent_mapping"][default_layout],
         default_layout=default_layout,
+        enable_survey=CONFIG['enable_survey'],
         disable_close=CONFIG['disable_close']
     )
 
@@ -447,6 +448,13 @@ def index():
 def get_config():
     resp = {"config_data":CONFIG}
     return jsonify(resp)
+
+from flask import jsonify
+
+@app.route("/reset_uid", methods=["POST"])
+def reset_uid():
+    session.pop('user_id', None)
+    return jsonify({"status": "success", "message": "User ID reset."})
 
 # @app.route('/set_user', methods=['POST'])
 # def set_user():
@@ -484,7 +492,11 @@ import time
 def tutorial():
     time.sleep(0.5)
     print("TUTORIAL_CONFIG ", TUTORIAL_CONFIG)
-    return render_template("tutorial.html", config=TUTORIAL_CONFIG, disable_close=CONFIG['disable_close'])
+    return render_template("tutorial.html", 
+                           config=TUTORIAL_CONFIG, 
+                           enable_survey=CONFIG['enable_survey'],
+                           disable_close=CONFIG['disable_close']
+                           )
 
 
 @app.route("/debug")
@@ -882,7 +894,7 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
         # check game end status
         if(GAME_FLOW and GAME_FLOW['current_session'] == len(GAME_FLOW['all_layouts']) and data['session_ended']):
             data['game_ended'] = True  
-            data['survey_baseurl'] = CONFIG['questionnaire_links']['post_game']
+            data['survey_baseurl_end'] = CONFIG['questionnaire_links']['post_game']
 
         socketio.emit(
             "end_game", {"status": status, "data": data}, room=game.id

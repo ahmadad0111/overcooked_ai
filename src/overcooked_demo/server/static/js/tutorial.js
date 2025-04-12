@@ -191,6 +191,19 @@ function showStartModal(message = null) {
   }, 1000);
 }
 
+function showTutOverModal(message = null) {
+  const modal = $('#tutover-modal');
+  if (message) {
+    modal.find('.tutover-modal-content').text(message);
+
+  }
+  modal.fadeIn(300);
+
+  setTimeout(() => {
+    modal.fadeOut(300);
+  }, 1000);
+}
+
 /* * * * * * * * * * * * * 
  * Socket event handlers *
  * * * * * * * * * * * * */
@@ -240,7 +253,6 @@ socket.on('reset_game', function(data) {
       showStartModal(message=`Game Started! Phase ${curr_tutorial_phase}`);
     } else {
       $('#game-title').hide();
-      showStartModal(message=`Tutorial Ended!`);
     }
     console.log(data)
     let button_pressed = $('#show-hint').text() === 'Hide Hint';
@@ -325,18 +337,23 @@ window.addEventListener('message', function (event) {
         console.log(" show pre-game")
         let surveyURL = `${window.surveyParams.pre_game_link}?player_Id=${window.surveyParams.player_id}&uid=${window.surveyParams.uid}`;
         showQualtricsSurvey(surveyURL)
+        window.surveyParams.isLastSurvey = true
       }
       delete window.surveyParams.player_id
       delete window.surveyParams.uid
       delete window.surveyParams['pre_game']
       delete window.surveyParams['pre_game_link']
     }, 500); // Delay to make the transition smooth
- 
+
+    if(window.surveyParams.isLastSurvey){
+      showTutOverModal();
+      delete window.surveyParams['isLastSurvey']
+
+    }
   }
 });
 
 function showQualtricsSurvey(url) {
-  $('#close-qualtrics').attr('hidden');
   const modal = document.getElementById('qualtrics-modal');
   const iframe = document.getElementById('qualtrics-frame');
   iframe.src = url;  // dynamically set URL based on participant/layout
