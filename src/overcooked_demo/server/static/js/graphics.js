@@ -27,6 +27,7 @@ var scene_config = {
     assets_loc : "./static/assets/",
     hud_size : 150 + ADAX_UI_HEIGHT,
     xai_exaplanation: '',
+    current_phase: 1,
     current_round: 1,
     current_session: 1,
     total_rounds: 1,
@@ -112,6 +113,7 @@ class OvercookedScene extends Phaser.Scene {
             xai_explanation: config.xai_explanation,
             current_round: config.currentRound,
             total_rounds: config.totalRounds,
+            current_phase: config.current_phase,
             current_session: config.currentSession,
             current_layout: config.currentLayout
         }
@@ -123,6 +125,7 @@ class OvercookedScene extends Phaser.Scene {
         this.hud_data.time = Math.round(state.time_left);
         this.hud_data.bonus_orders = state.state.bonus_orders;
         this.hud_data.all_orders = state.state.all_orders;
+        this.hud_data.current_phase = state.current_phase;
         this.hud_data.current_round = state.current_round;
         this.hud_data.current_session = state.current_session;
         this.hud_data.current_layout = state.current_layout;
@@ -382,6 +385,9 @@ class OvercookedScene extends Phaser.Scene {
         if (typeof(hud_data.potential) !== 'undefined' && hud_data.potential !== null) {
             this._drawPotential(hud_data.potential, sprites, board_height);
         }
+        if (typeof(hud_data.current_phase) !== 'undefined') {
+            this._drawCurrentPhase(hud_data.current_phase, sprites, board_height);
+        }
         if (typeof(hud_data.current_round) !== 'undefined') {
             this._drawCurrentRound(hud_data.current_round, sprites, board_height);
         }
@@ -524,6 +530,22 @@ class OvercookedScene extends Phaser.Scene {
         }
     }
 
+    _drawCurrentPhase(current_phase, sprites, board_height) {
+        current_phase = "Phase: "+current_phase;
+        if (typeof(sprites['current_phase']) !== 'undefined') {
+            sprites['current_phase'].setText(current_phase);
+        }
+        else {
+            sprites['current_phase'] = this.add.text(
+                0.5*this.game.canvas.width, board_height + 30 + this.agent_msg_size, current_phase,
+                {
+                    font: "20px Arial",
+                    fill: "red",
+                    align: "right"
+                }
+            )
+        }
+    }
     _drawCurrentRound(current_round, sprites, board_height) {
         current_round = "Round: "+current_round;
         if (typeof(sprites['current_round']) !== 'undefined') {
