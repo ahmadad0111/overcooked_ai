@@ -6,7 +6,11 @@ from threading import Thread
 import json
 
 class KeyboardTracker:
-    def __init__(self, config_file="db.json", server_host="0.0.0.0", server_port=5002):
+    def __init__(self,
+                 config_file="db.json",
+                 server_host="0.0.0.0",
+                 server_port=5002,
+                 is_bulk=False):
         # Load database credentials from JSON file
         with open(config_file, "r") as file:
             self.config = json.load(file)
@@ -15,6 +19,16 @@ class KeyboardTracker:
         self.server_port = server_port
         self.current_hash_key = None
         self.running = False
+        self.is_bulk = is_bulk
+        self.bulk_events = []
+        self.insert_query = """
+                            INSERT INTO keyboard_events (hash_key, timestamp, key, event_type)
+                            VALUES (%s, %s, %s, %s)
+                            """
+        self.insert_query_bulk = """
+                                INSERT INTO keyboard_events (hash_key, timestamp, key, event_type)
+                                VALUES {}
+                                """
 
         # Establish database connection
         try:
@@ -24,20 +38,20 @@ class KeyboardTracker:
             print(f"Error connecting to the database: {e}")
 
     # Connect to DB and insert keyboard event
-    def insert_keyboard_event(self, key, event_type):
-        if not self.current_hash_key:
-            return
-        try:
-            self.cursor.execute(
-                """
-                INSERT INTO keyboard_events (hash_key, timestamp, key, event_type)
-                VALUES (%s, %s, %s, %s)
-                """,
-                (self.current_hash_key, datetime.now(), key, event_type),
-            )
-            self.conn.commit()
-        except Exception as e:
-            print(f"Database Error: {e}")
+    def insert_keyboard_event(self,
+                              key,
+                              event_type):
+        if not self.is_bulk:
+            if not self.current_hash_key:
+                return
+            try:
+                self.cursor.execute(self.insert_query, (self.current_hash_key, datetime.now(), key, event_type),
+                )
+                self.conn.commit()
+            except Exception as e:
+                print(f"Database Error: {e}")
+        else:
+            self.bulk_events.append(tuple([self.current_hash_key, datetime.now(), key, event_type]))
 
     # Keyboard listener callback
     def on_key(self, event):
@@ -77,6 +91,12 @@ class KeyboardTracker:
                     elif data == "STOP":
                         self.running = False
                         self.current_hash_key = None
+                        if self.is_bulk:
+                            records_list_template = ','.join(['%s'] * len(self.bulk_events))
+                            self.cursor.execute(self.insert_query_bulk.format(records_list_template),
+                                                self.bulk_events)
+                            self.conn.commit()
+                            print("Keyboard events inserted into db.")
                         print("Recording stopped.")
 
     # Start both the socket listener and keyboard listener
@@ -86,3 +106,7 @@ class KeyboardTracker:
         # Start keyboard listener
         self.start_listener()
 
+
+if __name__ == "__main__":
+    kb_tracker_server = KeyboardTracker()
+    kb_tracker_server.start_tracking()
