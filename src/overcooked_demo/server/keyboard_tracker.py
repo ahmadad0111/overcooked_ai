@@ -36,6 +36,7 @@ class KeyboardTracker:
             self.cursor = self.conn.cursor()
         except Exception as e:
             print(f"Error connecting to the database: {e}")
+        print("Keyboard tracker initialized. Is bulk inserting keyboard events into database? ",self.is_bulk)
 
     # Connect to DB and insert keyboard event
     def insert_keyboard_event(self,
@@ -108,5 +109,5 @@ class KeyboardTracker:
 
 
 if __name__ == "__main__":
-    kb_tracker_server = KeyboardTracker()
+    kb_tracker_server = KeyboardTracker(is_bulk=True)
     kb_tracker_server.start_tracking()

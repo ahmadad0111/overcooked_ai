@@ -336,7 +336,7 @@ def _create_game(user_id,
                 {"spectating": spectating, "start_info": {"round_id": game.id, "player_id": user_id, "uid": session["user_id"], "xaiAgentType": start_info["xaiAgentType"]}},
                 broadcast=True
             )
-            game.start_recording_kb_events(f"{game.id}_{session["user_id"]}")
+            game.start_recording_kb_events(f"{game.id}_{session['user_id']}")
             socketio.start_background_task(play_game, game, fps=6, game_flow_on=game_flow_on, is_ending=is_ending)
         else:
             WAITING_GAMES.put(game.id)
