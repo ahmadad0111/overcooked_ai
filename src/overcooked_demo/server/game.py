@@ -23,8 +23,8 @@ from overcooked_ai_py.planning.planners import (
 
 from database import Database
 # from database1 import Database1
-# from keyboard_tracker import KeyboardTracker
-# from keyboard_tracking_controller import TrackingController
+from keyboard_tracker import KeyboardTracker
+from keyboard_tracking_controller import TrackingController
 
 
 import uuid
@@ -483,7 +483,7 @@ class OvercookedGame(Game):
         self.num_collisions = 0
         # self.kb_tracker = KeyboardTracker()
         # self.kb_tracker.start_tracking()
-        # self.kb_controller = TrackingController()
+        self.kb_controller = TrackingController()
         # self.commit_hash = str(generate_unique_hash())
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
@@ -540,6 +540,12 @@ class OvercookedGame(Game):
     @classmethod
     def get_uid(cls):
         return cls.uid_value
+
+    def start_recording_kb_events(self, session_id):
+        self.kb_controller.start_tracking(session_id)
+
+    def stop_recording_kb_events(self):
+        self.kb_controller.stop_tracking()
         
     def _curr_game_over(self):
 
