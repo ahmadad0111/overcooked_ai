@@ -450,6 +450,7 @@ class OvercookedGame(Game):
         showPotential=False,
         randomized=False,
         ticks_per_ai_action=1,
+        current_phase=1,
         current_round=1,
         current_session=1,
         total_rounds=1,
@@ -487,6 +488,7 @@ class OvercookedGame(Game):
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
         #self.uid = None
+        self.current_phase = current_phase
         self.current_round = current_round
         self.current_session = current_session
         self.total_rounds = total_rounds
@@ -786,6 +788,7 @@ class OvercookedGame(Game):
         state_dict["time_left"] = max(
             self.max_time - (time() - self.start_time), 0
         )
+        state_dict["current_phase"] = self.current_phase
         state_dict["current_round"] = self.current_round
         state_dict["current_session"] = self.current_session
         state_dict["current_layout"] = self.curr_layout
@@ -800,6 +803,9 @@ class OvercookedGame(Game):
     def set_session(self, new_session):
         self.current_session = new_session
 
+    def set_phase(self, new_phase):
+        self.current_phase = new_phase
+        
     def set_layout(self, new_layout):
         self.curr_layout = new_layout
 

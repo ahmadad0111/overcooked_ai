@@ -23,7 +23,6 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for, s
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from game import Game, OvercookedGame, OvercookedTutorial
 from utils import ThreadSafeDict, ThreadSafeSet
-from xai_agent import assignXAIAgents
 
 ### Thoughts -- where I'll log potential issues/ideas as they come up
 # Should make game driver code more error robust -- if overcooked randomlly errors we should catch it and report it to user
@@ -278,6 +277,7 @@ def _create_game(user_id,
                  game_name,
                  params={},
                  **kwargs):
+    current_phase=kwargs.get("current_phase",1)
     current_session=kwargs.get("current_session",1)
     current_round=kwargs.get("current_round",1)
     layouts=kwargs.get("layouts",[]) or params.get("layouts", [])
@@ -287,6 +287,7 @@ def _create_game(user_id,
     xai_agent_assignment = kwargs.get('xai_agent_assignment', [])
     params.update({
         "current_session": current_session,
+        "current_phase" : current_phase,
         "current_round": current_round,
         "total_rounds": CONFIG["total_num_rounds"],
         "layouts": layouts
@@ -319,11 +320,11 @@ def _create_game(user_id,
 
             start_info["experiment_order_disp"] = " => ".join(display_order)
             if xai_agent_assignment:
-                start_info["xaiAgentType"] = xai_agent_assignment[current_session-1][current_round-1]
+                start_info["xaiAgentType"] = xai_agent_assignment[current_phase-1]
             else:
                 start_info["xaiAgentType"] = params.get("xaiAgentType", xai_agent_type)
             start_info["current_layout"] = game.curr_layout
-            print(f"Current session: {current_session} & Current round: {current_round}\n")
+            print(f"Current Phase: {current_phase} & Current session: {current_session} & Current round: {current_round}\n")
             print("[XAI] Agent type: ", start_info["xaiAgentType"])
 
             emit(
@@ -620,6 +621,7 @@ def on_create_next(data):
             _create_game(user_id=user_id,
                         game_name=game_name,
                         params=params,
+                        current_phase = GAME_FLOW['current_phase'],
                         current_round=GAME_FLOW["current_round"],
                         current_session=GAME_FLOW["current_session"],
                         layouts=[layouts[GAME_FLOW["current_session"]-1]],
@@ -630,19 +632,41 @@ def on_create_next(data):
 
 
 def process_game_flow(curr_game, params):
+    current_phase = GAME_FLOW['current_phase']
     current_round = GAME_FLOW['current_round']
     current_session = GAME_FLOW['current_session']
     total_rounds = GAME_FLOW['total_num_rounds']
     if current_round < total_rounds:
         GAME_FLOW['current_round'] = current_round + 1
-    else:
+    elif current_round >= total_rounds:
         print("Moving to new session...")
 
         if current_session < len(GAME_FLOW['all_layouts']):
             # Resetting to initial round 1 with new session and new layout
             GAME_FLOW['current_round'] = 1
             GAME_FLOW['current_session'] = current_session + 1
-    if GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
+    if current_session > len(GAME_FLOW['all_layouts'])-1 and current_phase < GAME_FLOW['total_phases']:
+        print("Moving to new Phase...")
+        GAME_FLOW['current_phase'] = current_phase + 1
+        GAME_FLOW['current_round'] = CONFIG['initial_round']
+        GAME_FLOW['current_session'] = CONFIG['initial_session']
+
+        all_layouts = GAME_FLOW['all_layouts'].copy()
+        #Shuffle game layout order
+        all_layouts.remove(params["layout"])
+        random.shuffle(all_layouts)
+        layouts = [params["layout"]] + all_layouts
+        if layouts ==  GAME_FLOW['all_layouts']:
+            print("Same layout order. Shuffling again")
+            all_layouts = GAME_FLOW['all_layouts'].copy()
+            #Shuffle game layout order
+            all_layouts.remove(params["layout"])
+            random.shuffle(all_layouts)
+            layouts = [params["layout"]] + all_layouts
+        print(f"Phase {GAME_FLOW['current_phase'] } - New Layout Order {layouts}")
+        GAME_FLOW['all_layouts'] =  layouts
+
+    if GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
         GAME_FLOW['is_ending'] = 1
     
 @socketio.on("create")
@@ -668,26 +692,30 @@ def on_create(data):
         all_layouts.remove(params["layout"])
         random.shuffle(all_layouts)
         layouts = [params["layout"]] + all_layouts
+        print("New Layout Order ", layouts)
 
         # Retrieve randomized XAI agent order
-        xai_agent_assignment = None
-        if CONFIG["randomize_xai"]:
-            xai_agent_assignment = assignXAIAgents(user_id)
-            print("XAI Agent order: ", xai_agent_assignment)
+        xai_agent_assignment = CONFIG["xai_assignment"]
+        # if CONFIG["randomize_xai"]:
+        #     xai_agent_assignment = assignXAIAgents(user_id)
+        print("XAI Agent order: ", xai_agent_assignment)
 
         params["layouts"] = layouts
         print("Create game params: ",params)
         GAME_FLOW['current_session'] =  CONFIG["initial_session"]
+        GAME_FLOW['current_phase'] = CONFIG['initial_phase']
         GAME_FLOW['current_round'] =  CONFIG["initial_round"]
         GAME_FLOW['total_num_rounds'] =  CONFIG["total_num_rounds"]
+        GAME_FLOW['total_phases'] = len(xai_agent_assignment)
         GAME_FLOW['all_layouts'] =  layouts
-        GAME_FLOW['prev_params'] = layouts
+        # GAME_FLOW['prev_params'] = layouts
         GAME_FLOW['is_ending'] = CONFIG["is_ending"]
         GAME_FLOW['xai_agent_assignment'] = xai_agent_assignment
         _create_game(user_id=user_id,
                     game_name=game_name,
                     params=params,
                     current_session=CONFIG["initial_session"],
+                    current_phase=CONFIG["initial_phase"],
                     current_round=CONFIG["initial_round"],
                     layouts=[layouts[CONFIG["initial_session"]-1]],
                     layouts_order=layouts, 
@@ -883,7 +911,7 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
         data['session_id'] = GAME_FLOW['current_session'] if GAME_FLOW else ''
         tut_config = json.loads(TUTORIAL_CONFIG)
         data['layout'] = GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1] if GAME_FLOW else tut_config['tutorialParams']['layouts'][0]
-        data['xai_agent'] = GAME_FLOW['xai_agent_assignment'][GAME_FLOW['current_session']-1][GAME_FLOW['current_round']-1] if GAME_FLOW else ''
+        data['xai_agent'] = GAME_FLOW['xai_agent_assignment'][GAME_FLOW['current_phase']-1] if GAME_FLOW else ''
         data['session_ended'] = False
         data['game_ended'] = False
         data['survey_baseurl'] = None
@@ -893,7 +921,7 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
             data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session']
 
         # check game end status
-        if(GAME_FLOW and GAME_FLOW['current_session'] == len(GAME_FLOW['all_layouts']) and data['session_ended']):
+        if GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
             data['game_ended'] = True  
             data['survey_baseurl_end'] = CONFIG['questionnaire_links']['post_game']
 
