@@ -62,5 +62,5 @@
         "post_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eyaYl7WnQ2YsCUK"
     },
     "enable_survey": true,
-    "disable_close": false
+    "disable_close": true
 }
