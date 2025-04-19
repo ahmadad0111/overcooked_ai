@@ -92,12 +92,16 @@ class KeyboardTracker:
                     elif data == "STOP":
                         self.running = False
                         self.current_hash_key = None
-                        if self.is_bulk:
-                            records_list_template = ','.join(['%s'] * len(self.bulk_events))
-                            self.cursor.execute(self.insert_query_bulk.format(records_list_template),
-                                                self.bulk_events)
-                            self.conn.commit()
-                            print("Keyboard events inserted into db.")
+                        if self.is_bulk and len(self.bulk_events)>0:
+                            try:
+                                records_list_template = ','.join(['%s'] * len(self.bulk_events))
+                                self.cursor.execute(self.insert_query_bulk.format(records_list_template),
+                                                    self.bulk_events)
+                                self.conn.commit()
+                            except:
+                                print("!!! Keyboard events failed to be inserted into db !!!")
+                                print("Recorded keyboard events: ",self.bulk_events)
+                            print("Keyboard events recorded and finished insertion into db.")
                         print("Recording stopped.")
 
     # Start both the socket listener and keyboard listener
