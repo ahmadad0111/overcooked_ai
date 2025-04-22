@@ -291,6 +291,7 @@ socket.on('end_game', function(data) {
     if (!window.spectating) {
         disable_key_listener();
     }
+    speechSynthesis.cancel();
     $('#game-title').hide();
     $('#game-over').show();
     $("#join").show();
@@ -323,11 +324,11 @@ socket.on('end_game', function(data) {
 
     // Determine human player ID
     let humanPlayerId = '';
-    const t = data.data.trajectory[0];
+    const t = data.data && data.data.trajectory ? data.data.trajectory[0] : null
 
-    if (t.player_0_is_human) {
+    if (t && t.player_0_is_human) {
       humanPlayerId = t.player_0_id;
-    } else if (t.player_1_is_human) {
+    } else if (t && t.player_1_is_human) {
       humanPlayerId = t.player_1_id;
     }
     enable_survey = window.config_data.enable_survey
@@ -350,7 +351,35 @@ socket.on('end_game', function(data) {
     // }
       
 });
-  
+
+speechSynthesis.onvoiceschanged = () => {
+    const v = speechSynthesis.getVoices();
+    console.log(v);
+}
+prev_xai_msg = ''
+socket.on('xai_voice', function(data) {
+    if(window.config_data["ttsEnabled"]) {
+        try {
+            xai_msg = data["explanation"]
+            if (prev_xai_msg != xai_msg) {
+                prev_xai_msg = xai_msg
+                const utterance = new SpeechSynthesisUtterance(xai_msg);
+                selectedVoice = speechSynthesis.getVoices().find(v => v.name === 'Google UK English Male' )
+                utterance.lang= selectedVoice.lang;
+                utterance.rate = 1.1;
+                utterance.pitch = 1;
+                utterance.voice = selectedVoice;
+                speechSynthesis.cancel();
+                speechSynthesis.speak(utterance); 
+            }   
+        } catch(e){
+            console.log("Error xai, ", e)
+        }
+    }
+
+})
+
+
 $(document).ready(function () {
   const showModal = $('#instruction-modal').data('show-modal');
   if (showModal === true || showModal === 'true') {

@@ -4,6 +4,7 @@ import keyboard
 from datetime import datetime
 from threading import Thread
 import json
+from time import time
 
 class KeyboardTracker:
     def __init__(self,
@@ -46,13 +47,13 @@ class KeyboardTracker:
             if not self.current_hash_key:
                 return
             try:
-                self.cursor.execute(self.insert_query, (self.current_hash_key, datetime.now(), key, event_type),
+                self.cursor.execute(self.insert_query, (self.current_hash_key, time(), key, event_type),
                 )
                 self.conn.commit()
             except Exception as e:
                 print(f"Database Error: {e}")
         else:
-            self.bulk_events.append(tuple([self.current_hash_key, datetime.now(), key, event_type]))
+            self.bulk_events.append(tuple([self.current_hash_key, time(), key, event_type]))
 
     # Keyboard listener callback
     def on_key(self, event):
