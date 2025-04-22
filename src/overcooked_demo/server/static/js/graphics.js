@@ -626,8 +626,8 @@ class OvercookedScene extends Phaser.Scene {
                     align: "left",
                     wordWrap: { width: this.game.canvas.width - 20, useAdvancedWrap: true }
                 }
-            )
-            
+            )  
+                      
         }
     }
 }
