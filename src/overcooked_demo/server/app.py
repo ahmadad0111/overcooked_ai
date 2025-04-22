@@ -826,7 +826,10 @@ def on_xai_message(data):
     if not game:
         return
     if xai_agent_type in ["StaticX","AdaX"]:
+        socketio.emit("xai_voice",
+             {"explanation": adaxplanation})
         game.update_explanation(adaxplanation)
+        print("adaxplanation: ", adaxplanation)
 
 @socketio.on("disconnect")
 def on_disconnect():
