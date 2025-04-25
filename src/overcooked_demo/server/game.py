@@ -1140,7 +1140,7 @@ class TutorialAI:
 
     def action(self, state):
         self.curr_tick += 1
-        if self.curr_phase == 0:
+        if self.curr_phase <= 4:
             return (
                 self.COOK_SOUP_LOOP[self.curr_tick % len(self.COOK_SOUP_LOOP)],
                 None,

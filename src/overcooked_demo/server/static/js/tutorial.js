@@ -248,7 +248,7 @@ socket.on('reset_game', function(data) {
     $('#hint').empty();
     $("#tutorial-instructions").html(tutorial_instructions[curr_tutorial_phase-1]);
     $("#hint").append(tutorial_hints[curr_tutorial_phase]);
-    if (curr_tutorial_phase <= data.state.state.total_rounds) {
+    if (curr_tutorial_phase <= tutorial_instructions.length) {
       $('#game-title').text(`Tutorial in Progress, Phase ${curr_tutorial_phase}/${tutorial_instructions.length}`);
       showStartModal(message=`Game Started! Phase ${curr_tutorial_phase}`);
     } else {

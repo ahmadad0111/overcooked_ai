@@ -882,63 +882,65 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
                             room id for all clients connected to this game
     fps (int):              Number of game ticks that should happen every second
     """
-    status = Game.Status.ACTIVE
-    while status != Game.Status.DONE and status != Game.Status.INACTIVE:
-        with game.lock:
-            status = game.tick()
-        if status == Game.Status.RESET:
+    try:
+        status = Game.Status.ACTIVE
+        while status != Game.Status.DONE and status != Game.Status.INACTIVE:
             with game.lock:
-                data = game.get_data()
+                status = game.tick()
+            if status == Game.Status.RESET:
+                with game.lock:
+                    data = game.get_data()
+                socketio.emit(
+                    "reset_game",
+                    {
+                        "state": game.to_json(),
+                        "timeout": game.reset_timeout,
+                        "data": data,
+                    },
+                    room=game.id,
+                )
+                socketio.sleep(game.reset_timeout / 1000)
+            else:
+                socketio.emit(
+                    "state_pong", {"state": game.get_state()}, room=game.id
+                )
+            socketio.sleep(1 / fps)
+
+        with game.lock:
+            data = game.get_data()
+            
+            data['game_flow_on'] = 0 if is_ending  else game_flow_on 
+            data['is_ending'] = is_ending
+
+            data['session_id'] = GAME_FLOW['current_session'] if GAME_FLOW else ''
+            tut_config = json.loads(TUTORIAL_CONFIG)
+            data['layout'] = GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1] if GAME_FLOW else tut_config['tutorialParams']['layouts'][0]
+            data['xai_agent'] = GAME_FLOW['xai_agent_assignment'][GAME_FLOW['current_phase']-1] if GAME_FLOW else ''
+            data['session_ended'] = False
+            data['game_ended'] = False
+            data['survey_baseurl'] = None
+            # check session end status
+            if(GAME_FLOW and GAME_FLOW['current_round'] == GAME_FLOW['total_num_rounds']):
+                data['session_ended'] = True
+                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session']
+            # check game end status
+            if GAME_FLOW and GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
+                data['game_ended'] = True  
+                data['survey_baseurl_end'] = CONFIG['questionnaire_links']['post_game']
+
             socketio.emit(
-                "reset_game",
-                {
-                    "state": game.to_json(),
-                    "timeout": game.reset_timeout,
-                    "data": data,
-                },
-                room=game.id,
+                "end_game", {"status": status, "data": data}, room=game.id
             )
-            socketio.sleep(game.reset_timeout / 1000)
-        else:
             socketio.emit(
-                "state_pong", {"state": game.get_state()}, room=game.id
+                "stop_ecg", {"status": status, "data": data}, broadcast=True
             )
-        socketio.sleep(1 / fps)
+            game.stop_recording_kb_events()
 
-    with game.lock:
-        data = game.get_data()
-        
-        data['game_flow_on'] = 0 if is_ending  else game_flow_on 
-        data['is_ending'] = is_ending
-
-        data['session_id'] = GAME_FLOW['current_session'] if GAME_FLOW else ''
-        tut_config = json.loads(TUTORIAL_CONFIG)
-        data['layout'] = GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1] if GAME_FLOW else tut_config['tutorialParams']['layouts'][0]
-        data['xai_agent'] = GAME_FLOW['xai_agent_assignment'][GAME_FLOW['current_phase']-1] if GAME_FLOW else ''
-        data['session_ended'] = False
-        data['game_ended'] = False
-        data['survey_baseurl'] = None
-        # check session end status
-        if(GAME_FLOW and GAME_FLOW['current_round'] == GAME_FLOW['total_num_rounds']):
-            data['session_ended'] = True
-            data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session']
-
-        # check game end status
-        if GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
-            data['game_ended'] = True  
-            data['survey_baseurl_end'] = CONFIG['questionnaire_links']['post_game']
-
-        socketio.emit(
-            "end_game", {"status": status, "data": data}, room=game.id
-        )
-        socketio.emit(
-            "stop_ecg", {"status": status, "data": data}, broadcast=True
-        )
-        game.stop_recording_kb_events()
-
-        if status != Game.Status.INACTIVE:
-            game.deactivate()
-        cleanup_game(game)
+            if status != Game.Status.INACTIVE:
+                game.deactivate()
+            cleanup_game(game)
+    except Exception as e:
+        print("game play error ", e)
 
 
 if __name__ == "__main__":
