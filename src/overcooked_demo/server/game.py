@@ -864,6 +864,8 @@ class OvercookedGame(Game):
                 #print("BC model path: ", bc_model_path)
                 bc_model_path = AGENT_DIR + "/PPOCrampedRoom"
 
+                #bc_model_path = AGENT_DIR + npc_id
+
                 bc_model, bc_params = self.load_bc_model(bc_model_path)
 
                 bc_policy = BehaviorCloningPolicy.from_model(bc_model, bc_params, stochastic=True)
