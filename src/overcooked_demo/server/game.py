@@ -1,3 +1,9 @@
+from human_aware_rl.imitation.behavior_cloning_tf2 import _get_base_ae, BehaviorCloningPolicy
+from human_aware_rl.imitation.behavior_cloning_tf2 import load_bc_model
+import tensorflow as tf
+from tensorflow import keras
+from human_aware_rl.rllib.rllib import AgentPair
+from human_aware_rl.rllib.rllib import RlLibAgent
 from pylsl import StreamInfo, StreamOutlet
 import json
 import os
@@ -814,7 +820,24 @@ class OvercookedGame(Game):
         obj_dict["terrain"] = self.mdp.terrain_mtx if self._is_active else None
         obj_dict["state"] = self.get_state() if self._is_active else None
         return obj_dict
+    def load_bc_model(self,model_dir, verbose=False):
+        """
+        Returns the model instance (including all compilation data like optimizer state) and a dictionary of parameters
+        used to create the model
+        """
+        if verbose:
+            print("Loading bc model from ", model_dir)
+        print("Model loading")
+        print("Model dir: ", model_dir)
+        print("TensorFlow version:", tf.__version__)
+        print("Keras version:", tf.keras.__version__)
+        model = keras.models.load_model(model_dir, custom_objects={"tf": tf})
 
+        print("Model loaded")
+        with open(os.path.join(model_dir, "metadata.pickle"), "rb") as f:
+            bc_params = pickle.load(f)
+        return model, bc_params
+    
     def get_policy(self, npc_id, idx=0):
         if npc_id.lower().startswith("rllib"):
             print("agent policy", "rllib", npc_id.lower())
@@ -830,12 +853,37 @@ class OvercookedGame(Game):
                 )
         else:
             try:
-                fpath = os.path.join(AGENT_DIR, npc_id, "agent.pickle")
-                with open(fpath, "rb") as f:
-                    return pickle.load(f)
+                # fpath = os.path.join(AGENT_DIR, npc_id, "agent.pickle")
+                # with open(fpath, "rb") as f:
+                #     return pickle.load(f)
+
+                #bc_model_path = AGENT_DIR + "/tutorial_notebook_results/BC"
+                print("NPC ID: ", npc_id)
+                #bc_model_path = os.path.join(AGENT_DIR, npc_id)
+
+                #print("BC model path: ", bc_model_path)
+                bc_model_path = AGENT_DIR + "/PPOCrampedRoom"
+
+                #bc_model_path = AGENT_DIR + npc_id
+
+                bc_model, bc_params = self.load_bc_model(bc_model_path)
+
+                bc_policy = BehaviorCloningPolicy.from_model(bc_model, bc_params, stochastic=True)
+                base_ae = _get_base_ae(bc_params)
+                base_env = base_ae.env
+
+                
+                bc_agent0 = RlLibAgent(bc_policy, 0, base_env.featurize_state_mdp)
+
+                bc_agent1 = RlLibAgent(bc_policy, 1, base_env.featurize_state_mdp)
+                agent = AgentPair(bc_agent0, bc_agent1)
+                print("Agent loaded")
+                return  bc_agent1#agent
+
+
             except Exception as e:
                 raise IOError("Error loading agent\n{}".format(e.__repr__()))
-
+    
     def get_data(self):
         """
         Returns and then clears the accumulated trajectory
