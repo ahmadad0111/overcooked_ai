@@ -862,7 +862,7 @@ class OvercookedGame(Game):
                 #bc_model_path = os.path.join(AGENT_DIR, npc_id)
 
                 #print("BC model path: ", bc_model_path)
-                bc_model_path = AGENT_DIR + "/CrampedRoomBC/BC"
+                bc_model_path = AGENT_DIR + "/PPOCrampedRoom"
 
                 bc_model, bc_params = self.load_bc_model(bc_model_path)
 
