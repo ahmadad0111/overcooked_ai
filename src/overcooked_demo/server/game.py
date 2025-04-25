@@ -820,7 +820,24 @@ class OvercookedGame(Game):
         obj_dict["terrain"] = self.mdp.terrain_mtx if self._is_active else None
         obj_dict["state"] = self.get_state() if self._is_active else None
         return obj_dict
+    def load_bc_model(self,model_dir, verbose=False):
+        """
+        Returns the model instance (including all compilation data like optimizer state) and a dictionary of parameters
+        used to create the model
+        """
+        if verbose:
+            print("Loading bc model from ", model_dir)
+        print("Model loading")
+        print("Model dir: ", model_dir)
+        print("TensorFlow version:", tf.__version__)
+        print("Keras version:", tf.keras.__version__)
+        model = keras.models.load_model(model_dir, custom_objects={"tf": tf})
 
+        print("Model loaded")
+        with open(os.path.join(model_dir, "metadata.pickle"), "rb") as f:
+            bc_params = pickle.load(f)
+        return model, bc_params
+    
     def get_policy(self, npc_id, idx=0):
         if npc_id.lower().startswith("rllib"):
             print("agent policy", "rllib", npc_id.lower())
