@@ -122,7 +122,7 @@ window.addEventListener('message', function (event) {
         
       }, 500); // Delay to make the transition smooth
 
-    if (window.surveyParams.showend) {
+    if (window.surveyParams && window.surveyParams.showend) {
         showEndingSequence();
         delete window.surveyParams['showend']
     }
@@ -156,7 +156,7 @@ function closeQualtricsSurvey() {
         
       }, 500); // Delay to make the transition smooth
 
-    if (window.surveyParams.showend) {
+    if (window.surveyParams && window.surveyParams.showend) {
         showEndingSequence();
         delete window.surveyParams['showend']
     }
