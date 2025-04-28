@@ -610,14 +610,16 @@ def on_create_next(data):
 
         game_name = data.get("game_name", "overcooked")
         # all_layouts = CONFIG["layouts"].copy()
+        process_game_flow(curr_game, params)
 
         layouts = GAME_FLOW['all_layouts']
 
 
         params["layouts"] = layouts
-        
-        process_game_flow(curr_game, params)
         if GAME_FLOW:
+            params["playerOne"] = GAME_FLOW["playerOne"]
+            params["layout"] = layouts[GAME_FLOW["current_session"]-1]
+
             _create_game(user_id=user_id,
                         game_name=game_name,
                         params=params,
@@ -653,22 +655,23 @@ def process_game_flow(curr_game, params):
 
         all_layouts = GAME_FLOW['all_layouts'].copy()
         #Shuffle game layout order
-        all_layouts.remove(params["layout"])
+        # all_layouts.remove(params["layout"])
         random.shuffle(all_layouts)
-        layouts = [params["layout"]] + all_layouts
+        layouts = all_layouts
         if layouts ==  GAME_FLOW['all_layouts']:
             print("Same layout order. Shuffling again")
             all_layouts = GAME_FLOW['all_layouts'].copy()
             #Shuffle game layout order
-            all_layouts.remove(params["layout"])
+            # all_layouts.remove(params["layout"])
             random.shuffle(all_layouts)
-            layouts = [params["layout"]] + all_layouts
+            layouts = all_layouts
         print(f"Phase {GAME_FLOW['current_phase'] } - New Layout Order {layouts}")
         GAME_FLOW['all_layouts'] =  layouts
 
     if GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
         GAME_FLOW['is_ending'] = 1
     
+    GAME_FLOW["playerOne"] = CONFIG["layout_agent_mapping"][GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1]]
 @socketio.on("create")
 def on_create(data):
     global user_id
@@ -711,6 +714,15 @@ def on_create(data):
         # GAME_FLOW['prev_params'] = layouts
         GAME_FLOW['is_ending'] = CONFIG["is_ending"]
         GAME_FLOW['xai_agent_assignment'] = xai_agent_assignment
+
+        if params.get("playerZero") != "human":
+            GAME_FLOW["playerZero"] = params.get("playerZero")
+
+        if params.get("playerOne") != "human":
+            GAME_FLOW["playerOne"] = params.get("playerOne")
+        
+        params["playerOne"] = GAME_FLOW["playerOne"]
+
         _create_game(user_id=user_id,
                     game_name=game_name,
                     params=params,

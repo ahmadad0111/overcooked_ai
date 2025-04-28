@@ -30,12 +30,23 @@ $(function() {
 $(function() {
     $('#create-next').click(function () {
         params = arrToJSON($('form').serializeArray());
+        // console.log(params)
         params.layouts = [params.layout]
+        params.layout = $('#current-layout').attr("current-layout")
+        var agentMapping = window.config_data["layout_agent_mapping"];
+        try {
+            document.getElementById("playerOne").value = agentMapping[params.layout];
+        }
+        catch(err) {document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
+
+        params.playerOne = agentMapping[params.layout]
+
         data = {
             "params" : params,
             "game_name" : "overcooked",
             "create_if_not_found" : false
         };
+        // console.log("data ", data)
         socket.emit("create-next", data);
         $('#waiting').show();
         $('#join').hide();
@@ -70,6 +81,14 @@ $(function() {
     });
 });
 
+// $(function() {
+//     $('#current-layout').on("layoutUpdated", function() {
+//         const currentLayoutValue = $(this).attr("current-layout");
+//         console.log("Layout updated:", currentLayoutValue);
+//         // $('#layout').val(currentLayoutValue);
+//     });
+// });
+
 $(function() {
     $('#layout').change(function() {
         var layout = document.getElementById("layout").value;
@@ -77,7 +96,10 @@ $(function() {
         try {
             document.getElementById("playerOne").value = agentMapping[layout];
             // document.getElementById("playerOne").text = agentMapping[layout];
-            $('#current-layout').html(layout)
+            $('#current-layout')
+                .html(layout)
+                .attr("current-layout", layout)
+                // .trigger("layoutUpdated");
 
         }
         catch(err) {document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
@@ -233,7 +255,12 @@ socket.on('start_game', function(data) {
     document.getElementById("experiment-order").innerHTML = "<b>Layout Order:</b> " + data.start_info["experiment_order_disp"];
 
     let currentLayout = data.start_info.current_layout.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    $('#current-layout').html(currentLayout);
+    $('#current-layout')
+    .html(currentLayout)
+    .attr("current-layout", data.start_info.current_layout)
+    // .trigger("layoutUpdated"); // Custom event
+    $('#layout').val($('#current-layout').attr("current-layout"));
+    document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][data.start_info.current_layout]
     $('#xaiAgentType').val(data.start_info["xaiAgentType"]);
     $('#error-exit').hide();
     $("#overcooked").empty();
@@ -354,7 +381,6 @@ socket.on('end_game', function(data) {
 
 speechSynthesis.onvoiceschanged = () => {
     const v = speechSynthesis.getVoices();
-    console.log(v);
 }
 prev_xai_msg = ''
 socket.on('xai_voice', function(data) {
