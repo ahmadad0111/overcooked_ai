@@ -839,6 +839,7 @@ class OvercookedGame(Game):
         return model, bc_params
     
     def get_policy(self, npc_id, idx=0):
+        print("npc_id: ", npc_id)
         if npc_id.lower().startswith("rllib"):
             print("agent policy", "rllib", npc_id.lower())
             try:
@@ -866,13 +867,13 @@ class OvercookedGame(Game):
 
                 bc_model_path = AGENT_DIR + "/" + npc_id
 
-                bc_model, bc_params = self.load_bc_model(bc_model_path)
+                bc_model, bc_params = self.load_bc_model(bc_model_path) ##
 
                 bc_policy = BehaviorCloningPolicy.from_model(bc_model, bc_params, stochastic=True)
                 base_ae = _get_base_ae(bc_params)
                 base_env = base_ae.env
 
-                
+                print("[DEBUG] Layout:", base_env.mdp.layout_name)
                 bc_agent0 = RlLibAgent(bc_policy, 0, base_env.featurize_state_mdp)
 
                 bc_agent1 = RlLibAgent(bc_policy, 1, base_env.featurize_state_mdp)
