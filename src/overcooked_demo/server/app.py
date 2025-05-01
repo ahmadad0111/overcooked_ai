@@ -333,7 +333,7 @@ def _create_game(user_id,
                 room=game.id,
             )
             emit(
-                "start_ecg",
+                "start_sensors",
                 {"spectating": spectating, "start_info": {"round_id": game.id, "player_id": user_id, "uid": session["user_id"], "xaiAgentType": start_info["xaiAgentType"]}},
                 broadcast=True
             )
@@ -672,6 +672,7 @@ def process_game_flow(curr_game, params):
         GAME_FLOW['is_ending'] = 1
     
     GAME_FLOW["playerOne"] = CONFIG["layout_agent_mapping"][GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1]]
+
 @socketio.on("create")
 def on_create(data):
     global user_id
@@ -783,7 +784,7 @@ def on_join(data):
                         room=game.id,
                     )
                     emit(
-                        "start_ecg",
+                        "start_sensors",
                         {"spectating": False, "start_info":  {"round_id": game.id, "player_id": user_id, "uid": session["user_id"], "xaiAgentType": params["xaiAgentType"]}},
                         broadcast=True
                     )
@@ -803,7 +804,7 @@ def on_leave(data):
 
         if was_active:
             emit("end_game", {"status": Game.Status.DONE, "data": {}})
-            emit("stop_ecg", {"status": Game.Status.DONE, "data": {}}, broadcast=True)
+            emit("stop_sensors", {"status": Game.Status.DONE, "data": {}}, broadcast=True)
         else:
             emit("end_lobby")
 
@@ -870,7 +871,7 @@ def on_exit():
             room=game_id,
         )
         socketio.emit(
-            "stop_ecg",
+            "stop_sensors",
             {
                 "status": Game.Status.INACTIVE,
                 "data": get_game(game_id).get_data(),
@@ -944,7 +945,7 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
                 "end_game", {"status": status, "data": data}, room=game.id
             )
             socketio.emit(
-                "stop_ecg", {"status": status, "data": data}, broadcast=True
+                "stop_sensors", {"status": status, "data": data}, broadcast=True
             )
             game.stop_recording_kb_events()
 
@@ -953,7 +954,6 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
             cleanup_game(game)
     except Exception as e:
         print("game play error ", e)
-
 
 if __name__ == "__main__":
     # Dynamically parse host and port from environment variables (set by docker build)

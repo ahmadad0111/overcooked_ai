@@ -405,6 +405,9 @@ socket.on('xai_voice', function(data) {
 
 })
 
+socket.on('stop_sensors', function() {
+    speechSynthesis.cancel()
+})
 
 $(document).ready(function () {
   const showModal = $('#instruction-modal').data('show-modal');
