@@ -59,6 +59,7 @@
         "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_6fEEYHO7vmkBu9U",
         "pre_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eXM1EEX2EeSLIaO",
         "post_session": "https://researchsurveys.deakin.edu.au/jfe/form/SV_72RCeM76OoZH4Lc",
+        "post_session_nox": "https://researchsurveys.deakin.edu.au/jfe/form/SV_3racoez95wJ2uY6",
         "post_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eyaYl7WnQ2YsCUK"
     },
     "enable_survey": true,
