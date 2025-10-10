@@ -46,6 +46,13 @@
         "forced_coordination": "PPOForcedCoordination",
         "counter_circuit": "PPOCounterCircuit"
     },
+    "layout_agent_mapping_hrl": {
+        "cramped_room": "PPOCrampedRoom",
+        "asymmetric_advantages": "PPOAsymmetricAdvantages",
+        "coordination_ring": "PPOCoordinationRing",
+        "forced_coordination": "PPOForcedCoordination",
+        "counter_circuit": "PPOCounterCircuit"
+    },
     "total_num_rounds": 1,
     "initial_round": 1,
     "initial_session": 1,
@@ -54,7 +61,9 @@
     "is_ending": 0,
     "randomize_layout": true,
     "randomize_xai": 1,
+    "disable_xai": true,
     "xai_assignment": ["NoX", "StaticX", "AdaX"],
+    "ai_assignment": ["Baseline", "HRL"],
     "questionnaire_links": {
         "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_6fEEYHO7vmkBu9U",
         "pre_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eXM1EEX2EeSLIaO",

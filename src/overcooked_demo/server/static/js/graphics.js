@@ -77,6 +77,7 @@ class GraphicsManager {
         scene_config.currentRound = start_info.currentRound;
         scene_config.currentLayout = start_info.currentLayout;
         scene_config.xaiAgentType = start_info.xaiAgentType;
+        scene_config.disable_xai = start_info.disable_xai;
         game_config.scene = new OvercookedScene(scene_config);
         game_config.width = scene_config.tileSize*scene_config.terrain[0].length;
         game_config.height = scene_config.tileSize*scene_config.terrain.length  + scene_config.hud_size - (["StaticX", "AdaX"].includes(start_info.xaiAgentType)? 0 : ADAX_UI_HEIGHT);
@@ -100,15 +101,16 @@ class OvercookedScene extends Phaser.Scene {
         this.show_post_cook_time = config.show_post_cook_time;
         this.cook_time = config.cook_time;
         this.assets_loc = config.assets_loc;
-        this.hud_size = ["StaticX", "AdaX"].includes(config.xaiAgentType)  ? config.hud_size : config.hud_size - ADAX_UI_HEIGHT;
+        this.hud_size = !config.disable_xai && ["StaticX", "AdaX"].includes(config.xaiAgentType)  ? config.hud_size : config.hud_size - ADAX_UI_HEIGHT;
         
-        this.agent_msg_size = ["StaticX", "AdaX"].includes(config.xaiAgentType) ? ADAX_UI_HEIGHT: 0;
+        this.agent_msg_size = !config.disable_xai && ["StaticX", "AdaX"].includes(config.xaiAgentType) ? ADAX_UI_HEIGHT: 0;
         this.hud_data = {
             potential : config.start_state.potential,
             score : config.start_state.score,
             time : config.start_state.time_left,
             bonus_orders : config.start_state.state.bonus_orders,
             all_orders : config.start_state.state.all_orders,
+            disable_xai: config.disable_xai,
             xaiAgentType: config.xaiAgentType,
             xai_explanation: config.xai_explanation,
             current_round: config.currentRound,
@@ -367,7 +369,7 @@ class OvercookedScene extends Phaser.Scene {
 
     _drawHUD(hud_data, sprites, board_height) {
         // console.log("================", hud_data)
-        if (["StaticX", "AdaX"].includes(hud_data.xaiAgentType) && typeof(hud_data.xai_explanation) !== 'undefined' && hud_data.xai_explanation !== null) {
+        if (!hud_data.disable_xai && ["StaticX", "AdaX"].includes(hud_data.xaiAgentType) && typeof(hud_data.xai_explanation) !== 'undefined' && hud_data.xai_explanation !== null) {
             this._drawAdaXplanation(hud_data.xai_explanation, sprites, board_height);
         }
         if (typeof(hud_data.all_orders) !== 'undefined') {

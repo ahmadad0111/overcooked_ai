@@ -262,6 +262,7 @@ socket.on('start_game', function(data) {
     $('#layout').val($('#current-layout').attr("current-layout"));
     document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][data.start_info.current_layout]
     $('#xaiAgentType').val(data.start_info["xaiAgentType"]);
+    $('#aiAgentType').val(data.start_info["aiAgentType"]);
     $('#error-exit').hide();
     $("#overcooked").empty();
     $('#game-over').hide();

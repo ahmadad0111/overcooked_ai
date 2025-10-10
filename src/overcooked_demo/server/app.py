@@ -121,8 +121,9 @@ app.logger.addHandler(handler)
 
 app.secret_key = 'abc'
 
-global xai_agent_type
+global xai_agent_type, ai_agent_type
 xai_agent_type = 'NoX'
+ai_agent_type = 'Baseline'
 user_id = ''
 #################################
 # Global Coordination Functions #
@@ -285,6 +286,7 @@ def _create_game(user_id,
     game_flow_on = kwargs.get('game_flow_on', 0)
     is_ending = kwargs.get('is_ending', 0)
     xai_agent_assignment = kwargs.get('xai_agent_assignment', [])
+    ai_agent_assignment = kwargs.get('ai_agent_assignment', [])
     params.update({
         "current_session": current_session,
         "current_phase" : current_phase,
@@ -319,6 +321,12 @@ def _create_game(user_id,
             display_order = [layout.replace("_", " ").title() for layout in layouts_order]
 
             start_info["experiment_order_disp"] = " => ".join(display_order)
+        
+            if ai_agent_assignment:
+                start_info["aiAgentType"] = ai_agent_assignment[current_phase-1]
+            else:
+                start_info["aiAgentType"] = params.get("aiAgentType", ai_agent_type)
+            
             if xai_agent_assignment:
                 start_info["xaiAgentType"] = xai_agent_assignment[current_phase-1]
             else:
@@ -326,7 +334,7 @@ def _create_game(user_id,
             start_info["current_layout"] = game.curr_layout
             print(f"Current Phase: {current_phase} & Current session: {current_session} & Current round: {current_round}\n")
             print("[XAI] Agent type: ", start_info["xaiAgentType"])
-
+            start_info["disable_xai"] = CONFIG["disable_xai"]
             emit(
                 "start_game",
                 {"spectating": spectating, "start_info": start_info},
@@ -443,7 +451,8 @@ def index():
         default_agent=CONFIG["layout_agent_mapping"][default_layout],
         default_layout=default_layout,
         enable_survey=CONFIG['enable_survey'],
-        disable_close=CONFIG['disable_close']
+        disable_close=CONFIG['disable_close'],
+        disable_xai=CONFIG['disable_xai']
     )
 
 @app.route("/get_config", methods=["GET"])
@@ -565,7 +574,7 @@ def creation_params(params):
     # layouts: [layout in the config file], this one determines which layout to use, and if there is more than one layout, a series of game is run back to back
     #
     use_old = False
-    global xai_agent_type 
+    global xai_agent_type, ai_agent_type
     if "oldDynamics" in params and params["oldDynamics"] == "on":
         params["mdp_params"] = {"old_dynamics": True}
         use_old = True  
@@ -591,7 +600,8 @@ def creation_params(params):
     
     if "xaiAgentType" in params:
         xai_agent_type = params["xaiAgentType"]
-
+    if "aiAgentType" in params:
+        ai_agent_type = params["aiAgentType"]
 @socketio.on("create-next")
 def on_create_next(data):
     global user_id
@@ -697,9 +707,10 @@ def on_create(data):
         random.shuffle(all_layouts)
         layouts = [params["layout"]] + all_layouts
         print("New Layout Order ", layouts)
-
+        disable_xai = CONFIG["disable_xai"]
         # Retrieve randomized XAI agent order
         xai_agent_assignment = CONFIG["xai_assignment"]
+        ai_agent_assignment = CONFIG["ai_assignment"]
         # if CONFIG["randomize_xai"]:
         #     xai_agent_assignment = assignXAIAgents(user_id)
         print("XAI Agent order: ", xai_agent_assignment)
@@ -710,11 +721,12 @@ def on_create(data):
         GAME_FLOW['current_phase'] = CONFIG['initial_phase']
         GAME_FLOW['current_round'] =  CONFIG["initial_round"]
         GAME_FLOW['total_num_rounds'] =  CONFIG["total_num_rounds"]
-        GAME_FLOW['total_phases'] = len(xai_agent_assignment)
+        GAME_FLOW['total_phases'] = len(ai_agent_assignment) #len(xai_agent_assignment)
         GAME_FLOW['all_layouts'] =  layouts
         # GAME_FLOW['prev_params'] = layouts
         GAME_FLOW['is_ending'] = CONFIG["is_ending"]
         GAME_FLOW['xai_agent_assignment'] = xai_agent_assignment
+        GAME_FLOW['ai_agent_assignment'] = ai_agent_assignment
 
         if params.get("playerZero") != "human":
             GAME_FLOW["playerZero"] = params.get("playerZero")
@@ -733,7 +745,8 @@ def on_create(data):
                     layouts=[layouts[CONFIG["initial_session"]-1]],
                     layouts_order=layouts, 
                     game_flow_on=CONFIG['game_flow_on'],
-                    xai_agent_assignment=xai_agent_assignment)
+                    xai_agent_assignment=xai_agent_assignment,
+                    ai_agent_assignment=ai_agent_assignment)
 
 
 @socketio.on("join")

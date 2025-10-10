@@ -101,10 +101,17 @@
     <label for="dataCollection" data-toggle="tooltip" data-placement="top" title="Whether to store the trajectories of both agents that will participate in this game">Collect Data?</label>
     <input type="checkbox" id="dataCollection" name="dataCollection" checked>
     <label for="xaiAgentType" data-toggle="tooltip" data-placement="top" title="Which XAI agent to use for explanations">XAI Agent type</label>
+    {% if not disable_xai %}
     <select name="xaiAgentType" id="xaiAgentType"> 
       <option value="NoX">NoX</option>
       <option value="StaticX">StaticX</option>
       <option value="AdaX">AdaX</option>
+    </select>
+    {% end if %}
+    <label for="aiAgentType" data-toggle="tooltip" data-placement="top" title="Which AI agent to use for the other player">AI Agent type</label>
+    <select name="aiAgentType" id="aiAgentType"> 
+      <option value="Baseline">Baseline</option>
+      <option value="HRL">HRL</option>
     </select>
   </div>
       </div>
