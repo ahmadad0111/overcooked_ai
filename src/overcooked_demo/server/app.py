@@ -648,6 +648,8 @@ def process_game_flow(curr_game, params):
     current_round = GAME_FLOW['current_round']
     current_session = GAME_FLOW['current_session']
     total_rounds = GAME_FLOW['total_num_rounds']
+    
+    layout_agent_mapping = CONFIG["layout_agent_mapping"]
     if current_round < total_rounds:
         GAME_FLOW['current_round'] = current_round + 1
     elif current_round >= total_rounds:
@@ -664,6 +666,8 @@ def process_game_flow(curr_game, params):
         GAME_FLOW['current_session'] = CONFIG['initial_session']
 
         all_layouts = GAME_FLOW['all_layouts'].copy()
+        layout_agent_mapping = CONFIG["layout_agent_mapping_hrl"]
+        
         #Shuffle game layout order
         # all_layouts.remove(params["layout"])
         random.shuffle(all_layouts)
@@ -681,7 +685,7 @@ def process_game_flow(curr_game, params):
     if GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
         GAME_FLOW['is_ending'] = 1
     
-    GAME_FLOW["playerOne"] = CONFIG["layout_agent_mapping"][GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1]]
+    GAME_FLOW["playerOne"] = layout_agent_mapping[GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1]]
 
 @socketio.on("create")
 def on_create(data):
