@@ -369,7 +369,7 @@ socket.on('end_game', function(data) {
     if(enable_survey && data.data && data.data.game_ended){
         let endSurveyURL = `${data.data.survey_baseurl_end}?round_d=${data.data.round_id}&player_Id=${humanPlayerId}&uid=${data.data.uid}&session_Id=${data.data.session_id}&xai_agent=${data.data.xai_agent}&layout=${data.data.layout}`;
         window.surveyParams = {
-            post_game: true,
+            post_game: false, // disabled for HRL
             post_game_link: endSurveyURL
           }
         setTimeout(function(){}, 100)

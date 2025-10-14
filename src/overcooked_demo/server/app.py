@@ -952,7 +952,8 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
             # check session end status
             if(GAME_FLOW and GAME_FLOW['current_round'] == GAME_FLOW['total_num_rounds']):
                 data['session_ended'] = True
-                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] if data['xai_agent'] != 'NoX' else CONFIG['questionnaire_links']['post_session_nox'] # add differnt url for NoX
+                # data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] if data['xai_agent'] != 'NoX' else CONFIG['questionnaire_links']['post_session_nox'] # add differnt url for NoX
+                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] # add differnt url for HRL
             # check game end status
             if GAME_FLOW and GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
                 data['game_ended'] = True  

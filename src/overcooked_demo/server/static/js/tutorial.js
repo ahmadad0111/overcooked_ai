@@ -310,7 +310,7 @@ socket.on('end_game', function(data) {
     window.surveyParams = {
       player_id: humanPlayerId,
       uid: data.data.uid,
-      pre_game: true,
+      pre_game: false, // disabled for HRL
       pre_game_link: config.questionnaire_links.pre_game
     }
     let surveyURL = `${config.questionnaire_links.demographic}?player_Id=${humanPlayerId}&uid=${data.data.uid}&layout=${layoutName}`;
