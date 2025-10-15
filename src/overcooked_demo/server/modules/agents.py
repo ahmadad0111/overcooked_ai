@@ -5,6 +5,7 @@ from torch.distributions.categorical import Categorical
 
 import numpy as np
 from modules.utils.utils import layer_init
+#from utils.utils import layer_init
 
 
 class CNNAgent(nn.Module):

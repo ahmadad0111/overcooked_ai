@@ -2,6 +2,7 @@ import os
 import torch
 # from modules.agents import HiPPOAgent
 from modules.agents import HiPPOAgent, HiAgent, LoAgent, CNNAgent
+#from agents import HiPPOAgent, HiAgent, LoAgent, CNNAgent
 
 
 def load_model_state(agent, agent_name, path):
@@ -86,6 +87,9 @@ def infer_pasd(agent_name="cramped_room", path="./modules/pasd_trained/", obs_sh
 
 if __name__ == "__main__":
     agent_type = 'pasd'
+    agent_name="PPOCounterCircuit"
+    obs_shape= [26,8,5]
+    z_dim= 6
 
     if agent_type == 'hipt':
         print("hipt agent!")
@@ -108,7 +112,18 @@ if __name__ == "__main__":
 
     elif agent_type == 'pasd':
         print("pasd agent!")
-        agent_hi, agent_lo =  infer_pasd(agent_name="cramped_room")
+        agent_hi, agent_lo =  infer_pasd(agent_name=agent_name, obs_shape=obs_shape, z_dim=z_dim)
+
+
+        # # reduce model size
+
+        # torch.save({
+        #     'hi_model_state_dict': agent_hi.state_dict(),
+        #     'lo_model_state_dict': agent_lo.state_dict()
+        #         }, f"{agent_name}_model.pt")
+
+
+
 
         lstm_state_lo = (
             torch.zeros(agent_lo.lstm.num_layers, 1, agent_lo.lstm.hidden_size),
@@ -120,7 +135,7 @@ if __name__ == "__main__":
         )
         next_done = torch.zeros(1)
 
-        agent_obs = torch.randn(1, 26, 5, 4)
+        agent_obs = torch.randn(1, 26, 8, 5)
 
         with torch.no_grad():
             current_lstm_state_lo = (lstm_state_lo[0].clone(), lstm_state_lo[1].clone())
