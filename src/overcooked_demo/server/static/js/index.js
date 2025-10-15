@@ -366,7 +366,13 @@ socket.on('end_game', function(data) {
         setTimeout(function(){}, 100)
 
     }
-    if(enable_survey && data.data && data.data.game_ended){
+    if(enable_survey && data.data && data.data.phase_ended && data.data.survey_baseurl){
+        let surveyURL = `${data.data.survey_baseurl}?round_d=${data.data.round_id}&player_Id=${humanPlayerId}&uid=${data.data.uid}&session_Id=${data.data.session_id}&xai_agent=${data.data.xai_agent}&layout=${data.data.layout}`;
+        showQualtricsSurvey(surveyURL)
+        setTimeout(function(){}, 100)
+
+    }
+    if(enable_survey && data.data && data.data.game_ended && data.data.survey_baseurl_end){
         let endSurveyURL = `${data.data.survey_baseurl_end}?round_d=${data.data.round_id}&player_Id=${humanPlayerId}&uid=${data.data.uid}&session_Id=${data.data.session_id}&xai_agent=${data.data.xai_agent}&layout=${data.data.layout}`;
         window.surveyParams = {
             post_game: false, // disabled for HRL

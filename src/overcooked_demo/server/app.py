@@ -121,7 +121,7 @@ app.logger.addHandler(handler)
 
 app.secret_key = 'abc'
 
-global xai_agent_type, ai_agent_type
+global xai_agent_type, ai_agent_type, isTutorial
 xai_agent_type = 'NoX'
 ai_agent_type = 'Baseline'
 user_id = ''
@@ -574,7 +574,7 @@ def creation_params(params):
     # layouts: [layout in the config file], this one determines which layout to use, and if there is more than one layout, a series of game is run back to back
     #
     use_old = False
-    global xai_agent_type, ai_agent_type
+    global xai_agent_type, ai_agent_type, isTutorial
     if "oldDynamics" in params and params["oldDynamics"] == "on":
         params["mdp_params"] = {"old_dynamics": True}
         use_old = True  
@@ -602,6 +602,8 @@ def creation_params(params):
         xai_agent_type = params["xaiAgentType"]
     if "aiAgentType" in params:
         ai_agent_type = params["aiAgentType"]
+    isTutorial = True if "isTutorial" in params else False 
+
 @socketio.on("create-next")
 def on_create_next(data):
     global user_id
@@ -725,7 +727,7 @@ def on_create(data):
         GAME_FLOW['current_phase'] = CONFIG['initial_phase']
         GAME_FLOW['current_round'] =  CONFIG["initial_round"]
         GAME_FLOW['total_num_rounds'] =  CONFIG["total_num_rounds"]
-        GAME_FLOW['total_phases'] = len(ai_agent_assignment) #len(xai_agent_assignment)
+        GAME_FLOW['total_phases'] = 3 if isTutorial else len(ai_agent_assignment) #len(xai_agent_assignment)
         GAME_FLOW['all_layouts'] =  layouts
         # GAME_FLOW['prev_params'] = layouts
         GAME_FLOW['is_ending'] = CONFIG["is_ending"]
@@ -947,17 +949,25 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
             data['layout'] = GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1] if GAME_FLOW else tut_config['tutorialParams']['layouts'][0]
             data['xai_agent'] = GAME_FLOW['xai_agent_assignment'][GAME_FLOW['current_phase']-1] if GAME_FLOW else ''
             data['session_ended'] = False
+            data['phase_ended'] = False
             data['game_ended'] = False
             data['survey_baseurl'] = None
+            # # check session end status => DISABLED FOR HRL
+            # if(GAME_FLOW and GAME_FLOW['current_round'] == GAME_FLOW['total_num_rounds']):
+            #     data['session_ended'] = True
+            #     # data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] if data['xai_agent'] != 'NoX' else CONFIG['questionnaire_links']['post_session_nox'] # add differnt url for NoX
+            #     data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session']
+            
             # check session end status
-            if(GAME_FLOW and GAME_FLOW['current_round'] == GAME_FLOW['total_num_rounds']):
-                data['session_ended'] = True
-                # data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] if data['xai_agent'] != 'NoX' else CONFIG['questionnaire_links']['post_session_nox'] # add differnt url for NoX
-                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] # add differnt url for HRL
+            if(GAME_FLOW and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts'])):
+                data['phase_ended'] = True
+                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] #ADD DIFF URL FOR HRL
+            
             # check game end status
             if GAME_FLOW and GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
                 data['game_ended'] = True  
-                data['survey_baseurl_end'] = CONFIG['questionnaire_links']['post_game']
+                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] #ADD DIFF URL FOR HRL
+                data['survey_baseurl_end'] = CONFIG['questionnaire_links']['post_game'] # DISABLED FOR HRL
 
             socketio.emit(
                 "end_game", {"status": status, "data": data}, room=game.id

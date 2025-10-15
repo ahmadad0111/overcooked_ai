@@ -21,7 +21,8 @@
             "layouts" : [ "tutorial_0", "tutorial_0", "tutorial_0", "tutorial_0"],
             "playerZero" : "human",
             "playerOne" : "TutorialAI",
-            "oldDynamics": "on"
+            "oldDynamics": "on",
+            "IsTutorial": true
         },
         "tomato_value" : 13,
         "onion_value" : 21,
@@ -72,10 +73,11 @@
         "post_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eyaYl7WnQ2YsCUK"
     },
     "questionnaire_links": {
-        "demographic": "",
-        "post_session": "https://researchsurveys.deakin.edu.au/jfe/form/SV_72RCeM76OoZH4Lc"
+        "demographic": "demo",
+        "post_session": "test",
+        "post_game": ""
     },
     "enable_survey": true,
     "disable_close": true,
-    "ttsEnabled":true
+    "ttsEnabled":false
 }

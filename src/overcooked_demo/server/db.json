@@ -1,7 +1,7 @@
 {
     "host": "localhost",
     "port": 5432,
-    "dbname": "experiments",
+    "dbname": "uni_experiments_hrl",
     "user": "postgres",
-    "password": "admin@123"
+    "password": "postgres"
 }
