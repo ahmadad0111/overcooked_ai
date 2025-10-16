@@ -6,8 +6,10 @@ from human_aware_rl.rllib.rllib import AgentPair
 from human_aware_rl.rllib.rllib import RlLibAgent
 from pylsl import StreamInfo, StreamOutlet
 import json
+import numpy as np
 import os
 import pickle
+import gym
 import random
 from abc import ABC, abstractmethod
 from queue import Empty, Full, LifoQueue, Queue
@@ -27,10 +29,13 @@ from overcooked_ai_py.planning.planners import (
     MotionPlanner,
 )
 
+from modules.torch_agent import infer_hipt, infer_pasd, infer_pop
+import torch
+
 from database import Database
 # from database1 import Database1
 from keyboard_tracker import KeyboardTracker
-from keyboard_tracking_controller import TrackingController
+from keyboard_tracking_controller import TrackingController 
 
 
 import uuid
@@ -49,7 +54,7 @@ def generate_unique_hash():
     return hashlib.sha256(session_data.encode()).hexdigest()
 
 
-database = Database()
+database = Database() 
 # database1 = Database1()
 
 # Relative path to where all static pre-trained agents are stored on server
@@ -489,7 +494,7 @@ class OvercookedGame(Game):
         self.num_collisions = 0
         # self.kb_tracker = KeyboardTracker()
         # self.kb_tracker.start_tracking()
-        self.kb_controller = TrackingController()
+        self.kb_controller = TrackingController() 
         # self.commit_hash = str(generate_unique_hash())
         # session_id = self.commit_hash 
         # self.start_tracking(session_id)
@@ -501,7 +506,18 @@ class OvercookedGame(Game):
         self.xai_explanation = 'test'
         
         
+        self.npc_agent = {}
+        self.npc_agent_hi = {}
+        self.npc_agent_lo = {}
+        self.npc_lstm_state = {}
+        self.npc_lstm_state_hi = {}
+        self.npc_lstm_state_lo = {}
         
+        self.agent_type = {}
+        self.counter = 1
+
+
+        self.next_done = torch.zeros(1)         
         
 
         if randomized:
@@ -513,15 +529,109 @@ class OvercookedGame(Game):
             self.npc_policies[player_zero_id] = self.get_policy(
                 playerZero, idx=0
             )
+            self.agent_type[player_zero_id] = 'pop'
             self.npc_state_queues[player_zero_id] = LifoQueue()
+            print(f" selected player :  {playerZero}")
+            if playerZero == 'PPOCrampedRoom':
+                obs_shape = [26,5,4]
+                z_dim = 6
+            elif playerZero == 'PPOForcedCoordination':
+                obs_shape = [26, 5, 5]
+                z_dim = 5
+            elif playerZero == 'PPOCounterCircuit':
+                obs_shape = [26, 8, 5]
+                z_dim = 6
+            elif playerZero == 'PPOCoordinationRing':
+                obs_shape = [26, 5, 5]
+                z_dim = 6
+            elif playerZero == 'PPOAsymmetricAdvantages':
+                obs_shape = [26, 9, 5]
+                z_dim = 6
+
+            if self.agent_type[player_zero_id] == 'hipt':
+                self.agent0 = infer_hipt(agent_name=playerZero,obs_shape= obs_shape, z_dim= z_dim)
+                self.lstm_state = (
+                torch.zeros(self.agent0.lstm.num_layers, 1, self.agent0.lstm.hidden_size),
+                torch.zeros(self.agent0.lstm.num_layers, 1, self.agent0.lstm.hidden_size),)   
+
+                self.npc_agent[player_zero_id] = self.agent0
+                self.npc_lstm_state[player_zero_id]= self.lstm_state
+            elif self.agent_type[player_zero_id] == 'pasd':
+                self.agent0_hi, self.agent0_lo =  infer_pasd(agent_name=playerZero,obs_shape= obs_shape, z_dim= z_dim)
+
+                self.lstm_state_lo = (
+                    torch.zeros(self.agent0_lo.lstm.num_layers, 1, self.agent0_lo.lstm.hidden_size),
+                    torch.zeros(self.agent0_lo.lstm.num_layers, 1, self.agent0_lo.lstm.hidden_size),
+                )   
+                self.lstm_state_hi = (
+                    torch.zeros(self.agent0_hi.lstm.num_layers, 1, self.agent0_hi.lstm.hidden_size),
+                    torch.zeros(self.agent0_hi.lstm.num_layers, 1, self.agent0_hi.lstm.hidden_size),
+                )
+                self.npc_agent_hi[player_zero_id] = self.agent0_hi
+                self.npc_agent_lo[player_zero_id] = self.agent0_lo
+                self.npc_lstm_state_lo[player_zero_id]= self.lstm_state_lo
+                self.npc_lstm_state_hi[player_zero_id]= self.lstm_state_hi
+
+            else:
+                self.agent0 = infer_pop(agent_name=playerZero,obs_shape= obs_shape, z_dim= z_dim)
+                self.npc_agent[player_zero_id] = self.agent0
+                print("pop agent loaded")
+
 
         if playerOne != "human":
+
             player_one_id = playerOne + "_1"
+            self.agent_type[player_one_id] = 'pasd'
             self.add_player(player_one_id, idx=1, buff_size=1, is_human=False)
             self.npc_policies[player_one_id] = self.get_policy(
                 playerOne, idx=1
             )
             self.npc_state_queues[player_one_id] = LifoQueue()
+            if playerOne == 'PPOCrampedRoom':
+                obs_shape = [26,5,4]
+                z_dim = 6
+            elif playerOne == 'PPOForcedCoordination':
+                obs_shape = [26, 5, 5]
+                z_dim = 5
+            elif playerOne == 'PPOCounterCircuit':
+                obs_shape = [26, 8, 5]
+                z_dim = 6
+            elif playerOne == 'PPOCoordinationRing':
+                obs_shape = [26, 5, 5]
+                z_dim = 6
+            elif playerOne == 'PPOAsymmetricAdvantages':
+                obs_shape = [26, 9, 5]
+                z_dim = 6
+            if self.agent_type[player_one_id] == 'hipt':
+                
+                self.agent1 = infer_hipt(agent_name=playerOne,obs_shape= obs_shape, z_dim= z_dim)
+                self.lstm_state = (
+                torch.zeros(self.agent1.lstm.num_layers, 1, self.agent1.lstm.hidden_size),
+                torch.zeros(self.agent1.lstm.num_layers, 1, self.agent1.lstm.hidden_size),)   
+
+                self.npc_agent[player_one_id] = self.agent1
+                self.npc_lstm_state[player_one_id]= self.lstm_state
+                print("hipt agent loaded")
+            elif self.agent_type[player_one_id] == 'pasd':
+                self.agent1_hi, self.agent1_lo =  infer_pasd(agent_name=playerOne,obs_shape= obs_shape, z_dim= z_dim)
+
+                self.lstm_state_lo = (
+                    torch.zeros(self.agent1_lo.lstm.num_layers, 1, self.agent1_lo.lstm.hidden_size),
+                    torch.zeros(self.agent1_lo.lstm.num_layers, 1, self.agent1_lo.lstm.hidden_size),
+                )   
+                self.lstm_state_hi = (
+                    torch.zeros(self.agent1_hi.lstm.num_layers, 1, self.agent1_hi.lstm.hidden_size),
+                    torch.zeros(self.agent1_hi.lstm.num_layers, 1, self.agent1_hi.lstm.hidden_size),
+                )
+                self.npc_agent_hi[player_one_id] = self.agent1_hi
+                self.npc_agent_lo[player_one_id] = self.agent1_lo
+                self.npc_lstm_state_lo[player_one_id]= self.lstm_state_lo
+                self.npc_lstm_state_hi[player_one_id]= self.lstm_state_hi
+                print("pasd agent loaded")
+            else:
+                self.agent1 = infer_pop(agent_name=playerOne,obs_shape= obs_shape, z_dim= z_dim)
+                self.npc_agent[player_one_id] = self.agent1
+                print("pop agent loaded")
         # Always kill ray after loading agent, otherwise, ray will crash once process exits
         # Only kill ray after loading both agents to avoid having to restart ray during loading
         if ray.is_initialized():
@@ -548,10 +658,13 @@ class OvercookedGame(Game):
         return cls.uid_value
 
     def start_recording_kb_events(self, session_id):
-        self.kb_controller.start_tracking(session_id)
+        self.kb_controller.start_tracking(session_id) 
+   
 
     def stop_recording_kb_events(self):
-        self.kb_controller.stop_tracking()
+        self.kb_controller.stop_tracking() 
+
+
         
     def _curr_game_over(self):
 
@@ -578,13 +691,58 @@ class OvercookedGame(Game):
                 self.npc_players.remove(player_id)
             else:
                 raise ValueError("Inconsistent state")
-
-    def npc_policy_consumer(self, policy_id):
+            
+    def _setup_observation_space(self, mdp):
+        dummy_state = mdp.get_standard_start_state()
+        obs_shape = (2,) + mdp.lossless_state_encoding(dummy_state)[0].shape[-1:] + mdp.lossless_state_encoding(dummy_state)[0].shape[0:2]
+        high = np.ones(obs_shape) * float("inf")
+        low = np.zeros(obs_shape)
+        return gym.spaces.Box(low, high, dtype=np.float32)
+    
+    def npc_policy_consumer(self, policy_id, mdp):
         queue = self.npc_state_queues[policy_id]
         policy = self.npc_policies[policy_id]
         while self._is_active:
             state = queue.get()
-            npc_action, _ = policy.action(state)
+            
+            # get state encoding
+            self.observation_space = self._setup_observation_space(mdp)
+            ob_p0, ob_p1 = mdp.lossless_state_encoding(state)
+            ob_p0 = np.reshape(ob_p0, (1,) + (self.observation_space.shape[1:]))
+            ob_p1 = np.reshape(ob_p1, (1,) + (self.observation_space.shape[1:]))
+            obs = np.concatenate((ob_p0, ob_p1))
+            my_obs = obs[int(policy_id.split('_')[-1])]
+            obs = torch.tensor(my_obs, dtype=torch.float32)
+            obs = obs.unsqueeze(0)
+
+            with torch.no_grad():
+                if self.agent_type[policy_id] == 'pasd':
+                    z, _, ent, ___, self.npc_lstm_state_hi[policy_id], ____ = self.npc_agent_hi[policy_id].get_z_and_value(obs, self.next_done, self.npc_lstm_state_hi[policy_id])
+
+                    agent_action, _, __, ___,_, probs, self.npc_lstm_state_lo[policy_id] = self.npc_agent_lo[policy_id].get_action_and_value(obs, z, self.next_done, self.npc_lstm_state_lo[policy_id])
+
+
+                    
+                    npc_action = Action.INDEX_TO_ACTION[agent_action.item()]
+
+
+    
+                elif self.agent_type[policy_id] == 'hipt':
+                    z, _, ent, ___, self.npc_lstm_state[policy_id], ____ = self.npc_agent[policy_id].get_z_and_value(obs, self.next_done, self.npc_lstm_state[policy_id])
+                    agent_action, _, __, ___, _____, ______ = self.npc_agent[policy_id].get_action_and_value(obs, z, self.next_done, self.npc_lstm_state[policy_id])
+                    npc_action = Action.INDEX_TO_ACTION[agent_action.item()]
+                
+                else:
+                    agent_action,_, _, ___, probs = self.npc_agent[policy_id].get_action_and_value(obs)
+
+
+                    npc_action = Action.INDEX_TO_ACTION[agent_action.item()]
+
+
+            #npc_action, _ = policy.action(state)
+
+            # print(npc_action)
+
             super(OvercookedGame, self).enqueue_action(policy_id, npc_action)
 
     def is_full(self):
@@ -764,7 +922,7 @@ class OvercookedGame(Game):
         for npc_policy in self.npc_policies:
             self.npc_policies[npc_policy].reset()
             self.npc_state_queues[npc_policy].put(self.state)
-            t = Thread(target=self.npc_policy_consumer, args=(npc_policy,))
+            t = Thread(target=self.npc_policy_consumer, args=(npc_policy,self.mdp))
             self.threads.append(t)
             t.start()
         print("=== Game activated ===")
@@ -912,11 +1070,13 @@ class OvercookedGame(Game):
                 # 1.5 single table - timestamp, uid, expanded self.trajectory
                 # 2 double table - timestamp, uid, foreign key :: foreign key, other fields of self.trajectory
             # insert the database table update logic
-            database.update(data)
+            database.update(data) 
             # database1.update(data)
+            
             
 
         # self.stop_tracking()
+        
         return data
 
 
