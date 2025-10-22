@@ -169,9 +169,9 @@ function closeQualtricsSurvey() {
     const modal = document.getElementById('qualtrics-modal');
     const iframe = document.getElementById('qualtrics-frame');
     iframe.src = "";  // clear iframe to reset survey
-    modal.style.display = 'none';
+    modal.style.display = 'none';    
     setTimeout(() => {
-        if (window.surveyParams && window.surveyParams["post_game"]) {
+        if (window.surveyParams && window.surveyParams["post_game"]) { // not triggered in HRL
           // open next suevry
           let surveyURL = window.surveyParams.post_game_link;
           showQualtricsSurvey(surveyURL)
@@ -462,27 +462,34 @@ function showEndingSequence() {
     const button = document.getElementById('end-modal-btn');
   
     // Step 1: Initial message
-    message.textContent = "Experiment over. Thank you for your participation.";
+    message.textContent = "Experiment is over. Thank you for your participation.";
     button.style.display = 'inline-block';
     modal.style.display = 'flex';
   
-    // Step 2: On first OK click
     button.onclick = function () {
-  
-      // Step 3: After delay, show OK again (or handle further logic)
-      setTimeout(() => {
-        message.textContent = "Please enter UID for the next player!!";
-
-        button.style.display = 'inline-block';
-        button.textContent = 'OK'; // Or "Continue"
-        button.onclick = function () {
           // Close modal or move to UID input
           modal.style.display = 'none';
           resetUID()
           // Optionally trigger UID entry or refresh
         };
-      }, 200);
-    };
+        
+    // // Step 2: On first OK click
+    // button.onclick = function () {
+  
+    //   // Step 3: After delay, show OK again (or handle further logic)
+    //   setTimeout(() => {
+    //     message.textContent = "Please enter UID for the next player!!";
+
+    //     button.style.display = 'inline-block';
+    //     button.textContent = 'OK'; // Or "Continue"
+    //     button.onclick = function () {
+    //       // Close modal or move to UID input
+    //       modal.style.display = 'none';
+    //       resetUID()
+    //       // Optionally trigger UID entry or refresh
+    //     };
+    //   }, 200);
+    // };
   }
   
 /* * * * * * * * * * * * * * 

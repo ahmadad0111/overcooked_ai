@@ -75,7 +75,7 @@
     "questionnaire_links": {
         "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_1AdEtOanFFEZXGS",
         "post_session": "https://researchsurveys.deakin.edu.au/jfe/form/SV_ePByXht2DgysFka",
-        "post_game": ""
+        "post_game": "test"
     },
     "enable_survey": true,
     "disable_close": true,
