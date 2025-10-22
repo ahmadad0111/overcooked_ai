@@ -964,6 +964,7 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
             tut_config = json.loads(TUTORIAL_CONFIG)
             data['layout'] = GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1] if GAME_FLOW else tut_config['tutorialParams']['layouts'][0]
             data['xai_agent'] = GAME_FLOW['xai_agent_assignment'][GAME_FLOW['current_phase']-1] if GAME_FLOW else ''
+            data['ai_agent'] = GAME_FLOW['ai_agent_assignment'][GAME_FLOW['current_phase']-1] if GAME_FLOW else ''
             data['session_ended'] = False
             data['phase_ended'] = False
             data['game_ended'] = False
@@ -977,12 +978,12 @@ def play_game(game: OvercookedGame, fps=6, game_flow_on=0, is_ending=0):
             # check session end status
             if(GAME_FLOW and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts'])):
                 data['phase_ended'] = True
-                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] #ADD DIFF URL FOR HRL
+                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] #ADDED DIFF URL FOR HRL
             
             # check game end status
             if GAME_FLOW and GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
                 data['game_ended'] = True  
-                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] #ADD DIFF URL FOR HRL
+                data['survey_baseurl'] = CONFIG['questionnaire_links']['post_session'] #ADDED DIFF URL FOR HRL
                 data['survey_baseurl_end'] = CONFIG['questionnaire_links']['post_game'] # DISABLED FOR HRL
 
             socketio.emit(
