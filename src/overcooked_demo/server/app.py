@@ -789,6 +789,7 @@ def on_join(data):
             # No available game was found so create a game
             params = data.get("params", {})
             creation_params(params)
+            params['ai_agent_assignment'] = CONFIG["ai_assignment"]
             game_name = data.get("game_name", "overcooked")
             _create_game(user_id=user_id,
                          game_name=game_name,

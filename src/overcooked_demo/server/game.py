@@ -517,8 +517,9 @@ class OvercookedGame(Game):
         self.counter = 1
 
 
-        self.next_done = torch.zeros(1)         
-        ai_agent_assignment = kwargs.get("ai_agent_assignment", [])
+        self.next_done = torch.zeros(1)  
+        if(kwargs.get("ai_agent_assignment", []) != []):
+            ai_agent_assignment = kwargs.get("ai_agent_assignment", [])
         self.phase_agent_type = ai_agent_assignment[self.current_phase-1]
         print(f"===== Phase  {self.current_phase} agent_type: {self.phase_agent_type}")
         print(f"===== Player zero  {playerZero} Player One: {playerOne}")
