@@ -22,3 +22,4 @@ keyboard
 pylsl
 eventlet
 
+torch==1.13.1

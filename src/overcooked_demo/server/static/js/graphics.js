@@ -80,7 +80,7 @@ class GraphicsManager {
         scene_config.disable_xai = start_info.disable_xai;
         game_config.scene = new OvercookedScene(scene_config);
         game_config.width = scene_config.tileSize*scene_config.terrain[0].length;
-        game_config.height = scene_config.tileSize*scene_config.terrain.length  + scene_config.hud_size - (["StaticX", "AdaX"].includes(start_info.xaiAgentType)? 0 : ADAX_UI_HEIGHT);
+        game_config.height = scene_config.tileSize*scene_config.terrain.length  + scene_config.hud_size - !scene_config.disable_xai && (["StaticX", "AdaX"].includes(start_info.xaiAgentType)? 0 : ADAX_UI_HEIGHT);
         game_config.parent = graphics_config.container_id;
         this.game = new Phaser.Game(game_config);
     }

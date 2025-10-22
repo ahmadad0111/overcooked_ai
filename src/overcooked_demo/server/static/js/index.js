@@ -35,11 +35,14 @@ $(function() {
         params.layout = $('#current-layout').attr("current-layout")
         var agentMapping = window.config_data["layout_agent_mapping"];
         try {
-            document.getElementById("playerOne").value = agentMapping[params.layout];
+            // document.getElementById("playerOne").value = agentMapping[params.layout];
+            document.getElementById("playerZero").value = agentMapping[params.layout];
         }
-        catch(err) {document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
+        // catch(err) {document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
+        catch(err) {document.getElementById("playerZero").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
 
-        params.playerOne = agentMapping[params.layout]
+        // params.playerOne = agentMapping[params.layout]
+        params.playerZero = agentMapping[params.layout]
 
         data = {
             "params" : params,
@@ -94,15 +97,16 @@ $(function() {
         var layout = document.getElementById("layout").value;
         var agentMapping = window.config_data["layout_agent_mapping"];
         try {
-            document.getElementById("playerOne").value = agentMapping[layout];
-            // document.getElementById("playerOne").text = agentMapping[layout];
+            // document.getElementById("playerOne").value = agentMapping[layout];
+            document.getElementById("playerZero").text = agentMapping[layout];
             $('#current-layout')
                 .html(layout)
                 .attr("current-layout", layout)
                 // .trigger("layoutUpdated");
 
         }
-        catch(err) {document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
+        // catch(err) {document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
+        catch(err) {document.getElementById("playerZero").value = window.config_data["layout_agent_mapping"][window.config_data["default_layout"]];console.log(err);}
     });
 });
 
@@ -260,7 +264,8 @@ socket.on('start_game', function(data) {
     .attr("current-layout", data.start_info.current_layout)
     // .trigger("layoutUpdated"); // Custom event
     $('#layout').val($('#current-layout').attr("current-layout"));
-    document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][data.start_info.current_layout]
+    // document.getElementById("playerOne").value = window.config_data["layout_agent_mapping"][data.start_info.current_layout]
+    document.getElementById("playerZero").value = window.config_data["layout_agent_mapping"][data.start_info.current_layout]
     $('#xaiAgentType').val(data.start_info["xaiAgentType"]);
     $('#aiAgentType').val(data.start_info["aiAgentType"]);
     $('#error-exit').hide();
@@ -376,7 +381,8 @@ socket.on('end_game', function(data) {
         let endSurveyURL = `${data.data.survey_baseurl_end}?round_d=${data.data.round_id}&player_Id=${humanPlayerId}&uid=${data.data.uid}&session_Id=${data.data.session_id}&xai_agent=${data.data.xai_agent}&layout=${data.data.layout}`;
         window.surveyParams = {
             post_game: false, // disabled for HRL
-            post_game_link: endSurveyURL
+            post_game_link: endSurveyURL,
+            showend: true //ADDED for HRL
           }
         setTimeout(function(){}, 100)
     }

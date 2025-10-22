@@ -54,12 +54,12 @@
 	  <label for="playerZero" style="color:#1E6A9E">Player 1</label>
 	  <select class="form-control" id="playerZero" name="playerZero">
         <option value="human">Human Keyboard Input</option>
-        <!-- {% for agent_name in agent_names %}
+        {% for agent_name in agent_names %}
           <option
             value={{agent_name}}
             {% if agent_name == default_agent %} selected {% endif %}
           >{{agent_name}}</option>
-        {% endfor %} -->
+        {% endfor %}
 	  </select>
 
   </div>
@@ -70,12 +70,12 @@
         <!-- {% for agent_name in agent_names %}
             <option value={{agent_name}}>{{agent_name}}</option>
         {% endfor %} -->
-        {% for agent_name in agent_names %}
+        <!-- {% for agent_name in agent_names %}
           <option
             value={{agent_name}}
             {% if agent_name == default_agent %} selected {% endif %}
           >{{agent_name}}</option>
-        {% endfor %}
+        {% endfor %} -->
     </select>
   </div>
 	<div class="form-group col-lg-2">
@@ -109,11 +109,11 @@
       <option value="AdaX">AdaX</option>
     </select>
     {% endif %}
-    <label for="aiAgentType" data-toggle="tooltip" data-placement="top" title="Which AI agent to use for the other player">AI Agent type</label>
+    <!-- <label for="aiAgentType" data-toggle="tooltip" data-placement="top" title="Which AI agent to use for the other player">AI Agent type</label>
     <select name="aiAgentType" id="aiAgentType"> 
       <option value="Baseline">Baseline</option>
       <option value="HRL">HRL</option>
-    </select>
+    </select> -->
   </div>
       </div>
       </div>

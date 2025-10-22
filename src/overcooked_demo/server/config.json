@@ -64,7 +64,7 @@
     "randomize_xai": 1,
     "disable_xai": true,
     "xai_assignment": ["NoX", "StaticX", "AdaX"],
-    "ai_assignment": ["Baseline", "HRL"],
+    "ai_assignment": ["hipt", "pasd"],
     "questionnaire_links_xai": {
         "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_6fEEYHO7vmkBu9U",
         "pre_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eXM1EEX2EeSLIaO",
@@ -73,8 +73,8 @@
         "post_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eyaYl7WnQ2YsCUK"
     },
     "questionnaire_links": {
-        "demographic": "demo",
-        "post_session": "test",
+        "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_1AdEtOanFFEZXGS",
+        "post_session": "https://researchsurveys.deakin.edu.au/jfe/form/SV_ePByXht2DgysFka",
         "post_game": ""
     },
     "enable_survey": true,

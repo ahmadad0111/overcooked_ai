@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow import keras
 from human_aware_rl.rllib.rllib import AgentPair
 from human_aware_rl.rllib.rllib import RlLibAgent
-from pylsl import StreamInfo, StreamOutlet
+# from pylsl import StreamInfo, StreamOutlet
 import json
 import numpy as np
 import os
@@ -518,8 +518,10 @@ class OvercookedGame(Game):
 
 
         self.next_done = torch.zeros(1)         
-        
-
+        ai_agent_assignment = kwargs.get("ai_agent_assignment", [])
+        self.phase_agent_type = ai_agent_assignment[self.current_phase-1]
+        print(f"===== Phase  {self.current_phase} agent_type: {self.phase_agent_type}")
+        print(f"===== Player zero  {playerZero} Player One: {playerOne}")
         if randomized:
             random.shuffle(self.layouts)
 
@@ -529,7 +531,7 @@ class OvercookedGame(Game):
             self.npc_policies[player_zero_id] = self.get_policy(
                 playerZero, idx=0
             )
-            self.agent_type[player_zero_id] = 'pop'
+            self.agent_type[player_zero_id] = self.phase_agent_type
             self.npc_state_queues[player_zero_id] = LifoQueue()
             print(f" selected player :  {playerZero}")
             if playerZero == 'PPOCrampedRoom':
@@ -581,7 +583,7 @@ class OvercookedGame(Game):
         if playerOne != "human":
 
             player_one_id = playerOne + "_1"
-            self.agent_type[player_one_id] = 'pasd'
+            self.agent_type[player_one_id] = self.phase_agent_type
             self.add_player(player_one_id, idx=1, buff_size=1, is_human=False)
             self.npc_policies[player_one_id] = self.get_policy(
                 playerOne, idx=1
@@ -767,9 +769,9 @@ class OvercookedGame(Game):
         """
         Game is ready to be activated if there are a sufficient number of players and at least one human (spectator or player)
         """
-        info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string', source_id='Overcooked')
-        self.outlet = StreamOutlet(info)
-        print("Stream outlet created.")
+        # info = StreamInfo(name="OvercookedStream", type="Event", channel_count=1, nominal_srate=0, channel_format='string', source_id='Overcooked')
+        # self.outlet = StreamOutlet(info)
+        # print("Stream outlet created.")
         return super(OvercookedGame, self).is_ready() and not self.is_empty()
 
     def apply_action(self, player_id, action):
@@ -866,7 +868,7 @@ class OvercookedGame(Game):
 
         #message = json.dumps(dummy_data)
         # print("Pushing sample:", message)  # Debugging message content
-        self.outlet.push_sample([message])
+        # self.outlet.push_sample([message]) #=> COMMENTED FOR drl
         # print("Sample pushed.")
         # database1.update_transition(transition, self.commit_hash)
         self.trajectory.append(transition)

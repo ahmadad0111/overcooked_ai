@@ -123,7 +123,7 @@ app.secret_key = 'abc'
 
 global xai_agent_type, ai_agent_type, isTutorial
 xai_agent_type = 'NoX'
-ai_agent_type = 'Baseline'
+ai_agent_type = 'hipt'
 user_id = ''
 #################################
 # Global Coordination Functions #
@@ -629,7 +629,8 @@ def on_create_next(data):
 
         params["layouts"] = layouts
         if GAME_FLOW:
-            params["playerOne"] = GAME_FLOW["playerOne"]
+            # params["playerOne"] = GAME_FLOW["playerOne"]
+            params["playerZero"] = GAME_FLOW["playerZero"]
             params["layout"] = layouts[GAME_FLOW["current_session"]-1]
 
             _create_game(user_id=user_id,
@@ -687,8 +688,10 @@ def process_game_flow(curr_game, params):
     if GAME_FLOW['current_phase'] >= GAME_FLOW['total_phases'] and GAME_FLOW['current_session'] >= len(GAME_FLOW['all_layouts']) and GAME_FLOW['current_round'] >= GAME_FLOW['total_num_rounds']:
         GAME_FLOW['is_ending'] = 1
     
-    GAME_FLOW["playerOne"] = layout_agent_mapping[GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1]]
-
+    # GAME_FLOW["playerOne"] = layout_agent_mapping[GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1]]
+    GAME_FLOW["playerZero"] = layout_agent_mapping[GAME_FLOW['all_layouts'][GAME_FLOW['current_session']-1]]
+    params['ai_agent_assignment'] = CONFIG["ai_assignment"]
+     
 @socketio.on("create")
 def on_create(data):
     global user_id
@@ -733,14 +736,26 @@ def on_create(data):
         GAME_FLOW['is_ending'] = CONFIG["is_ending"]
         GAME_FLOW['xai_agent_assignment'] = xai_agent_assignment
         GAME_FLOW['ai_agent_assignment'] = ai_agent_assignment
-
+        params['ai_agent_assignment'] = ai_agent_assignment
+        # initialise => @TODO check
+        GAME_FLOW["playerZero"] = 'human'
+        GAME_FLOW["playerOne"] = 'human'
+        print("params:  ", params)
         if params.get("playerZero") != "human":
             GAME_FLOW["playerZero"] = params.get("playerZero")
 
         if params.get("playerOne") != "human":
             GAME_FLOW["playerOne"] = params.get("playerOne")
         
-        params["playerOne"] = GAME_FLOW["playerOne"]
+        # params["playerOne"] = GAME_FLOW["playerOne"]
+        params["playerZero"] = GAME_FLOW["playerZero"]
+        # params["playerOne"] = GAME_FLOW["playerOne"]
+        # if "playerOne" in GAME_FLOW:
+        #     params["playerOne"] = GAME_FLOW["playerOne"]
+        # else:
+        #     # Handle the missing key appropriately
+        #     print("WARNING: 'playerOne' not found in GAME_FLOW.")
+        #     params["playerOne"] = "human"  # or whatever fallback makes sense
 
         _create_game(user_id=user_id,
                     game_name=game_name,

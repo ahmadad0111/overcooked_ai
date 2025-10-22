@@ -11,7 +11,7 @@ def load_model_state(agent, agent_name, path):
     checkpoint = torch.load(ckpt_path, map_location=torch.device("cpu"))
     
     agent.load_state_dict(checkpoint["model_state_dict"])
-    print(f"✅ Loaded {agent_name} model from {ckpt_path}")
+    print(f"Loaded {agent_name} model from {ckpt_path}")
 
     return agent
 
@@ -20,7 +20,7 @@ def load(agent, agent_name, path):
     """Load only model weights (no optimizer)."""
     model_path = os.path.join(path, f"{agent_name}.pt")
     agent.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
-    print(f"✅ Loaded weights from {model_path}")
+    print(f"Loaded weights from {model_path}")
     return agent
 
 
