@@ -26,8 +26,8 @@
         "tomato_value" : 13,
         "onion_value" : 21,
         "questionnaire_links": {
-            "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_6fEEYHO7vmkBu9U",
-            "pre_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eXM1EEX2EeSLIaO"
+            "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_d1mLK77R0tTrB1Y",
+            "pre_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_71xFD9c9Dd2ABGC"
             }
     },
     "layout_globals" : {
@@ -56,11 +56,11 @@
     "randomize_xai": 1,
     "xai_assignment": ["NoX", "StaticX", "AdaX"],
     "questionnaire_links": {
-        "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_6fEEYHO7vmkBu9U",
-        "pre_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eXM1EEX2EeSLIaO",
-        "post_session": "https://researchsurveys.deakin.edu.au/jfe/form/SV_72RCeM76OoZH4Lc",
-        "post_session_nox": "https://researchsurveys.deakin.edu.au/jfe/form/SV_3racoez95wJ2uY6",
-        "post_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_eyaYl7WnQ2YsCUK"
+        "demographic": "https://researchsurveys.deakin.edu.au/jfe/form/SV_d1mLK77R0tTrB1Y",
+        "pre_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_71xFD9c9Dd2ABGC",
+        "post_session_nox": "https://researchsurveys.deakin.edu.au/jfe/form/SV_cFUwLpydfYlDX7g",
+        "post_session": "https://researchsurveys.deakin.edu.au/jfe/form/SV_3R9U4vpVmaae4mO",
+        "post_game": "https://researchsurveys.deakin.edu.au/jfe/form/SV_08p8J8TdJr1LayG"
     },
     "enable_survey": true,
     "disable_close": true,
