@@ -515,6 +515,8 @@ class OvercookedGame(Game):
         
         self.agent_type = {}
         self.counter = 1
+        self.p0 = ''
+        self.p1 = ''
 
 
         self.next_done = torch.zeros(1)  
@@ -523,6 +525,8 @@ class OvercookedGame(Game):
         self.phase_agent_type = ai_agent_assignment[self.current_phase-1]
         print(f"===== Phase  {self.current_phase} agent_type: {self.phase_agent_type}")
         print(f"===== Player zero  {playerZero} Player One: {playerOne}")
+        self.p0 = playerZero
+        self.p1 = playerOne
         if randomized:
             random.shuffle(self.layouts)
 
@@ -550,35 +554,40 @@ class OvercookedGame(Game):
             elif playerZero == 'PPOAsymmetricAdvantages':
                 obs_shape = [26, 9, 5]
                 z_dim = 6
+            elif playerZero == 'TutorialAI':
+                obs_shape = [26, 5, 5]
+                z_dim = 6
+            
+            if playerZero != 'TutorialAI':
 
-            if self.agent_type[player_zero_id] == 'hipt':
-                self.agent0 = infer_hipt(agent_name=playerZero,obs_shape= obs_shape, z_dim= z_dim)
-                self.lstm_state = (
-                torch.zeros(self.agent0.lstm.num_layers, 1, self.agent0.lstm.hidden_size),
-                torch.zeros(self.agent0.lstm.num_layers, 1, self.agent0.lstm.hidden_size),)   
+                if self.agent_type[player_zero_id] == 'hipt':
+                    self.agent0 = infer_hipt(agent_name=playerZero,obs_shape= obs_shape, z_dim= z_dim)
+                    self.lstm_state = (
+                    torch.zeros(self.agent0.lstm.num_layers, 1, self.agent0.lstm.hidden_size),
+                    torch.zeros(self.agent0.lstm.num_layers, 1, self.agent0.lstm.hidden_size),)   
 
-                self.npc_agent[player_zero_id] = self.agent0
-                self.npc_lstm_state[player_zero_id]= self.lstm_state
-            elif self.agent_type[player_zero_id] == 'pasd':
-                self.agent0_hi, self.agent0_lo =  infer_pasd(agent_name=playerZero,obs_shape= obs_shape, z_dim= z_dim)
+                    self.npc_agent[player_zero_id] = self.agent0
+                    self.npc_lstm_state[player_zero_id]= self.lstm_state
+                elif self.agent_type[player_zero_id] == 'pasd':
+                    self.agent0_hi, self.agent0_lo =  infer_pasd(agent_name=playerZero,obs_shape= obs_shape, z_dim= z_dim)
 
-                self.lstm_state_lo = (
-                    torch.zeros(self.agent0_lo.lstm.num_layers, 1, self.agent0_lo.lstm.hidden_size),
-                    torch.zeros(self.agent0_lo.lstm.num_layers, 1, self.agent0_lo.lstm.hidden_size),
-                )   
-                self.lstm_state_hi = (
-                    torch.zeros(self.agent0_hi.lstm.num_layers, 1, self.agent0_hi.lstm.hidden_size),
-                    torch.zeros(self.agent0_hi.lstm.num_layers, 1, self.agent0_hi.lstm.hidden_size),
-                )
-                self.npc_agent_hi[player_zero_id] = self.agent0_hi
-                self.npc_agent_lo[player_zero_id] = self.agent0_lo
-                self.npc_lstm_state_lo[player_zero_id]= self.lstm_state_lo
-                self.npc_lstm_state_hi[player_zero_id]= self.lstm_state_hi
+                    self.lstm_state_lo = (
+                        torch.zeros(self.agent0_lo.lstm.num_layers, 1, self.agent0_lo.lstm.hidden_size),
+                        torch.zeros(self.agent0_lo.lstm.num_layers, 1, self.agent0_lo.lstm.hidden_size),
+                    )   
+                    self.lstm_state_hi = (
+                        torch.zeros(self.agent0_hi.lstm.num_layers, 1, self.agent0_hi.lstm.hidden_size),
+                        torch.zeros(self.agent0_hi.lstm.num_layers, 1, self.agent0_hi.lstm.hidden_size),
+                    )
+                    self.npc_agent_hi[player_zero_id] = self.agent0_hi
+                    self.npc_agent_lo[player_zero_id] = self.agent0_lo
+                    self.npc_lstm_state_lo[player_zero_id]= self.lstm_state_lo
+                    self.npc_lstm_state_hi[player_zero_id]= self.lstm_state_hi
 
-            else:
-                self.agent0 = infer_pop(agent_name=playerZero,obs_shape= obs_shape, z_dim= z_dim)
-                self.npc_agent[player_zero_id] = self.agent0
-                print("pop agent loaded")
+                else:
+                    self.agent0 = infer_pop(agent_name=playerZero,obs_shape= obs_shape, z_dim= z_dim)
+                    self.npc_agent[player_zero_id] = self.agent0
+                    print("pop agent loaded")
 
 
         if playerOne != "human":
@@ -605,36 +614,42 @@ class OvercookedGame(Game):
             elif playerOne == 'PPOAsymmetricAdvantages':
                 obs_shape = [26, 9, 5]
                 z_dim = 6
-            if self.agent_type[player_one_id] == 'hipt':
-                
-                self.agent1 = infer_hipt(agent_name=playerOne,obs_shape= obs_shape, z_dim= z_dim)
-                self.lstm_state = (
-                torch.zeros(self.agent1.lstm.num_layers, 1, self.agent1.lstm.hidden_size),
-                torch.zeros(self.agent1.lstm.num_layers, 1, self.agent1.lstm.hidden_size),)   
+            elif playerOne == 'TutorialAI':
+                obs_shape = [26, 5, 5]
+                z_dim = 6
 
-                self.npc_agent[player_one_id] = self.agent1
-                self.npc_lstm_state[player_one_id]= self.lstm_state
-                print("hipt agent loaded")
-            elif self.agent_type[player_one_id] == 'pasd':
-                self.agent1_hi, self.agent1_lo =  infer_pasd(agent_name=playerOne,obs_shape= obs_shape, z_dim= z_dim)
+            if playerOne != 'TutorialAI':
 
-                self.lstm_state_lo = (
-                    torch.zeros(self.agent1_lo.lstm.num_layers, 1, self.agent1_lo.lstm.hidden_size),
-                    torch.zeros(self.agent1_lo.lstm.num_layers, 1, self.agent1_lo.lstm.hidden_size),
-                )   
-                self.lstm_state_hi = (
-                    torch.zeros(self.agent1_hi.lstm.num_layers, 1, self.agent1_hi.lstm.hidden_size),
-                    torch.zeros(self.agent1_hi.lstm.num_layers, 1, self.agent1_hi.lstm.hidden_size),
-                )
-                self.npc_agent_hi[player_one_id] = self.agent1_hi
-                self.npc_agent_lo[player_one_id] = self.agent1_lo
-                self.npc_lstm_state_lo[player_one_id]= self.lstm_state_lo
-                self.npc_lstm_state_hi[player_one_id]= self.lstm_state_hi
-                print("pasd agent loaded")
-            else:
-                self.agent1 = infer_pop(agent_name=playerOne,obs_shape= obs_shape, z_dim= z_dim)
-                self.npc_agent[player_one_id] = self.agent1
-                print("pop agent loaded")
+                if self.agent_type[player_one_id] == 'hipt':
+                    
+                    self.agent1 = infer_hipt(agent_name=playerOne,obs_shape= obs_shape, z_dim= z_dim)
+                    self.lstm_state = (
+                    torch.zeros(self.agent1.lstm.num_layers, 1, self.agent1.lstm.hidden_size),
+                    torch.zeros(self.agent1.lstm.num_layers, 1, self.agent1.lstm.hidden_size),)   
+
+                    self.npc_agent[player_one_id] = self.agent1
+                    self.npc_lstm_state[player_one_id]= self.lstm_state
+                    print("hipt agent loaded")
+                elif self.agent_type[player_one_id] == 'pasd':
+                    self.agent1_hi, self.agent1_lo =  infer_pasd(agent_name=playerOne,obs_shape= obs_shape, z_dim= z_dim)
+
+                    self.lstm_state_lo = (
+                        torch.zeros(self.agent1_lo.lstm.num_layers, 1, self.agent1_lo.lstm.hidden_size),
+                        torch.zeros(self.agent1_lo.lstm.num_layers, 1, self.agent1_lo.lstm.hidden_size),
+                    )   
+                    self.lstm_state_hi = (
+                        torch.zeros(self.agent1_hi.lstm.num_layers, 1, self.agent1_hi.lstm.hidden_size),
+                        torch.zeros(self.agent1_hi.lstm.num_layers, 1, self.agent1_hi.lstm.hidden_size),
+                    )
+                    self.npc_agent_hi[player_one_id] = self.agent1_hi
+                    self.npc_agent_lo[player_one_id] = self.agent1_lo
+                    self.npc_lstm_state_lo[player_one_id]= self.lstm_state_lo
+                    self.npc_lstm_state_hi[player_one_id]= self.lstm_state_hi
+                    print("pasd agent loaded")
+                else:
+                    self.agent1 = infer_pop(agent_name=playerOne,obs_shape= obs_shape, z_dim= z_dim)
+                    self.npc_agent[player_one_id] = self.agent1
+                    print("pop agent loaded")
         # Always kill ray after loading agent, otherwise, ray will crash once process exits
         # Only kill ray after loading both agents to avoid having to restart ray during loading
         if ray.is_initialized():
@@ -718,31 +733,32 @@ class OvercookedGame(Game):
             obs = torch.tensor(my_obs, dtype=torch.float32)
             obs = obs.unsqueeze(0)
 
-            with torch.no_grad():
-                if self.agent_type[policy_id] == 'pasd':
-                    z, _, ent, ___, self.npc_lstm_state_hi[policy_id], ____ = self.npc_agent_hi[policy_id].get_z_and_value(obs, self.next_done, self.npc_lstm_state_hi[policy_id])
+            if self.p0 != 'TutorialAI' and self.p1 != 'TutorialAI':
+                with torch.no_grad():
+                    if self.agent_type[policy_id] == 'pasd':
+                        z, _, ent, ___, self.npc_lstm_state_hi[policy_id], ____ = self.npc_agent_hi[policy_id].get_z_and_value(obs, self.next_done, self.npc_lstm_state_hi[policy_id])
 
-                    agent_action, _, __, ___,_, probs, self.npc_lstm_state_lo[policy_id] = self.npc_agent_lo[policy_id].get_action_and_value(obs, z, self.next_done, self.npc_lstm_state_lo[policy_id])
+                        agent_action, _, __, ___,_, probs, self.npc_lstm_state_lo[policy_id] = self.npc_agent_lo[policy_id].get_action_and_value(obs, z, self.next_done, self.npc_lstm_state_lo[policy_id])
 
 
+                        
+                        npc_action = Action.INDEX_TO_ACTION[agent_action.item()]
+
+
+        
+                    elif self.agent_type[policy_id] == 'hipt':
+                        z, _, ent, ___, self.npc_lstm_state[policy_id], ____ = self.npc_agent[policy_id].get_z_and_value(obs, self.next_done, self.npc_lstm_state[policy_id])
+                        agent_action, _, __, ___, _____, ______ = self.npc_agent[policy_id].get_action_and_value(obs, z, self.next_done, self.npc_lstm_state[policy_id])
+                        npc_action = Action.INDEX_TO_ACTION[agent_action.item()]
                     
-                    npc_action = Action.INDEX_TO_ACTION[agent_action.item()]
+                    else:
+                        agent_action,_, _, ___, probs = self.npc_agent[policy_id].get_action_and_value(obs)
 
 
-    
-                elif self.agent_type[policy_id] == 'hipt':
-                    z, _, ent, ___, self.npc_lstm_state[policy_id], ____ = self.npc_agent[policy_id].get_z_and_value(obs, self.next_done, self.npc_lstm_state[policy_id])
-                    agent_action, _, __, ___, _____, ______ = self.npc_agent[policy_id].get_action_and_value(obs, z, self.next_done, self.npc_lstm_state[policy_id])
-                    npc_action = Action.INDEX_TO_ACTION[agent_action.item()]
-                
-                else:
-                    agent_action,_, _, ___, probs = self.npc_agent[policy_id].get_action_and_value(obs)
+                        npc_action = Action.INDEX_TO_ACTION[agent_action.item()]
 
-
-                    npc_action = Action.INDEX_TO_ACTION[agent_action.item()]
-
-
-            #npc_action, _ = policy.action(state)
+            else:
+                npc_action, _ = policy.action(state)
 
             # print(npc_action)
 
